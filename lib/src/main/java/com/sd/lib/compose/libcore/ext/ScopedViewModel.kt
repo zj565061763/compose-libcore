@@ -160,7 +160,7 @@ class ViewModelContainer : ViewModel() {
     )
 
     companion object {
-        private const val KeyPrefix = "com.sd.keyedViewModel"
+        private const val KeyPrefix = "com.sd.android.keyedViewModel"
 
         fun transformKey(clazz: Class<out ViewModel>, key: String): String {
             require(key.isNotEmpty()) { "key is empty" }
