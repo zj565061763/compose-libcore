@@ -44,7 +44,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
     )
 }
 
-class FViewModelContainer : ViewModel() {
+internal class FViewModelContainer : ViewModel() {
     /** 保存每个key的信息 */
     private val _keyHolder: MutableMap<Class<out ViewModel>, MutableMap<String, KeyInfo>> = mutableMapOf()
 
@@ -187,7 +187,7 @@ class FViewModelContainer : ViewModel() {
     companion object {
         private const val KeyPrefix = "com.sd.android.keyedViewModel"
 
-        internal fun transformKey(clazz: Class<out ViewModel>, key: String): String {
+        private fun transformKey(clazz: Class<out ViewModel>, key: String): String {
             require(key.isNotEmpty()) { "key is empty" }
             require(!key.startsWith(KeyPrefix)) { "key start with $KeyPrefix" }
             return "${KeyPrefix}:${clazz.name}:${key}"
