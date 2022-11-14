@@ -9,22 +9,21 @@ fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     key: String,
     index: Int? = null,
 ): VM {
-    val transformKey = FViewModelContainer.transformKey(clazz, key)
-    return getViewModel(clazz, transformKey).also {
-        getViewModel(FViewModelContainer::class.java).addKey(
-            clazz = clazz,
-            key = key,
-            index = index,
-            viewModelStoreOwner = this,
-        )
-    }
+    val container = getViewModel(FViewModelContainer::class.java)
+    return container.addKey(
+        clazz = clazz,
+        key = key,
+        index = index,
+        viewModelStoreOwner = this,
+    )
 }
 
 fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVM(
     clazz: Class<VM>,
     key: String,
 ) {
-    getViewModel(FViewModelContainer::class.java).removeKey(
+    val container = getViewModel(FViewModelContainer::class.java)
+    container.removeKey(
         clazz = clazz,
         key = key,
         viewModelStoreOwner = this,
@@ -36,7 +35,8 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
     index: Int,
     maxSize: Int,
 ) {
-    getViewModel(FViewModelContainer::class.java).removeKeyFartherFromIndex(
+    val container = getViewModel(FViewModelContainer::class.java)
+    container.removeKeyFartherFromIndex(
         clazz = clazz,
         index = index,
         maxSize = maxSize,
@@ -55,12 +55,12 @@ class FViewModelContainer : ViewModel() {
      * 添加key
      */
     @Synchronized
-    fun addKey(
-        clazz: Class<out ViewModel>,
+    fun <VM : ViewModel> addKey(
+        clazz: Class<VM>,
         key: String,
         index: Int? = null,
         viewModelStoreOwner: ViewModelStoreOwner,
-    ) {
+    ): VM {
         val key = transformKey(clazz, key)
 
         val keyInfoHolder = _keyHolder[clazz] ?: mutableMapOf<String, KeyInfo>().also {
@@ -69,8 +69,11 @@ class FViewModelContainer : ViewModel() {
 
         val oldKeyInfo = keyInfoHolder[key]
         if (index == null && oldKeyInfo?.index != null) {
-            // 不能用null覆盖非null
-            return
+            // 不能用null的index覆盖非null的index
+            return viewModelStoreOwner.getViewModel(
+                javaClass = clazz,
+                key = key,
+            )
         }
 
         if (oldKeyInfo == null || oldKeyInfo.index != index) {
@@ -90,6 +93,11 @@ class FViewModelContainer : ViewModel() {
             // 保存信息
             keyInfoHolder[key] = KeyInfo(key = key, index = index)
         }
+
+        return viewModelStoreOwner.getViewModel(
+            javaClass = clazz,
+            key = key,
+        )
     }
 
     @Synchronized
