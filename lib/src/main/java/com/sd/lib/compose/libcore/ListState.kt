@@ -99,9 +99,11 @@ class ListState<D> {
         modifyData { listData ->
             var result = false
             val listRemove = mutableListOf<Int>()
+
             for (index in listData.indices) {
                 val item = listData[index]
                 val newItem = modify(item)
+
                 if (newItem == null) {
                     listRemove.add(index)
                     result = true
@@ -109,8 +111,10 @@ class ListState<D> {
                     listData[index] = newItem
                     result = true
                 }
+
                 if (result && !all) break
             }
+
             listRemove.forEach { listData.removeAt(it) }
             result
         }
