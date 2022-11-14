@@ -100,6 +100,12 @@ internal class FViewModelContainer : ViewModel() {
         return unpackKey(clazz, key)
     }
 
+    @Synchronized
+    fun size(clazz: Class<out ViewModel>): Int {
+        val viewModelInfo = _vmHolder[clazz] ?: return 0
+        return viewModelInfo.size()
+    }
+
     private class ViewModelInfo {
         private val _keyVMHolder: MutableMap<String, ViewModel> = mutableMapOf()
         private val _vmKeyHolder: MutableMap<ViewModel, String> = mutableMapOf()
