@@ -79,7 +79,7 @@ internal class FViewModelContainer : ViewModel() {
             if (it) {
                 viewModelStoreOwner.removeViewModel(packKey)
 
-                if (viewModelInfo.isEmpty()) {
+                if (viewModelInfo.size() <= 0) {
                     _vmHolder.remove(clazz)
                 }
 
@@ -123,9 +123,9 @@ internal class FViewModelContainer : ViewModel() {
             return _vmKeyHolder[vm] ?: ""
         }
 
-        fun isEmpty(): Boolean {
+        fun size(): Int {
             check(_keyVMHolder.size == _vmKeyHolder.size)
-            return _keyVMHolder.isEmpty()
+            return _keyVMHolder.size
         }
     }
 
