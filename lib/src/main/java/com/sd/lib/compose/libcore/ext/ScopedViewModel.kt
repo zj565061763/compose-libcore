@@ -97,14 +97,15 @@ class FViewModelContainer : ViewModel() {
         val listDirtyKey = mutableListOf<String>()
 
         // 按距离分组
-        val deltaGroup = keyInfoHolder.values.groupBy { abs(index - (it.index ?: 0)) }
+        val distanceGroup = keyInfoHolder.values.groupBy { abs(index - (it.index ?: 0)) }
+
         // 按距离排序，降序
-        val deltas = deltaGroup.keys.sortedDescending()
+        val listDistance = distanceGroup.keys.sortedDescending()
 
-        for (delta in deltas) {
-            if (delta == 0) break
+        for (distance in listDistance) {
+            if (distance == 0) break
 
-            val listInfo = checkNotNull(deltaGroup[delta])
+            val listInfo = checkNotNull(distanceGroup[distance])
             for (info in listInfo) {
                 keyInfoHolder.remove(info.key)
                 listDirtyKey.add(info.key)
