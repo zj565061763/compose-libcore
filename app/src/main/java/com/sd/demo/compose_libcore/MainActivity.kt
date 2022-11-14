@@ -1,6 +1,7 @@
 package com.sd.demo.compose_libcore
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,4 +37,8 @@ fun DefaultPreview() {
     AppTheme {
         Content()
     }
+}
+
+fun logMsg(block: () -> String) {
+    Log.i("libcore-demo", block())
 }
