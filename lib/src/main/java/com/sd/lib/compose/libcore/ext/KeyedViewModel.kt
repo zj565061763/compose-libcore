@@ -1,11 +1,9 @@
 package com.sd.lib.compose.libcore.ext
 
 import androidx.compose.runtime.Composable
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelStore
-import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.*
+import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.abs
 
 @Composable
@@ -13,37 +11,47 @@ inline fun <reified VM : ViewModel> fKeyedViewModel(
     key: String,
     index: Int? = null,
 ): VM {
-    val container = viewModel<FViewModelContainer>()
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    val transformKey = FViewModelContainer.transformKey(VM::class.java, key)
+    return viewModelStoreOwner.fKeyedViewModel(
+        clazz = VM::class.java,
+        key = key,
+        index = index,
+    )
+}
 
-    return viewModel<VM>(key = transformKey).also {
-        container.addKey(
-            clazz = VM::class.java,
+fun <VM : ViewModel> ViewModelStoreOwner.fKeyedViewModel(
+    clazz: Class<VM>,
+    key: String,
+    index: Int? = null,
+): VM {
+    val transformKey = FViewModelContainer.transformKey(clazz, key)
+    return getViewModel(clazz, transformKey).also {
+        getViewModel(FViewModelContainer::class.java).addKey(
+            clazz = clazz,
             key = key,
             index = index,
-            viewModelStoreOwner = viewModelStoreOwner,
+            viewModelStoreOwner = this,
         )
     }
 }
 
-@Composable
-inline fun <reified VM : ViewModel> fRemoveKeyedViewModel(key: String) {
-    val container = viewModel<FViewModelContainer>()
-    container.removeKey(
-        clazz = VM::class.java,
+fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModel(
+    clazz: Class<VM>,
+    key: String,
+) {
+    getViewModel(FViewModelContainer::class.java).removeKey(
+        clazz = clazz,
         key = key,
     )
 }
 
-@Composable
-inline fun <reified VM : ViewModel> fRemoveKeyedViewModelFartherFromIndex(
+fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModelFartherFromIndex(
+    clazz: Class<VM>,
     index: Int,
     maxSize: Int,
 ) {
-    val container = viewModel<FViewModelContainer>()
-    container.removeKeyFartherFromIndex(
-        clazz = VM::class.java,
+    getViewModel(FViewModelContainer::class.java).removeKeyFartherFromIndex(
+        clazz = clazz,
         index = index,
         maxSize = maxSize,
     )
@@ -91,7 +99,7 @@ class FViewModelContainer : ViewModel() {
                 if (oldKey != null && oldKey != key) {
                     // index被新的key覆盖，移除旧的key和对应的ViewModel
                     keyInfoHolder.remove(oldKey)
-                    viewModelStoreOwner.fRemoveViewModel(oldKey)
+                    viewModelStoreOwner.removeViewModel(oldKey)
                 }
             }
 
@@ -118,7 +126,7 @@ class FViewModelContainer : ViewModel() {
             }
         }
 
-        viewModelStoreOwner.fRemoveViewModel(key)
+        viewModelStoreOwner.removeViewModel(key)
 
         if (keyInfoHolder.isEmpty()) {
             _keyHolder.remove(clazz)
@@ -171,7 +179,7 @@ class FViewModelContainer : ViewModel() {
         }
 
         listDirtyKey.forEach { dirtyKey ->
-            viewModelStoreOwner.fRemoveViewModel(dirtyKey)
+            viewModelStoreOwner.removeViewModel(dirtyKey)
         }
 
         if (keyInfoHolder.isEmpty()) {
@@ -200,7 +208,8 @@ class FViewModelContainer : ViewModel() {
     }
 }
 
-fun ViewModelStoreOwner.fRemoveViewModel(key: String?) {
+
+private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
 
     val map = ViewModelStore::class.java.getDeclaredField("mMap").apply {
@@ -215,3 +224,26 @@ fun ViewModelStoreOwner.fRemoveViewModel(key: String?) {
     }
 }
 
+private fun <VM : ViewModel> ViewModelStoreOwner.getViewModel(
+    javaClass: Class<VM>,
+    key: String? = null,
+    factory: ViewModelProvider.Factory? = null,
+    extras: CreationExtras = if (this is HasDefaultViewModelProviderFactory) {
+        this.defaultViewModelCreationExtras
+    } else {
+        CreationExtras.Empty
+    }
+): VM {
+    val provider = if (factory != null) {
+        ViewModelProvider(this.viewModelStore, factory, extras)
+    } else if (this is HasDefaultViewModelProviderFactory) {
+        ViewModelProvider(this.viewModelStore, this.defaultViewModelProviderFactory, extras)
+    } else {
+        ViewModelProvider(this)
+    }
+    return if (key != null) {
+        provider[key, javaClass]
+    } else {
+        provider[javaClass]
+    }
+}
