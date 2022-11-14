@@ -1,30 +1,12 @@
 package com.sd.lib.compose.libcore.ext
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import java.util.*
 import kotlin.math.abs
-
-@Composable
-inline fun <reified VM : ViewModel> disposableViewModel(): VM {
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    val key = rememberSaveable {
-        "disposableViewModel:${VM::class.java.name}:${UUID.randomUUID()}"
-    }
-
-    DisposableEffect(key, viewModelStoreOwner) {
-        onDispose {
-            viewModelStoreOwner.removeViewModel(key)
-        }
-    }
-    return viewModel(key = key)
-}
 
 @Composable
 inline fun <reified VM : ViewModel> keyedViewModel(
