@@ -28,6 +28,15 @@ inline fun <reified VM : ViewModel> fKeyedViewModel(
 }
 
 @Composable
+inline fun <reified VM : ViewModel> fRemoveKeyedViewModel(key: String) {
+    val container = viewModel<FViewModelContainer>()
+    container.removeKey(
+        clazz = VM::class.java,
+        key = key,
+    )
+}
+
+@Composable
 inline fun <reified VM : ViewModel> fRemoveKeyedViewModelFartherFromIndex(
     maxSize: Int,
     index: Int,
