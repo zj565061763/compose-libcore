@@ -16,6 +16,11 @@ fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     )
 }
 
+fun ViewModelStoreOwner.fKeyedVMSize(clazz: Class<out ViewModel>): Int {
+    val container = getViewModel(FViewModelContainer::class.java)
+    return container.size(clazz)
+}
+
 fun ViewModelStoreOwner.fIndexKeyedVM(
     vm: ViewModel,
     index: Int

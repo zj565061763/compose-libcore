@@ -23,6 +23,7 @@ import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.ext.fIndexKeyedVM
 import com.sd.lib.compose.libcore.ext.fIndexKeyedVMRemoveFartherFromIndex
 import com.sd.lib.compose.libcore.ext.fKeyedVM
+import com.sd.lib.compose.libcore.ext.fKeyedVMSize
 import kotlinx.coroutines.flow.filter
 
 class SampleKeyedViewModelActivity : ComponentActivity() {
@@ -70,6 +71,8 @@ private fun Content() {
                     index = pagerState.currentPage,
                     maxSize = 3,
                 )
+
+                logMsg { "size ${viewModelStoreOwner.fKeyedVMSize(PageViewModel::class.java)}" }
             }
     }
 }
