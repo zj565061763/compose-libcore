@@ -13,18 +13,17 @@ inline fun <reified VM : ViewModel> fKeyedViewModel(
     key: String,
     index: Int? = null,
 ): VM {
+    val container = viewModel<FViewModelContainer>()
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val transformKey = FViewModelContainer.transformKey(VM::class.java, key)
 
     return viewModel<VM>(key = transformKey).also {
-        with(viewModel<FViewModelContainer>()) {
-            this.addKey(
-                clazz = VM::class.java,
-                key = key,
-                index = index,
-                viewModelStoreOwner = viewModelStoreOwner,
-            )
-        }
+        container.addKey(
+            clazz = VM::class.java,
+            key = key,
+            index = index,
+            viewModelStoreOwner = viewModelStoreOwner,
+        )
     }
 }
 
