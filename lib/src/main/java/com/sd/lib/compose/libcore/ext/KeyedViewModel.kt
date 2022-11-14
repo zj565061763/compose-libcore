@@ -2,31 +2,29 @@ package com.sd.lib.compose.libcore.ext
 
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
-import kotlin.math.abs
+import kotlin.math.absoluteValue
 
 fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     clazz: Class<VM>,
     key: String,
-    index: Int? = null,
 ): VM {
     val container = getViewModel(FViewModelContainer::class.java)
     return container.addKey(
         clazz = clazz,
         key = key,
-        index = index,
         viewModelStoreOwner = this,
     )
 }
 
-fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVM(
-    clazz: Class<VM>,
-    key: String,
+fun ViewModelStoreOwner.fIndexKeyedVM(
+    vm: ViewModel,
+    index: Int
 ) {
-    val container = getViewModel(FViewModelContainer::class.java)
-    container.removeKey(
-        clazz = clazz,
-        key = key,
-        viewModelStoreOwner = this,
+    val container = getViewModel(FIndexedViewModelContainer::class.java)
+    container.index(
+        vm = vm,
+        index = index,
+        viewModelStoreOwner = this
     )
 }
 
@@ -35,8 +33,8 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
     index: Int,
     maxSize: Int,
 ) {
-    val container = getViewModel(FViewModelContainer::class.java)
-    container.removeKeyFartherFromIndex(
+    val container = getViewModel(FIndexedViewModelContainer::class.java)
+    container.removeFartherFromIndex(
         clazz = clazz,
         index = index,
         maxSize = maxSize,
@@ -45,106 +43,164 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
 }
 
 internal class FViewModelContainer : ViewModel() {
-    /** 保存每个key的信息 */
-    private val _keyHolder: MutableMap<Class<out ViewModel>, MutableMap<String, KeyInfo>> = mutableMapOf()
+    private val _vmHolder: MutableMap<Class<out ViewModel>, ViewModelInfo> = mutableMapOf()
 
-    /** 保存每个index对应的key */
-    private val _indexHolder: MutableMap<Class<out ViewModel>, MutableMap<Int, String>> = mutableMapOf()
-
-    /**
-     * 添加key
-     */
     @Synchronized
     fun <VM : ViewModel> addKey(
         clazz: Class<VM>,
         key: String,
-        index: Int? = null,
         viewModelStoreOwner: ViewModelStoreOwner,
     ): VM {
-        val key = transformKey(clazz, key)
+        val packKey = packKey(clazz, key)
 
-        val keyInfoHolder = _keyHolder[clazz] ?: mutableMapOf<String, KeyInfo>().also {
-            _keyHolder[clazz] = it
-        }
-
-        val oldKeyInfo = keyInfoHolder[key]
-        if (index == null && oldKeyInfo?.index != null) {
-            // 不能用null的index覆盖非null的index
-            return viewModelStoreOwner.getViewModel(
-                javaClass = clazz,
-                key = key,
-            )
-        }
-
-        if (oldKeyInfo == null || oldKeyInfo.index != index) {
-            if (index != null) {
-                val indexInfoHolder = _indexHolder[clazz] ?: mutableMapOf<Int, String>().also {
-                    _indexHolder[clazz] = it
-                }
-
-                val oldKey = indexInfoHolder.put(index, key)
-                if (oldKey != null && oldKey != key) {
-                    // index被新的key覆盖，移除旧的key和对应的ViewModel
-                    keyInfoHolder.remove(oldKey)
-                    viewModelStoreOwner.removeViewModel(oldKey)
-                }
-            }
-
-            // 保存信息
-            keyInfoHolder[key] = KeyInfo(key = key, index = index)
-        }
-
-        return viewModelStoreOwner.getViewModel(
+        val viewModel = viewModelStoreOwner.getViewModel(
             javaClass = clazz,
-            key = key,
+            key = packKey,
         )
+
+        val viewModelInfo = _vmHolder[clazz] ?: ViewModelInfo().also {
+            _vmHolder[clazz] = it
+        }
+
+        viewModelInfo.bind(packKey, viewModel)
+        return viewModel
     }
 
     @Synchronized
     fun removeKey(
         clazz: Class<out ViewModel>,
         key: String,
+        checkOtherContainer: Boolean,
         viewModelStoreOwner: ViewModelStoreOwner,
-    ) {
-        val keyInfoHolder = _keyHolder[clazz] ?: return
+    ): Boolean {
+        val viewModelInfo = _vmHolder[clazz] ?: return false
+        val packKey = packKey(clazz, key)
+        return viewModelInfo.remove(packKey).also {
+            if (it) {
+                viewModelStoreOwner.removeViewModel(packKey)
 
-        val key = transformKey(clazz, key)
-        val info = keyInfoHolder.remove(key) ?: return
+                if (viewModelInfo.isEmpty()) {
+                    _vmHolder.remove(clazz)
+                }
 
-        if (info.index != null) {
-            _indexHolder[clazz]?.let { holder ->
-                holder.remove(info.index)
-                if (holder.isEmpty()) _indexHolder.remove(clazz)
+                if (checkOtherContainer) {
+                    viewModelStoreOwner
+                        .getViewModel(FIndexedViewModelContainer::class.java)
+                        .removeKey(clazz, key)
+                }
             }
-        }
-
-        viewModelStoreOwner.removeViewModel(key)
-
-        if (keyInfoHolder.isEmpty()) {
-            _keyHolder.remove(clazz)
         }
     }
 
-    /**
-     * 移除离[index]较远的key
-     */
     @Synchronized
-    fun removeKeyFartherFromIndex(
+    fun getKey(vm: ViewModel): String {
+        val clazz = vm.javaClass
+        val viewModelInfo = _vmHolder[clazz] ?: return ""
+        val key = viewModelInfo.getKey(vm)
+        return unpackKey(clazz, key)
+    }
+
+    private class ViewModelInfo {
+        private val _keyVMHolder: MutableMap<String, ViewModel> = mutableMapOf()
+        private val _vmKeyHolder: MutableMap<ViewModel, String> = mutableMapOf()
+
+        fun bind(key: String, vm: ViewModel) {
+            _keyVMHolder.put(key, vm)?.also { oldVM ->
+                _vmKeyHolder.remove(oldVM)
+            }
+            _vmKeyHolder[vm] = key
+            check(_keyVMHolder.size == _vmKeyHolder.size)
+        }
+
+        fun remove(key: String): Boolean {
+            return _keyVMHolder.remove(key)?.also { oldVM ->
+                _vmKeyHolder.remove(oldVM)
+                check(_keyVMHolder.size == _vmKeyHolder.size)
+            } != null
+        }
+
+        fun getKey(vm: ViewModel): String {
+            return _vmKeyHolder[vm] ?: ""
+        }
+
+        fun isEmpty(): Boolean {
+            check(_keyVMHolder.size == _vmKeyHolder.size)
+            return _keyVMHolder.isEmpty()
+        }
+    }
+
+    companion object {
+        private const val KeyPrefix = "com.sd.android.keyedViewModel"
+
+        private fun packKey(clazz: Class<out ViewModel>, key: String): String {
+            require(key.isNotEmpty()) { "key is empty" }
+            require(!key.startsWith(KeyPrefix)) { "key start with $KeyPrefix" }
+            val prefix = "${KeyPrefix}:${clazz.name}:"
+            return prefix + key
+        }
+
+        private fun unpackKey(clazz: Class<out ViewModel>, key: String): String {
+            require(key.isNotEmpty()) { "key is empty" }
+            require(key.startsWith(KeyPrefix)) { "key should start with $KeyPrefix" }
+            val prefix = "${KeyPrefix}:${clazz.name}:"
+            return key.removePrefix(prefix)
+        }
+    }
+}
+
+
+internal class FIndexedViewModelContainer : ViewModel() {
+    private val _indexHolder: MutableMap<Class<out ViewModel>, MutableMap<Int, String>> = mutableMapOf()
+
+    @Synchronized
+    fun index(
+        vm: ViewModel,
+        index: Int,
+        viewModelStoreOwner: ViewModelStoreOwner,
+    ) {
+        val container = viewModelStoreOwner.getViewModel(FViewModelContainer::class.java)
+        val key = container.getKey(vm)
+        if (key.isEmpty()) return
+
+        val clazz = vm.javaClass
+        val holder = _indexHolder[clazz] ?: mutableMapOf<Int, String>().also {
+            _indexHolder[clazz] = it
+        }
+        holder[index] = key
+    }
+
+    @Synchronized
+    fun removeKey(
+        clazz: Class<out ViewModel>,
+        key: String,
+    ) {
+        val holder = _indexHolder[clazz] ?: return
+
+        val it = holder.iterator()
+        while (it.hasNext()) {
+            val item = it.next()
+            if (item.value == key) {
+                it.remove()
+            }
+        }
+    }
+
+    @Synchronized
+    fun removeFartherFromIndex(
         clazz: Class<out ViewModel>,
         index: Int,
         maxSize: Int,
         viewModelStoreOwner: ViewModelStoreOwner,
     ) {
         require(maxSize > 0) { "require maxSize > 0" }
-        val keyInfoHolder = _keyHolder[clazz] ?: return
 
-        val overSize = keyInfoHolder.size - maxSize
-        if (overSize <= 0) return
+        val holder = _indexHolder[clazz] ?: return
+        if (holder.size <= maxSize) return
 
         val listDirtyKey = mutableListOf<String>()
 
         // 按距离分组
-        val distanceGroup = keyInfoHolder.values.groupBy { abs(index - (it.index ?: 0)) }
+        val distanceGroup = holder.keys.groupBy { (index - it).absoluteValue }
 
         // 按距离排序，降序
         val listDistance = distanceGroup.keys.sortedDescending()
@@ -152,49 +208,32 @@ internal class FViewModelContainer : ViewModel() {
         for (distance in listDistance) {
             if (distance == 0) break
 
-            val listInfo = checkNotNull(distanceGroup[distance])
-            for (info in listInfo) {
-                keyInfoHolder.remove(info.key)
-                listDirtyKey.add(info.key)
+            val listIndex = checkNotNull(distanceGroup[distance])
+            for (item in listIndex) {
+                val key = checkNotNull(holder.remove(item))
+                listDirtyKey.add(key)
 
-                if (info.index != null) {
-                    _indexHolder[clazz]?.let { holder ->
-                        holder.remove(info.index)
-                        if (holder.isEmpty()) _indexHolder.remove(clazz)
-                    }
-                }
-
-                if (keyInfoHolder.size <= maxSize) break
+                if (holder.size <= maxSize) break
             }
 
-            if (keyInfoHolder.size <= maxSize) break
+            if (holder.size <= maxSize) break
         }
 
+        val container = viewModelStoreOwner.getViewModel(FViewModelContainer::class.java)
         listDirtyKey.forEach { dirtyKey ->
-            viewModelStoreOwner.removeViewModel(dirtyKey)
+            container.removeKey(
+                clazz = clazz,
+                key = dirtyKey,
+                checkOtherContainer = false,
+                viewModelStoreOwner = viewModelStoreOwner,
+            )
         }
 
-        if (keyInfoHolder.isEmpty()) {
-            _keyHolder.remove(clazz)
-        }
-    }
-
-    private data class KeyInfo(
-        val key: String,
-        val index: Int?
-    )
-
-    companion object {
-        private const val KeyPrefix = "com.sd.android.keyedViewModel"
-
-        private fun transformKey(clazz: Class<out ViewModel>, key: String): String {
-            require(key.isNotEmpty()) { "key is empty" }
-            require(!key.startsWith(KeyPrefix)) { "key start with $KeyPrefix" }
-            return "${KeyPrefix}:${clazz.name}:${key}"
+        if (holder.isEmpty()) {
+            _indexHolder.remove(clazz)
         }
     }
 }
-
 
 private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return

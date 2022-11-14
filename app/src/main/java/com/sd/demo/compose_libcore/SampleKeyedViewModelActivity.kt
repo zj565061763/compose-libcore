@@ -20,6 +20,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
+import com.sd.lib.compose.libcore.ext.fIndexKeyedVM
 import com.sd.lib.compose.libcore.ext.fKeyedVM
 import com.sd.lib.compose.libcore.ext.fRemoveKeyedVMFartherFromIndex
 import kotlinx.coroutines.flow.filter
@@ -49,16 +50,14 @@ private fun Content() {
         count = 20,
         modifier = Modifier.fillMaxSize(),
     ) { index ->
-
-        val viewModel = viewModelStoreOwner.fKeyedVM(
-            clazz = PageViewModel::class.java,
-            key = index.toString(),
-            index = index
-        )
-
         PageView(
             index = index,
-            viewModel = viewModel
+            viewModel = viewModelStoreOwner.fKeyedVM(
+                clazz = PageViewModel::class.java,
+                key = index.toString(),
+            ).also {
+                viewModelStoreOwner.fIndexKeyedVM(it, index)
+            }
         )
     }
 
