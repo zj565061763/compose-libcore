@@ -28,7 +28,7 @@ fun ViewModelStoreOwner.fIndexKeyedVM(
     )
 }
 
-fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
+fun <VM : ViewModel> ViewModelStoreOwner.fIndexKeyedVMRemoveFartherFromIndex(
     clazz: Class<VM>,
     index: Int,
     maxSize: Int,
