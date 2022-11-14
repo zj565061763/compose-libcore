@@ -3,7 +3,7 @@ package com.sd.lib.compose.libcore
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-abstract class ListViewModel<T, D> : BaseViewModel<T>() {
+abstract class ListViewModel<I, D> : BaseViewModel<I>() {
     protected val listState = ListState<D>()
 
     val listUiState = listState.uiState

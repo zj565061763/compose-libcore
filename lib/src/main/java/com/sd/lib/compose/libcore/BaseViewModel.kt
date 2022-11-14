@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<T> : ViewModel() {
+abstract class BaseViewModel<I> : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
 
     /** 基础页面状态 */
@@ -32,7 +32,7 @@ abstract class BaseViewModel<T> : ViewModel() {
     /**
      * 外部触发意图
      */
-    fun dispatch(intent: T) {
+    fun dispatch(intent: I) {
         if (isActiveState || (intent is IgnoreActiveIntent)) {
             viewModelScope.launch {
                 if (isActiveState || (intent is IgnoreActiveIntent)) {
@@ -71,7 +71,7 @@ abstract class BaseViewModel<T> : ViewModel() {
     /**
      * 处理意图
      */
-    protected abstract suspend fun handleIntent(intent: T)
+    protected abstract suspend fun handleIntent(intent: I)
 
     /**
      * 刷新数据
