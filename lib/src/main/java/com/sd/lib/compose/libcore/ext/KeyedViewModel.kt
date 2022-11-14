@@ -38,8 +38,8 @@ inline fun <reified VM : ViewModel> fRemoveKeyedViewModel(key: String) {
 
 @Composable
 inline fun <reified VM : ViewModel> fRemoveKeyedViewModelFartherFromIndex(
-    maxSize: Int,
     index: Int,
+    maxSize: Int,
 ) {
     val container = viewModel<FViewModelContainer>()
     container.removeKeyFartherFromIndex(
