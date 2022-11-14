@@ -41,7 +41,6 @@ android {
 dependencies {
     api "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
     api 'com.github.zj565061763:mutator:+'
-    api 'com.github.zj565061763:page-holder:+'
     api 'com.github.zj565061763:result:1.1.0'
 
     implementation "androidx.compose.ui:ui:$compose_version"

@@ -1,6 +1,5 @@
 package com.sd.lib.compose.libcore
 
-import com.sd.lib.holder.page.FPageHolder
 import com.sd.lib.result.FResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,14 +20,6 @@ class ListState<D> {
 
     /** 列表ui数据 */
     val uiState = _uiState.asStateFlow()
-
-    /** 分页管理 */
-    val pageHolder = object : FPageHolder() {
-        override fun onUpdate() {
-            super.onUpdate()
-            setHasMore(hasNextPage())
-        }
-    }
 
     /**
      * 设置是否刷新中
