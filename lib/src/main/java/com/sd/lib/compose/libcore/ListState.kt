@@ -171,7 +171,10 @@ data class ListUiState<T>(
 /**
  * 根据条件移除元素
  */
-private fun <T> MutableList<T>.removeWith(all: Boolean = false, predicate: (T) -> Boolean): Boolean {
+private fun <T> MutableList<T>.removeWith(
+    all: Boolean = false,
+    predicate: (T) -> Boolean,
+): Boolean {
     var result = false
     with(iterator()) {
         while (hasNext()) {
