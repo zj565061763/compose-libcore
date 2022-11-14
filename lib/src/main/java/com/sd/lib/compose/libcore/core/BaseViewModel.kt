@@ -33,9 +33,9 @@ abstract class BaseViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isActiveState || (intent is IgnoreActiveIntent)) {
+        if (isActiveState || (intent is IgnoreActiveStateIntent)) {
             viewModelScope.launch {
-                if (isActiveState || (intent is IgnoreActiveIntent)) {
+                if (isActiveState || (intent is IgnoreActiveStateIntent)) {
                     handleIntent(intent)
                 }
             }
@@ -84,4 +84,4 @@ abstract class BaseViewModel<I> : ViewModel() {
     protected open fun onActiveStateChanged() {}
 }
 
-interface IgnoreActiveIntent
+interface IgnoreActiveStateIntent
