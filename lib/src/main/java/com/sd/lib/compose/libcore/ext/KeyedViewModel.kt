@@ -1,23 +1,8 @@
 package com.sd.lib.compose.libcore.ext
 
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import kotlin.math.abs
-
-@Composable
-inline fun <reified VM : ViewModel> fKeyedViewModel(
-    key: String,
-    index: Int? = null,
-): VM {
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    return viewModelStoreOwner.fKeyedViewModel(
-        clazz = VM::class.java,
-        key = key,
-        index = index,
-    )
-}
 
 fun <VM : ViewModel> ViewModelStoreOwner.fKeyedViewModel(
     clazz: Class<VM>,
@@ -200,7 +185,7 @@ class FViewModelContainer : ViewModel() {
     companion object {
         private const val KeyPrefix = "com.sd.android.keyedViewModel"
 
-        fun transformKey(clazz: Class<out ViewModel>, key: String): String {
+        internal fun transformKey(clazz: Class<out ViewModel>, key: String): String {
             require(key.isNotEmpty()) { "key is empty" }
             require(!key.startsWith(KeyPrefix)) { "key start with $KeyPrefix" }
             return "${KeyPrefix}:${clazz.name}:${key}"

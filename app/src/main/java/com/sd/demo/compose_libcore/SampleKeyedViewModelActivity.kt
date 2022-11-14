@@ -47,9 +47,16 @@ private fun Content() {
         count = 20,
         modifier = Modifier.fillMaxSize(),
     ) { index ->
+
+        val viewModel = viewModelStoreOwner.fKeyedViewModel(
+            clazz = PageViewModel::class.java,
+            key = index.toString(),
+            index = index
+        )
+
         PageView(
             index = index,
-            viewModel = fKeyedViewModel(key = index.toString(), index = index)
+            viewModel = viewModel
         )
     }
 
