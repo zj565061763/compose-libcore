@@ -40,7 +40,6 @@ class SampleKeyedViewModelActivity : ComponentActivity() {
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 private fun Content() {
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     val pagerState = rememberPagerState()
 
     HorizontalPager(
@@ -54,6 +53,7 @@ private fun Content() {
         )
     }
 
+    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
     LaunchedEffect(pagerState, viewModelStoreOwner) {
         snapshotFlow { pagerState.isScrollInProgress }
             .filter { !it }
