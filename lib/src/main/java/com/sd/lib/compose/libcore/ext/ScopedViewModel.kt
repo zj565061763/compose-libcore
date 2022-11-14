@@ -27,6 +27,19 @@ inline fun <reified VM : ViewModel> fKeyedViewModel(
     }
 }
 
+@Composable
+inline fun <reified VM : ViewModel> fRemoveKeyedViewModelFartherFromIndex(
+    maxSize: Int,
+    index: Int,
+) {
+    val container = viewModel<FViewModelContainer>()
+    container.removeKeyFartherFromIndex(
+        clazz = VM::class.java,
+        index = index,
+        maxSize = maxSize,
+    )
+}
+
 class FViewModelContainer : ViewModel() {
     /** 保存每个key的信息 */
     private val _keyHolder: MutableMap<Class<out ViewModel>, MutableMap<String, KeyInfo>> = mutableMapOf()
@@ -82,10 +95,10 @@ class FViewModelContainer : ViewModel() {
      * 移除离[index]较远的key
      */
     @Synchronized
-    fun removeFartherKey(
+    fun removeKeyFartherFromIndex(
         clazz: Class<out ViewModel>,
-        maxSize: Int,
         index: Int,
+        maxSize: Int,
     ) {
         require(maxSize > 0) { "require maxSize > 0" }
         val keyInfoHolder = _keyHolder[clazz] ?: return
