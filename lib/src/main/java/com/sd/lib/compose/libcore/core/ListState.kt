@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore
+package com.sd.lib.compose.libcore.core
 
 import com.sd.lib.result.FResult
 import kotlinx.coroutines.Dispatchers

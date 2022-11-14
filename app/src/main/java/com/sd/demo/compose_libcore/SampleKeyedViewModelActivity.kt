@@ -20,7 +20,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.ext.*
+import com.sd.lib.compose.libcore.utils.*
 import kotlinx.coroutines.flow.filter
 
 class SampleKeyedViewModelActivity : ComponentActivity() {

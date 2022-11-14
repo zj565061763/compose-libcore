@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.sd.lib.compose.dialogview.FDialogConfirm
 import com.sd.lib.compose.dialogview.FDialogProgress
-import com.sd.lib.compose.libcore.BaseViewModel
+import com.sd.lib.compose.libcore.core.BaseViewModel
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 

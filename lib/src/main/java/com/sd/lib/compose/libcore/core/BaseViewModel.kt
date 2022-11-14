@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore
+package com.sd.lib.compose.libcore.core
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore.ext
+package com.sd.lib.compose.libcore.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
