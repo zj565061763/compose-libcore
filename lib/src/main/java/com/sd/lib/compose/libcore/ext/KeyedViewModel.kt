@@ -27,6 +27,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModel(
     getViewModel(FViewModelContainer::class.java).removeKey(
         clazz = clazz,
         key = key,
+        viewModelStoreOwner = this,
     )
 }
 
@@ -39,6 +40,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModelFartherFromIndex(
         clazz = clazz,
         index = index,
         maxSize = maxSize,
+        viewModelStoreOwner = this,
     )
 }
 
@@ -48,8 +50,6 @@ class FViewModelContainer : ViewModel() {
 
     /** 保存每个index对应的key */
     private val _indexHolder: MutableMap<Class<out ViewModel>, MutableMap<Int, String>> = mutableMapOf()
-
-    private var _viewModelStoreOwner: ViewModelStoreOwner? = null
 
     /**
      * 添加key
@@ -62,7 +62,6 @@ class FViewModelContainer : ViewModel() {
         viewModelStoreOwner: ViewModelStoreOwner,
     ) {
         val key = transformKey(clazz, key)
-        _viewModelStoreOwner = viewModelStoreOwner
 
         val keyInfoHolder = _keyHolder[clazz] ?: mutableMapOf<String, KeyInfo>().also {
             _keyHolder[clazz] = it
@@ -97,8 +96,8 @@ class FViewModelContainer : ViewModel() {
     fun removeKey(
         clazz: Class<out ViewModel>,
         key: String,
+        viewModelStoreOwner: ViewModelStoreOwner,
     ) {
-        val viewModelStoreOwner = _viewModelStoreOwner ?: return
         val keyInfoHolder = _keyHolder[clazz] ?: return
 
         val key = transformKey(clazz, key)
@@ -126,6 +125,7 @@ class FViewModelContainer : ViewModel() {
         clazz: Class<out ViewModel>,
         index: Int,
         maxSize: Int,
+        viewModelStoreOwner: ViewModelStoreOwner,
     ) {
         require(maxSize > 0) { "require maxSize > 0" }
         val keyInfoHolder = _keyHolder[clazz] ?: return
@@ -133,7 +133,6 @@ class FViewModelContainer : ViewModel() {
         val overSize = keyInfoHolder.size - maxSize
         if (overSize <= 0) return
 
-        val viewModelStoreOwner = _viewModelStoreOwner ?: return
         val listDirtyKey = mutableListOf<String>()
 
         // 按距离分组
@@ -170,11 +169,6 @@ class FViewModelContainer : ViewModel() {
         if (keyInfoHolder.isEmpty()) {
             _keyHolder.remove(clazz)
         }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        _viewModelStoreOwner = null
     }
 
     private data class KeyInfo(
