@@ -20,8 +20,8 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.ext.fKeyedViewModel
-import com.sd.lib.compose.libcore.ext.fRemoveKeyedViewModelFartherFromIndex
+import com.sd.lib.compose.libcore.ext.fKeyedVM
+import com.sd.lib.compose.libcore.ext.fRemoveKeyedVMFartherFromIndex
 import kotlinx.coroutines.flow.filter
 
 class SampleKeyedViewModelActivity : ComponentActivity() {
@@ -50,7 +50,7 @@ private fun Content() {
         modifier = Modifier.fillMaxSize(),
     ) { index ->
 
-        val viewModel = viewModelStoreOwner.fKeyedViewModel(
+        val viewModel = viewModelStoreOwner.fKeyedVM(
             clazz = PageViewModel::class.java,
             key = index.toString(),
             index = index
@@ -66,7 +66,7 @@ private fun Content() {
         snapshotFlow { pagerState.isScrollInProgress }
             .filter { !it }
             .collect {
-                viewModelStoreOwner.fRemoveKeyedViewModelFartherFromIndex(
+                viewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
                     clazz = PageViewModel::class.java,
                     index = pagerState.currentPage,
                     maxSize = 3,

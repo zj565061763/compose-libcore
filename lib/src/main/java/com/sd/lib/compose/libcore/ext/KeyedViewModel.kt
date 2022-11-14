@@ -4,7 +4,7 @@ import androidx.lifecycle.*
 import androidx.lifecycle.viewmodel.CreationExtras
 import kotlin.math.abs
 
-fun <VM : ViewModel> ViewModelStoreOwner.fKeyedViewModel(
+fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     clazz: Class<VM>,
     key: String,
     index: Int? = null,
@@ -20,7 +20,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fKeyedViewModel(
     }
 }
 
-fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModel(
+fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVM(
     clazz: Class<VM>,
     key: String,
 ) {
@@ -31,7 +31,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModel(
     )
 }
 
-fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedViewModelFartherFromIndex(
+fun <VM : ViewModel> ViewModelStoreOwner.fRemoveKeyedVMFartherFromIndex(
     clazz: Class<VM>,
     index: Int,
     maxSize: Int,
