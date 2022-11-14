@@ -132,8 +132,8 @@ class ListState<D> {
         _mutex.withLock {
             withContext(Dispatchers.IO) {
                 if (modify(_list)) _list.toList() else null
-            }?.also { result ->
-                _uiState.update { it.copy(data = result) }
+            }?.also { data ->
+                _uiState.update { it.copy(data = data) }
             }
         }
     }
