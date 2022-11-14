@@ -60,4 +60,5 @@ dependencies {
     debugImplementation "androidx.compose.ui:ui-test-manifest:$compose_version"
 
     implementation(project(':lib'))
+    implementation 'com.github.zj565061763:compose-dialog-view:1.0.0-alpha06'
 }
