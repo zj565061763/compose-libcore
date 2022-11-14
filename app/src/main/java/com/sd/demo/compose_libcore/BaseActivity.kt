@@ -1,7 +1,6 @@
 package com.sd.demo.compose_libcore
 
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.view.WindowCompat
@@ -20,7 +19,6 @@ abstract class BaseActivity : ComponentActivity() {
         FDialogProgress(this).apply {
             this.setOnDismissListener {
                 _loadingCount.set(0)
-                Log.i(this@BaseActivity.javaClass.simpleName, "loading count:$_loadingCount")
             }
         }
     }
