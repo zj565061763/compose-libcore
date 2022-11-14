@@ -95,7 +95,10 @@ class ListState<D> {
      * 更新数据，[all]表示是否遍历整个列表，
      * [modify]返回的对象如果为null，则删除原对象；如果为新对象，则替换原对象；如果为原对象，则保持不变。
      */
-    suspend fun updateData(all: Boolean = false, modify: (D) -> D?) {
+    suspend fun updateData(
+        all: Boolean = false,
+        modify: (D) -> D?,
+    ) {
         modifyData { listData ->
             var result = false
             val listRemove = mutableListOf<Int>()
@@ -123,7 +126,10 @@ class ListState<D> {
     /**
      * 删除数据，[all]表示是否遍历整个列表，
      */
-    suspend fun removeData(all: Boolean = false, predicate: (D) -> Boolean) {
+    suspend fun removeData(
+        all: Boolean = false,
+        predicate: (D) -> Boolean,
+    ) {
         modifyData { listData ->
             listData.removeWith(all = all, predicate = predicate)
         }
