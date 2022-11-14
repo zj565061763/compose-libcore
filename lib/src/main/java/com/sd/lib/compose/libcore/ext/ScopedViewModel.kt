@@ -91,6 +91,31 @@ class FViewModelContainer : ViewModel() {
         }
     }
 
+    @Synchronized
+    fun removeKey(
+        clazz: Class<out ViewModel>,
+        key: String,
+    ) {
+        val viewModelStoreOwner = _viewModelStoreOwner ?: return
+        val keyInfoHolder = _keyHolder[clazz] ?: return
+
+        val key = transformKey(clazz, key)
+        val info = keyInfoHolder.remove(key) ?: return
+
+        if (info.index != null) {
+            _indexHolder[clazz]?.let { holder ->
+                holder.remove(info.index)
+                if (holder.isEmpty()) _indexHolder.remove(clazz)
+            }
+        }
+
+        viewModelStoreOwner.fRemoveViewModel(key)
+
+        if (keyInfoHolder.isEmpty()) {
+            _keyHolder.remove(clazz)
+        }
+    }
+
     /**
      * 移除离[index]较远的key
      */
@@ -139,6 +164,7 @@ class FViewModelContainer : ViewModel() {
         listDirtyKey.forEach { dirtyKey ->
             viewModelStoreOwner.fRemoveViewModel(dirtyKey)
         }
+
         if (keyInfoHolder.isEmpty()) {
             _keyHolder.remove(clazz)
         }
