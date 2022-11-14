@@ -74,6 +74,8 @@ class ListState<D> {
         distinct: ((oldItem: D, newItem: D) -> Boolean)? = null,
     ) {
         if (list.isEmpty()) return
+        if (distinctAll && distinct == null) throw IllegalArgumentException("Did you forget the distinct parameter?")
+
         modifyData { listData ->
             if (distinct != null) {
                 listData.removeWith(distinctAll) { oldItem ->
