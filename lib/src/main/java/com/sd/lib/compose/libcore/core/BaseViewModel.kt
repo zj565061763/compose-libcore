@@ -49,20 +49,20 @@ abstract class BaseViewModel<I> : ViewModel() {
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
-        if (isActiveState) {
-            viewModelScope.launch {
-                if (isActiveState) {
-                    try {
-                        if (notifyRefreshing) {
-                            _isRefreshing.value = true
-                        }
-                        mutator.mutate {
-                            delay(delayTime)
-                            refreshDataImpl()
-                        }
-                    } finally {
-                        _isRefreshing.value = false
-                    }
+        if (!isActiveState) return
+        viewModelScope.launch {
+            if (!isActiveState) return@launch
+            try {
+                if (notifyRefreshing) {
+                    _isRefreshing.value = true
+                }
+                mutator.mutate {
+                    delay(delayTime)
+                    refreshDataImpl()
+                }
+            } finally {
+                if (notifyRefreshing) {
+                    _isRefreshing.value = false
                 }
             }
         }
