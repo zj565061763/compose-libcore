@@ -9,15 +9,15 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlin.math.abs
 
 @Composable
-inline fun <reified VM : ViewModel> keyedViewModel(
+inline fun <reified VM : ViewModel> fKeyedViewModel(
     key: String,
     index: Int? = null,
 ): VM {
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    val transformKey = ViewModelContainer.transformKey(VM::class.java, key)
+    val transformKey = FViewModelContainer.transformKey(VM::class.java, key)
 
     return viewModel<VM>(key = transformKey).also {
-        with(viewModel<ViewModelContainer>()) {
+        with(viewModel<FViewModelContainer>()) {
             this.addKey(
                 clazz = VM::class.java,
                 key = key,
@@ -28,7 +28,7 @@ inline fun <reified VM : ViewModel> keyedViewModel(
     }
 }
 
-class ViewModelContainer : ViewModel() {
+class FViewModelContainer : ViewModel() {
     /** 保存每个key的信息 */
     private val _keyHolder: MutableMap<Class<out ViewModel>, MutableMap<String, KeyInfo>> = mutableMapOf()
 
@@ -70,7 +70,7 @@ class ViewModelContainer : ViewModel() {
                 if (oldKey != null && oldKey != key) {
                     // index被新的key覆盖，移除旧的key和对应的ViewModel
                     keyInfoHolder.remove(oldKey)
-                    viewModelStoreOwner.removeViewModel(oldKey)
+                    viewModelStoreOwner.fRemoveViewModel(oldKey)
                 }
             }
 
@@ -124,7 +124,7 @@ class ViewModelContainer : ViewModel() {
         }
 
         listDirtyKey.forEach { dirtyKey ->
-            viewModelStoreOwner.removeViewModel(dirtyKey)
+            viewModelStoreOwner.fRemoveViewModel(dirtyKey)
         }
         if (keyInfoHolder.isEmpty()) {
             _keyHolder.remove(clazz)
@@ -152,7 +152,7 @@ class ViewModelContainer : ViewModel() {
     }
 }
 
-fun ViewModelStoreOwner.removeViewModel(key: String?) {
+fun ViewModelStoreOwner.fRemoveViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
 
     val map = ViewModelStore::class.java.getDeclaredField("mMap").apply {
