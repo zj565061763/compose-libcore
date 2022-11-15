@@ -9,14 +9,14 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class ListState<D> {
+class FListState<D> {
     /** 互斥锁 */
     private val _mutex = Mutex()
 
     /** 列表数据 */
     private val _list = mutableListOf<D>()
 
-    private val _uiState = MutableStateFlow(ListUiState<D>())
+    private val _uiState = MutableStateFlow(FListUiState<D>())
 
     /** 列表ui数据 */
     val uiState = _uiState.asStateFlow()
@@ -151,7 +151,7 @@ class ListState<D> {
     }
 }
 
-data class ListUiState<T>(
+data class FListUiState<T>(
     /** 列表数据加载结果 */
     val result: FResult<Unit> = FResult.loading(),
 

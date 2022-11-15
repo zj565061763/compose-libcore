@@ -39,7 +39,6 @@ android {
 }
 
 dependencies {
-    api "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
     api "androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1"
 
     api 'com.github.zj565061763:mutator:+'

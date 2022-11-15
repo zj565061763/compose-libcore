@@ -3,8 +3,8 @@ package com.sd.lib.compose.libcore.core
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 
-abstract class ListViewModel<I, D> : BaseViewModel<I>() {
-    protected val listState = ListState<D>()
+abstract class FListViewModel<I, D> : FViewModel<I>() {
+    protected val listState = FListState<D>()
 
     val listUiState = listState.uiState
 

@@ -9,7 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.sd.lib.compose.dialogview.FDialogConfirm
 import com.sd.lib.compose.dialogview.FDialogProgress
-import com.sd.lib.compose.libcore.core.BaseViewModel
+import com.sd.lib.compose.libcore.core.FViewModel
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -36,7 +36,7 @@ abstract class BaseActivity : ComponentActivity() {
         return object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 val viewModel = superFactory.create(modelClass)
-                if (viewModel is BaseViewModel<*>) {
+                if (viewModel is FViewModel<*>) {
                     initViewModel(viewModel)
                 }
                 return viewModel
@@ -44,15 +44,15 @@ abstract class BaseActivity : ComponentActivity() {
         }
     }
 
-    private fun initViewModel(vm: BaseViewModel<*>) {
+    private fun initViewModel(vm: FViewModel<*>) {
         initStateLoading(vm)
         initStateToast(vm)
         initStateClosePage(vm)
     }
 
-    protected open fun initStateLoading(vm: BaseViewModel<*>) {
+    protected open fun initStateLoading(vm: FViewModel<*>) {
         lifecycleScope.launch {
-            vm.baseUiState.stateLoading.collect { state ->
+            vm.commonUiState.stateLoading.collect { state ->
                 if (state == null) {
                     if (_loadingCount.decrementAndGet() <= 0) {
                         _dialogProgress.dismiss()
@@ -70,18 +70,18 @@ abstract class BaseActivity : ComponentActivity() {
         }
     }
 
-    protected open fun initStateToast(vm: BaseViewModel<*>) {
+    protected open fun initStateToast(vm: FViewModel<*>) {
         lifecycleScope.launch {
-            vm.baseUiState.stateToast.collect { state ->
+            vm.commonUiState.stateToast.collect { state ->
                 val length = if (state.longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
                 Toast.makeText(this@BaseActivity, state.msg, length).show()
             }
         }
     }
 
-    protected open fun initStateClosePage(vm: BaseViewModel<*>) {
+    protected open fun initStateClosePage(vm: FViewModel<*>) {
         lifecycleScope.launch {
-            vm.baseUiState.stateClosePage.collect { state ->
+            vm.commonUiState.stateClosePage.collect { state ->
                 if (state.confirmMsg.isEmpty()) {
                     finish()
                 } else {

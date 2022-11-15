@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class BaseUiState(coroutineScope: CoroutineScope) {
+class FCommonUiState(coroutineScope: CoroutineScope) {
     private val _coroutineScope = coroutineScope
 
     private val _stateLoading = MutableSharedFlow<StateLoading?>()

@@ -8,11 +8,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-abstract class BaseViewModel<I> : ViewModel() {
+abstract class FViewModel<I> : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
 
-    /** 基础页面状态 */
-    val baseUiState by lazy { BaseUiState(viewModelScope) }
+    /** 公用的页面状态 */
+    val commonUiState by lazy { FCommonUiState(viewModelScope) }
 
     /** 是否正在刷新 */
     val isRefreshing = _isRefreshing.asStateFlow()
