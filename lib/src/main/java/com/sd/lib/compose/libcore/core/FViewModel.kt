@@ -11,9 +11,6 @@ import kotlinx.coroutines.launch
 abstract class FViewModel<I> : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
 
-    /** 公用的页面状态 */
-    val commonUiState by lazy { FCommonUiState(viewModelScope) }
-
     /** 是否正在刷新 */
     val isRefreshing = _isRefreshing.asStateFlow()
 

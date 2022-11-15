@@ -1,16 +1,12 @@
 package com.sd.demo.compose_libcore
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.sd.lib.compose.dialogview.FDialogConfirm
 import com.sd.lib.compose.dialogview.FDialogProgress
 import com.sd.lib.compose.libcore.core.FViewModel
-import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class BaseActivity : ComponentActivity() {
@@ -44,57 +40,7 @@ abstract class BaseActivity : ComponentActivity() {
         }
     }
 
-    private fun initViewModel(vm: FViewModel<*>) {
-        initStateLoading(vm)
-        initStateToast(vm)
-        initStateClosePage(vm)
-    }
+    protected open fun initViewModel(vm: FViewModel<*>) {
 
-    protected open fun initStateLoading(vm: FViewModel<*>) {
-        lifecycleScope.launch {
-            vm.commonUiState.stateLoading.collect { state ->
-                if (state == null) {
-                    if (_loadingCount.decrementAndGet() <= 0) {
-                        _dialogProgress.dismiss()
-                        _loadingCount.set(0)
-                    }
-                } else {
-                    if (_loadingCount.incrementAndGet() > 0) {
-                        _dialogProgress.apply {
-                            this.text = state.msg
-                            this.setCancelable(state.cancelable)
-                        }.show()
-                    }
-                }
-            }
-        }
-    }
-
-    protected open fun initStateToast(vm: FViewModel<*>) {
-        lifecycleScope.launch {
-            vm.commonUiState.stateToast.collect { state ->
-                val length = if (state.longDuration) Toast.LENGTH_LONG else Toast.LENGTH_SHORT
-                Toast.makeText(this@BaseActivity, state.msg, length).show()
-            }
-        }
-    }
-
-    protected open fun initStateClosePage(vm: FViewModel<*>) {
-        lifecycleScope.launch {
-            vm.commonUiState.stateClosePage.collect { state ->
-                if (state.confirmMsg.isEmpty()) {
-                    finish()
-                } else {
-                    FDialogConfirm(this@BaseActivity).apply {
-                        setCancelable(false)
-                        this.content = state.confirmMsg
-                        this.onClickConfirm = {
-                            dismiss()
-                            finish()
-                        }
-                    }.show()
-                }
-            }
-        }
     }
 }
