@@ -1,61 +1,28 @@
-package com.sd.lib.compose.libcore.core
+package com.sd.lib.compose.libcore.utils
 
-import com.sd.lib.result.FResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class FListState<D> {
+class FListHolder<D> {
     /** 互斥锁 */
     private val _mutex = Mutex()
 
     /** 列表数据 */
     private val _list = mutableListOf<D>()
 
-    private val _uiState = MutableStateFlow(FListUiState<D>())
+    private val _data = MutableStateFlow(listOf<D>())
 
-    /** 列表ui数据 */
-    val uiState = _uiState.asStateFlow()
-
-    /**
-     * 设置是否刷新中
-     */
-    fun setRefreshing(isRefreshing: Boolean) {
-        _uiState.update { it.copy(isRefreshing = isRefreshing) }
-    }
-
-    /**
-     * 设置是否加载更多中
-     */
-    fun setLoadingMore(isLoadingMore: Boolean) {
-        _uiState.update { it.copy(isLoadingMore = isLoadingMore) }
-    }
-
-    /**
-     * 设置是否还有更多数据
-     */
-    fun setHasMore(hasMore: Boolean) {
-        _uiState.update { it.copy(hasMore = hasMore) }
-    }
-
-    /**
-     * 设置数据结果
-     */
-    fun setResult(result: FResult<Unit>) {
-        if (_list.isEmpty()) {
-            _uiState.update { it.copy(result = result) }
-        }
-    }
+    /** 数据流 */
+    val data = _data.asStateFlow()
 
     /**
      * 设置数据
      */
     suspend fun setData(list: List<D>) {
-        setResult(FResult.success(Unit))
         modifyData { listData ->
             listData.clear()
             listData.addAll(list)
@@ -145,28 +112,12 @@ class FListState<D> {
             withContext(Dispatchers.IO) {
                 if (modify(_list)) _list.toList() else null
             }?.also { data ->
-                _uiState.update { it.copy(data = data) }
+                _data.value = data
             }
         }
     }
 }
 
-data class FListUiState<T>(
-    /** 列表数据加载结果 */
-    val result: FResult<Unit> = FResult.loading(),
-
-    /** 列表数据 */
-    val data: List<T> = listOf(),
-
-    /** 是否正在刷新 */
-    val isRefreshing: Boolean = false,
-
-    /** 是否正在加载更多 */
-    val isLoadingMore: Boolean = false,
-
-    /** 是否还有更多数据 */
-    val hasMore: Boolean = false,
-)
 
 /**
  * 根据条件移除元素
