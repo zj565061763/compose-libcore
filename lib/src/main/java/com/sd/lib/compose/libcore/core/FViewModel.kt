@@ -2,7 +2,8 @@ package com.sd.lib.compose.libcore.core
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sd.lib.mutator.FMutator
+import com.sd.lib.coroutine.FMutator
+import com.sd.lib.coroutine.FScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,7 +15,8 @@ abstract class FViewModel<I> : ViewModel() {
     /** 是否正在刷新 */
     val isRefreshing = _isRefreshing.asStateFlow()
 
-    val mutator = FMutator()
+    val vmMutator = FMutator()
+    val vmScope = FScope(viewModelScope)
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
     @Volatile
@@ -53,7 +55,7 @@ abstract class FViewModel<I> : ViewModel() {
                 if (notifyRefreshing) {
                     _isRefreshing.value = true
                 }
-                mutator.mutate {
+                vmMutator.mutate {
                     delay(delayTime)
                     refreshDataImpl()
                 }
