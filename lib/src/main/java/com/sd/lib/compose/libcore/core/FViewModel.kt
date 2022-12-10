@@ -1,7 +1,6 @@
 package com.sd.lib.compose.libcore.core
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.sd.lib.coroutine.FMutator
 import com.sd.lib.coroutine.FScope
 import kotlinx.coroutines.delay
@@ -9,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-abstract class FViewModel<I> : ViewModel() {
+abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     private val _isRefreshing = MutableStateFlow(false)
 
     /** 是否正在刷新 */
@@ -18,12 +17,15 @@ abstract class FViewModel<I> : ViewModel() {
     val vmMutator = FMutator()
     val vmScope = FScope(viewModelScope)
 
+    private var _isPausedByLifecycle = false
+
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
     @Volatile
     var isActiveState: Boolean = true
         set(value) {
             if (field != value) {
                 field = value
+                _isPausedByLifecycle = false
                 onActiveStateChanged()
             }
         }
@@ -81,6 +83,26 @@ abstract class FViewModel<I> : ViewModel() {
      * 激活状态变化
      */
     protected open fun onActiveStateChanged() {}
+
+    /**
+     * 声明周期变化
+     */
+    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+        when (event) {
+            Lifecycle.Event.ON_STOP -> {
+                if (isActiveState) {
+                    isActiveState = false
+                    _isPausedByLifecycle = true
+                }
+            }
+            Lifecycle.Event.ON_START -> {
+                if (_isPausedByLifecycle) {
+                    isActiveState = true
+                }
+            }
+            else -> {}
+        }
+    }
 }
 
 interface IgnoreActiveStateIntent
