@@ -150,7 +150,7 @@ abstract class FViewModel<I> : ViewModel() {
         }
     }
 
-    override fun onCleared() {
+    final override fun onCleared() {
         super.onCleared()
         onDestroy()
         isActiveState = false
