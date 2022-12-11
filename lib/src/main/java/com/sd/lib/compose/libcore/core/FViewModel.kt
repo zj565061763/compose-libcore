@@ -24,6 +24,7 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     @Volatile
     var isActiveState: Boolean = true
         set(value) {
+            if (_isDestroyed) return
             if (field != value) {
                 field = value
                 _isPausedByLifecycle = false
@@ -108,6 +109,7 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     override fun onCleared() {
         super.onCleared()
         onDestroy()
+        isActiveState = false
         _isDestroyed = true
     }
 
