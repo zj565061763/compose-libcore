@@ -76,10 +76,18 @@ abstract class FViewModel<I> : ViewModel() {
     /**
      * 观察生命周期
      */
-    fun setLifecycle(lifecycle: Lifecycle) {
+    fun setLifecycle(lifecycle: Lifecycle?) {
         val old = _lifecycle?.get()
-        if (old != lifecycle) {
-            old?.removeObserver(_lifecycleObserver)
+        if (old === lifecycle) return
+
+        old?.removeObserver(_lifecycleObserver)
+
+        if (lifecycle == null) {
+            _lifecycle = null
+            if (_isPausedByLifecycle) {
+                isActiveState = true
+            }
+        } else {
             if (!_isDestroyed) {
                 _lifecycle = WeakReference(lifecycle)
                 lifecycle.addObserver(_lifecycleObserver)
