@@ -46,8 +46,6 @@ dependencies {
     api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
     api 'androidx.lifecycle:lifecycle-process:2.5.1'
     api 'com.github.zj565061763:coroutine:latest.release'
-
-
 }
 
 task generateSourcesJar(type: Jar) {
