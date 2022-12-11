@@ -17,6 +17,7 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     val vmMutator = FMutator()
     val vmScope = FScope(viewModelScope)
 
+    private var _isDestroyed = false
     private var _isPausedByLifecycle = false
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
@@ -103,6 +104,17 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
             else -> {}
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        onDestroy()
+        _isDestroyed = true
+    }
+
+    /**
+     * 销毁回调
+     */
+    protected open fun onDestroy() {}
 }
 
 interface IgnoreActiveStateIntent
