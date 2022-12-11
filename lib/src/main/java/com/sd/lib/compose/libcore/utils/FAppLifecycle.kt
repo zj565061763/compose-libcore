@@ -3,7 +3,7 @@ package com.sd.lib.compose.libcore.utils
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ProcessLifecycleOwner
 
-object FProcessLifecycle {
+object FAppLifecycle {
     val lifecycle get() = ProcessLifecycleOwner.get().lifecycle
 
     /**
