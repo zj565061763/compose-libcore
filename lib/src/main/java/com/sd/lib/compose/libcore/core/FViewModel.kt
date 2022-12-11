@@ -7,8 +7,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import java.lang.ref.WeakReference
 
-abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
+abstract class FViewModel<I> : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
 
     /** 是否正在刷新 */
@@ -19,6 +20,7 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
 
     private var _isDestroyed = false
     private var _isPausedByLifecycle = false
+    private var _lifecycle: WeakReference<Lifecycle>? = null
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
     @Volatile
@@ -72,6 +74,20 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     }
 
     /**
+     * 观察生命周期
+     */
+    fun setLifecycle(lifecycle: Lifecycle) {
+        val old = _lifecycle?.get()
+        if (old != lifecycle) {
+            old?.removeObserver(_lifecycleObserver)
+            if (!_isDestroyed) {
+                _lifecycle = WeakReference(lifecycle)
+                lifecycle.addObserver(_lifecycleObserver)
+            }
+        }
+    }
+
+    /**
      * 处理意图
      */
     protected abstract suspend fun handleIntent(intent: I)
@@ -87,22 +103,42 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
     protected open fun onActiveStateChanged() {}
 
     /**
-     * 声明周期变化
+     * 生命周期变化回调
      */
-    override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-        when (event) {
-            Lifecycle.Event.ON_STOP -> {
-                if (isActiveState) {
-                    isActiveState = false
-                    _isPausedByLifecycle = true
-                }
+    protected open fun onLifecycleStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {}
+
+    /**
+     * 销毁回调
+     */
+    protected open fun onDestroy() {}
+
+    /**
+     * 生命周期观察者
+     */
+    private val _lifecycleObserver = object : LifecycleEventObserver {
+        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
+            if (_isDestroyed) {
+                source.lifecycle.removeObserver(this)
+                return
             }
-            Lifecycle.Event.ON_START -> {
-                if (_isPausedByLifecycle) {
-                    isActiveState = true
+            when (event) {
+                Lifecycle.Event.ON_STOP -> {
+                    if (isActiveState) {
+                        isActiveState = false
+                        _isPausedByLifecycle = true
+                    }
                 }
+                Lifecycle.Event.ON_START -> {
+                    if (_isPausedByLifecycle) {
+                        isActiveState = true
+                    }
+                }
+                Lifecycle.Event.ON_DESTROY -> {
+                    source.lifecycle.removeObserver(this)
+                }
+                else -> {}
             }
-            else -> {}
+            onLifecycleStateChanged(source, event)
         }
     }
 
@@ -112,11 +148,6 @@ abstract class FViewModel<I> : ViewModel(), LifecycleEventObserver {
         isActiveState = false
         _isDestroyed = true
     }
-
-    /**
-     * 销毁回调
-     */
-    protected open fun onDestroy() {}
 }
 
 interface IgnoreActiveStateIntent
