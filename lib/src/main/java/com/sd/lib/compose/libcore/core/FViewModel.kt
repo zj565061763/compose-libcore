@@ -10,6 +10,10 @@ import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
 abstract class FViewModel<I> : ViewModel() {
+    private var _isDestroyed = false
+    private var _isPausedByLifecycle = false
+    private var _lifecycle: WeakReference<Lifecycle>? = null
+
     private val _isRefreshing = MutableStateFlow(false)
 
     /** 是否正在刷新 */
@@ -17,10 +21,6 @@ abstract class FViewModel<I> : ViewModel() {
 
     val vmMutator = FMutator()
     val vmScope = FScope(viewModelScope)
-
-    private var _isDestroyed = false
-    private var _isPausedByLifecycle = false
-    private var _lifecycle: WeakReference<Lifecycle>? = null
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
     @Volatile
