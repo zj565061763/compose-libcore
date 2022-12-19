@@ -7,7 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
-class FListHolder<D> {
+open class FListHolder<D> {
     /** 互斥锁 */
     private val _mutex = Mutex()
 
@@ -22,7 +22,7 @@ class FListHolder<D> {
     /**
      * 设置数据
      */
-    suspend fun setData(list: List<D>) {
+    open suspend fun setData(list: List<D>) {
         modifyData { listData ->
             listData.clear()
             listData.addAll(list)
@@ -33,7 +33,7 @@ class FListHolder<D> {
     /**
      * 添加数据
      */
-    suspend fun addData(
+    open suspend fun addData(
         list: List<D>,
         /** 是否全部去重，true-遍历整个列表，false-遇到符合条件的就结束 */
         distinctAll: Boolean = false,
@@ -64,7 +64,7 @@ class FListHolder<D> {
      * 更新数据，[all]表示是否遍历整个列表，
      * [modify]返回的对象如果为null，则删除原对象；如果为新对象，则替换原对象；如果为原对象，则保持不变。
      */
-    suspend fun updateData(
+    open suspend fun updateData(
         all: Boolean = false,
         modify: (D) -> D?,
     ) {
@@ -95,7 +95,7 @@ class FListHolder<D> {
     /**
      * 删除数据，[all]表示是否遍历整个列表，
      */
-    suspend fun removeData(
+    open suspend fun removeData(
         all: Boolean = false,
         predicate: (D) -> Boolean,
     ) {
