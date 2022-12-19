@@ -66,5 +66,5 @@ dependencies {
 
     implementation(project(':lib'))
     implementation 'com.google.accompanist:accompanist-pager:0.28.0'
-    implementation 'com.github.zj565061763:compose-dialog-view:1.0.0-alpha08'
+    implementation 'com.github.zj565061763:compose-dialog-view:1.0.0-alpha10'
 }
