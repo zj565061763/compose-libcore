@@ -14,10 +14,10 @@ open class FListHolder<D> {
     /** 列表数据 */
     private val _list = mutableListOf<D>()
 
-    private val _data = MutableStateFlow(listOf<D>())
+    private val _dataFlow = MutableStateFlow(listOf<D>())
 
     /** 数据流 */
-    val data = _data.asStateFlow()
+    val dataFlow = _dataFlow.asStateFlow()
 
     /**
      * 设置数据
@@ -112,7 +112,7 @@ open class FListHolder<D> {
             withContext(Dispatchers.IO) {
                 if (modify(_list)) _list.toList() else null
             }?.also { data ->
-                _data.value = data
+                _dataFlow.value = data
             }
         }
     }
