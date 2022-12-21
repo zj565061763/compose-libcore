@@ -42,6 +42,7 @@ dependencies {
     implementation platform("androidx.compose:compose-bom:$compose_bom_version")
     implementation 'androidx.compose.material3:material3'
 
+    api 'androidx.activity:activity-compose:1.6.1'
     api 'androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1'
     api 'androidx.lifecycle:lifecycle-process:2.5.1'
     api 'com.github.zj565061763:coroutine:latest.release'
