@@ -128,8 +128,7 @@ internal class FViewModelContainer : ViewModel() {
         private fun packKey(clazz: Class<out ViewModel>, key: String): String {
             require(key.isNotEmpty()) { "key is empty" }
             require(!key.startsWith(KeyPrefix)) { "key start with $KeyPrefix" }
-            val prefix = "${KeyPrefix}:${clazz.name}:"
-            return prefix + key
+            return "${KeyPrefix}:${clazz.name}:${key}"
         }
     }
 }
