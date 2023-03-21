@@ -72,10 +72,6 @@ abstract class FViewModel<I> : ViewModel() {
         }
     }
 
-    protected fun launchMutator() {
-
-    }
-
     /**
      * 观察生命周期
      */
