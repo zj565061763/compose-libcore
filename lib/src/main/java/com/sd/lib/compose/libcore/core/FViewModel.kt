@@ -99,11 +99,12 @@ abstract class FViewModel<I> : ViewModel() {
                 if (_isPausedByLifecycle) {
                     _isActiveState = true
                 }
-            } else {
-                if (!_isDestroyed) {
-                    _lifecycle = WeakReference(lifecycle)
-                    lifecycle.addObserver(_lifecycleObserver)
-                }
+                return
+            }
+
+            if (!_isDestroyed) {
+                _lifecycle = WeakReference(lifecycle)
+                lifecycle.addObserver(_lifecycleObserver)
             }
         }
     }
