@@ -124,22 +124,22 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
-     * 处理意图
+     * 处理意图，[viewModelScope]触发
      */
     protected abstract suspend fun handleIntent(intent: I)
 
     /**
-     * 刷新数据
+     * 刷新数据，[viewModelScope]触发
      */
     protected abstract suspend fun refreshDataImpl()
 
     /**
-     * 激活状态变化
+     * 激活状态变化（UI线程）
      */
     protected open fun onActiveStateChanged() {}
 
     /**
-     * 销毁回调
+     * 销毁回调，[onCleared]触发
      */
     protected open fun onDestroy() {}
 
