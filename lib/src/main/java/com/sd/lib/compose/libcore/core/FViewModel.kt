@@ -58,10 +58,10 @@ abstract class FViewModel<I> : ViewModel() {
         viewModelScope.launch {
             if (isActiveState) {
                 try {
-                    if (notifyRefreshing) {
-                        _isRefreshing.value = true
-                    }
                     vmMutator.mutate {
+                        if (notifyRefreshing) {
+                            _isRefreshing.value = true
+                        }
                         delay(delayTime)
                         refreshDataImpl()
                     }
