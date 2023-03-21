@@ -2,7 +2,6 @@ package com.sd.lib.compose.libcore.core
 
 import androidx.lifecycle.*
 import com.sd.lib.coroutine.FMutator
-import com.sd.lib.coroutine.FScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
