@@ -20,7 +20,6 @@ abstract class FViewModel<I> : ViewModel() {
     val isRefreshing = _isRefreshing.asStateFlow()
 
     val vmMutator = FMutator()
-    val vmScope = FScope(viewModelScope)
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
     @Volatile
@@ -71,6 +70,10 @@ abstract class FViewModel<I> : ViewModel() {
                 }
             }
         }
+    }
+
+    protected fun launchMutator() {
+
     }
 
     /**
