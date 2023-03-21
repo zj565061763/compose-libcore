@@ -13,6 +13,8 @@ abstract class FViewModel<I> : ViewModel() {
     private var _isDestroyed = false
 
     private var _lifecycle: WeakReference<Lifecycle>? = null
+
+    @Volatile
     private var _isPausedByLifecycle = false
 
     private val _isRefreshing = MutableStateFlow(false)
