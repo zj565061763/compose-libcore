@@ -25,7 +25,7 @@ abstract class FViewModel<I> : ViewModel() {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    notifyActivityStateChange()
+                    _handler.post { onActiveStateChanged() }
                 }
             }
         }
@@ -168,15 +168,6 @@ abstract class FViewModel<I> : ViewModel() {
                 setLifecycle(null)
             }
             else -> {}
-        }
-    }
-
-    /**
-     * 通知状态变化
-     */
-    private fun notifyActivityStateChange() {
-        _handler.post {
-            onActiveStateChanged()
         }
     }
 
