@@ -1,6 +1,9 @@
 package com.sd.lib.compose.libcore.core
 
-import androidx.lifecycle.*
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sd.lib.coroutine.FMutator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,9 +15,23 @@ abstract class FViewModel<I> : ViewModel() {
     @Volatile
     private var _isDestroyed = false
 
-    private var _lifecycle: WeakReference<Lifecycle>? = null
-
     @Volatile
+    private var _isActiveState = true
+        set(value) {
+            if (_isDestroyed) return
+            synchronized(this@FViewModel) {
+                val changed = field != value
+                if (changed) {
+                    field = value
+                    _isPausedByLifecycle = false
+                }
+                changed
+            }.let {
+                if (it) onActiveStateChanged()
+            }
+        }
+
+    private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -25,16 +42,7 @@ abstract class FViewModel<I> : ViewModel() {
     val vmMutator = FMutator()
 
     /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
-    @Volatile
-    var isActiveState: Boolean = true
-        set(value) {
-            if (_isDestroyed) return
-            if (field != value) {
-                field = value
-                _isPausedByLifecycle = false
-                onActiveStateChanged()
-            }
-        }
+    val isActiveState: Boolean get() = _isActiveState
 
     /**
      * 外部触发意图
@@ -80,20 +88,22 @@ abstract class FViewModel<I> : ViewModel() {
      * 观察生命周期
      */
     fun setLifecycle(lifecycle: Lifecycle?) {
-        val old = _lifecycle?.get()
-        if (old === lifecycle) return
+        synchronized(this@FViewModel) {
+            val old = _lifecycle?.get()
+            if (old === lifecycle) return
 
-        old?.removeObserver(_lifecycleObserver)
+            old?.removeObserver(_lifecycleObserver)
 
-        if (lifecycle == null) {
-            _lifecycle = null
-            if (_isPausedByLifecycle) {
-                isActiveState = true
-            }
-        } else {
-            if (!_isDestroyed) {
-                _lifecycle = WeakReference(lifecycle)
-                lifecycle.addObserver(_lifecycleObserver)
+            if (lifecycle == null) {
+                _lifecycle = null
+                if (_isPausedByLifecycle) {
+                    _isActiveState = true
+                }
+            } else {
+                if (!_isDestroyed) {
+                    _lifecycle = WeakReference(lifecycle)
+                    lifecycle.addObserver(_lifecycleObserver)
+                }
             }
         }
     }
@@ -114,11 +124,6 @@ abstract class FViewModel<I> : ViewModel() {
     protected open fun onActiveStateChanged() {}
 
     /**
-     * 生命周期变化回调
-     */
-    protected open fun onLifecycleStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {}
-
-    /**
      * 销毁回调
      */
     protected open fun onDestroy() {}
@@ -126,37 +131,34 @@ abstract class FViewModel<I> : ViewModel() {
     /**
      * 生命周期观察者
      */
-    private val _lifecycleObserver = object : LifecycleEventObserver {
-        override fun onStateChanged(source: LifecycleOwner, event: Lifecycle.Event) {
-            if (_isDestroyed) {
-                source.lifecycle.removeObserver(this)
-                return
-            }
-            when (event) {
-                Lifecycle.Event.ON_STOP -> {
-                    if (isActiveState) {
-                        isActiveState = false
+    private val _lifecycleObserver = LifecycleEventObserver { _, event ->
+        when (event) {
+            Lifecycle.Event.ON_STOP -> {
+                synchronized(this@FViewModel) {
+                    if (_isActiveState) {
+                        _isActiveState = false
                         _isPausedByLifecycle = true
                     }
                 }
-                Lifecycle.Event.ON_START -> {
+            }
+            Lifecycle.Event.ON_START -> {
+                synchronized(this@FViewModel) {
                     if (_isPausedByLifecycle) {
-                        isActiveState = true
+                        _isActiveState = true
                     }
                 }
-                Lifecycle.Event.ON_DESTROY -> {
-                    source.lifecycle.removeObserver(this)
-                }
-                else -> {}
             }
-            onLifecycleStateChanged(source, event)
+            Lifecycle.Event.ON_DESTROY -> {
+                setLifecycle(null)
+            }
+            else -> {}
         }
     }
 
     final override fun onCleared() {
         super.onCleared()
-        _lifecycle = null
-        isActiveState = false
+        setLifecycle(null)
+        _isActiveState = false
         _isDestroyed = true
         onDestroy()
     }
