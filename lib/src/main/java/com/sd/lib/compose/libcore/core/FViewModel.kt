@@ -13,12 +13,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
-abstract class FViewModel<I> : ViewModel() {
+abstract class FViewModel<I>(
+    isActive: Boolean = true,
+) : ViewModel() {
     @Volatile
     private var _isDestroyed = false
 
     @Volatile
-    private var _isActiveState = true
+    private var _isActiveState = isActive
         set(value) {
             if (_isDestroyed) return
             synchronized(this@FViewModel) {
