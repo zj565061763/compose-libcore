@@ -1,5 +1,7 @@
 package com.sd.lib.compose.libcore.core
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
@@ -20,19 +22,17 @@ abstract class FViewModel<I> : ViewModel() {
         set(value) {
             if (_isDestroyed) return
             synchronized(this@FViewModel) {
-                val changed = field != value
-                if (changed) {
+                if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
+                    notifyActivityStateChange()
                 }
-                changed
-            }.let {
-                if (it) onActiveStateChanged()
             }
         }
 
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
+    private val _handler = Handler(Looper.getMainLooper())
 
     private val _isRefreshing = MutableStateFlow(false)
 
@@ -167,6 +167,15 @@ abstract class FViewModel<I> : ViewModel() {
                 setLifecycle(null)
             }
             else -> {}
+        }
+    }
+
+    /**
+     * 通知状态变化
+     */
+    private fun notifyActivityStateChange() {
+        _handler.post {
+            onActiveStateChanged()
         }
     }
 
