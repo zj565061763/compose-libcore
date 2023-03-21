@@ -150,7 +150,7 @@ abstract class FViewModel<I> : ViewModel() {
         when (event) {
             Lifecycle.Event.ON_STOP -> {
                 synchronized(this@FViewModel) {
-                    if (_isActiveState) {
+                    if (isActiveState) {
                         _isActiveState = false
                         _isPausedByLifecycle = true
                     }
