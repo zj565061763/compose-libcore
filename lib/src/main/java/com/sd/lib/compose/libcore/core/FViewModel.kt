@@ -109,6 +109,21 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
+     * 设置是否处于激活状态
+     */
+    fun setActiveState(active: Boolean) {
+        synchronized(this@FViewModel) {
+            if (active) {
+                if (!_isPausedByLifecycle) {
+                    _isActiveState = true
+                }
+            } else {
+                _isActiveState = false
+            }
+        }
+    }
+
+    /**
      * 处理意图
      */
     protected abstract suspend fun handleIntent(intent: I)
