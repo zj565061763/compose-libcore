@@ -9,13 +9,14 @@ import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
 abstract class FViewModel<I> : ViewModel() {
+    @Volatile
     private var _isDestroyed = false
     private var _isPausedByLifecycle = false
     private var _lifecycle: WeakReference<Lifecycle>? = null
 
     private val _isRefreshing = MutableStateFlow(false)
 
-    /** 是否正在刷新 */
+    /** 是否正在刷新中 */
     val isRefreshing = _isRefreshing.asStateFlow()
 
     val vmMutator = FMutator()
@@ -154,10 +155,10 @@ abstract class FViewModel<I> : ViewModel() {
 
     final override fun onCleared() {
         super.onCleared()
-        onDestroy()
         _lifecycle = null
         isActiveState = false
         _isDestroyed = true
+        onDestroy()
     }
 }
 
