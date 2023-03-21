@@ -11,8 +11,9 @@ import java.lang.ref.WeakReference
 abstract class FViewModel<I> : ViewModel() {
     @Volatile
     private var _isDestroyed = false
-    private var _isPausedByLifecycle = false
+
     private var _lifecycle: WeakReference<Lifecycle>? = null
+    private var _isPausedByLifecycle = false
 
     private val _isRefreshing = MutableStateFlow(false)
 
