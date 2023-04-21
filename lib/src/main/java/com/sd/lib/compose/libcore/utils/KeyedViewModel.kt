@@ -3,10 +3,16 @@ package com.sd.lib.compose.libcore.utils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.lifecycle.*
+import androidx.lifecycle.HasDefaultViewModelProviderFactory
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import java.util.*
+import java.lang.reflect.Field
+import java.util.UUID
+import kotlin.collections.set
 
 @Composable
 inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
@@ -137,9 +143,14 @@ internal class FViewModelContainer : ViewModel() {
 private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
 
-    val map = ViewModelStore::class.java.getDeclaredField("map").apply {
+    var mapField: Field? = ViewModelStore::class.java.getDeclaredField("map")
+    if (mapField == null) {
+        mapField = ViewModelStore::class.java.getDeclaredField("mMap") ?: error("map field was not found in ${ViewModelStore::class.java.name}")
+    }
+
+    val map = mapField.apply {
         this.isAccessible = true
-    }.get(viewModelStore) as HashMap<String, ViewModel>
+    }.get(viewModelStore) as MutableMap<String, ViewModel>
 
     map.remove(key)?.let { viewModel ->
         val method = ViewModel::class.java.getDeclaredMethod("clear").apply {
