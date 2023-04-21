@@ -137,7 +137,7 @@ internal class FViewModelContainer : ViewModel() {
 private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
 
-    val map = ViewModelStore::class.java.getDeclaredField("mMap").apply {
+    val map = ViewModelStore::class.java.getDeclaredField("map").apply {
         this.isAccessible = true
     }.get(viewModelStore) as HashMap<String, ViewModel>
 

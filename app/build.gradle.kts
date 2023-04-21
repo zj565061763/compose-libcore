@@ -59,6 +59,5 @@ dependencies {
 
     implementation(project(":lib"))
 
-    implementation(libs.accompanist.pager)
     implementation(libs.sd.composeDialogView)
 }

@@ -27,18 +27,19 @@ abstract class BaseActivity : ComponentActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
-    override fun getDefaultViewModelProviderFactory(): ViewModelProvider.Factory {
-        val superFactory = super.getDefaultViewModelProviderFactory()
-        return object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                val viewModel = superFactory.create(modelClass)
-                if (viewModel is FViewModel<*>) {
-                    initViewModel(viewModel)
+    override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+        get() {
+            val superFactory = super.defaultViewModelProviderFactory
+            return object : ViewModelProvider.Factory {
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    val viewModel = superFactory.create(modelClass)
+                    if (viewModel is FViewModel<*>) {
+                        initViewModel(viewModel)
+                    }
+                    return viewModel
                 }
-                return viewModel
             }
         }
-    }
 
     protected open fun initViewModel(vm: FViewModel<*>) {
 
