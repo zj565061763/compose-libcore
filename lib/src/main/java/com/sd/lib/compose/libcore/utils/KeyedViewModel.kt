@@ -10,7 +10,6 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
-import java.lang.reflect.Field
 import java.util.UUID
 import kotlin.collections.set
 
@@ -22,15 +21,13 @@ inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
     DisposableEffect(viewModelStoreOwner, key) {
         onDispose {
             viewModelStoreOwner.fKeyedVMRemove(
-                clazz = VM::class.java,
-                key = key
+                clazz = VM::class.java, key = key
             )
         }
     }
 
     return viewModelStoreOwner.fKeyedVM(
-        clazz = VM::class.java,
-        key = key
+        clazz = VM::class.java, key = key
     )
 }
 
@@ -143,9 +140,8 @@ internal class FViewModelContainer : ViewModel() {
 private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
 
-    var mapField: Field? = ViewModelStore::class.java.getDeclaredField("map")
-    if (mapField == null) {
-        mapField = ViewModelStore::class.java.getDeclaredField("mMap") ?: error("map field was not found in ${ViewModelStore::class.java.name}")
+    val mapField = with(ViewModelStore::class.java) {
+        getDeclaredField("map") ?: getDeclaredField("mMap") ?: error("map field was not found in ${ViewModelStore::class.java.name}")
     }
 
     val map = mapField.apply {
@@ -161,10 +157,7 @@ private fun ViewModelStoreOwner.removeViewModel(key: String?) {
 }
 
 private fun <VM : ViewModel> ViewModelStoreOwner.getViewModel(
-    javaClass: Class<VM>,
-    key: String? = null,
-    factory: ViewModelProvider.Factory? = null,
-    extras: CreationExtras = if (this is HasDefaultViewModelProviderFactory) {
+    javaClass: Class<VM>, key: String? = null, factory: ViewModelProvider.Factory? = null, extras: CreationExtras = if (this is HasDefaultViewModelProviderFactory) {
         this.defaultViewModelCreationExtras
     } else {
         CreationExtras.Empty
