@@ -63,7 +63,7 @@ fun ViewModelStoreOwner.fKeyedVMSize(clazz: Class<out ViewModel>): Int {
 }
 
 internal class FViewModelContainer : ViewModel() {
-    private val _vmHolder: MutableMap<Class<out ViewModel>, ViewModelInfo> = mutableMapOf()
+    private val _vmHolder: MutableMap<Class<out ViewModel>, ViewModelInfo> = hashMapOf()
 
     @Synchronized
     fun <VM : ViewModel> addKey(
@@ -97,7 +97,6 @@ internal class FViewModelContainer : ViewModel() {
         return viewModelInfo.remove(packKey).also {
             if (it) {
                 viewModelStoreOwner.removeViewModel(packKey)
-
                 if (viewModelInfo.size() <= 0) {
                     _vmHolder.remove(clazz)
                 }
@@ -112,7 +111,7 @@ internal class FViewModelContainer : ViewModel() {
     }
 
     private class ViewModelInfo {
-        private val _keyHolder = mutableSetOf<String>()
+        private val _keyHolder: MutableSet<String> = hashSetOf()
 
         fun bind(key: String, vm: ViewModel) {
             _keyHolder.add(key)
