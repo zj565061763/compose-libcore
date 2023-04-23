@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Button
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,9 +22,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    Content(this)
-                }
+                Content(this)
             }
         }
     }
@@ -48,6 +45,6 @@ private fun Content(activity: Activity) {
     }
 }
 
-fun logMsg(block: () -> String) {
+inline fun logMsg(block: () -> String) {
     Log.i("libcore-demo", block())
 }

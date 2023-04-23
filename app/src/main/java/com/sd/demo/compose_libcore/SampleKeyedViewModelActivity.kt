@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -29,9 +28,7 @@ class SampleKeyedViewModelActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
-                    Content()
-                }
+                Content()
             }
         }
     }
@@ -43,9 +40,9 @@ private fun Content() {
     val pagerState = rememberPagerState()
 
     HorizontalPager(
-        state = pagerState,
-        pageCount = 20,
         modifier = Modifier.fillMaxSize(),
+        pageCount = 20,
+        state = pagerState,
     ) { index ->
         PageView(
             index = index,
