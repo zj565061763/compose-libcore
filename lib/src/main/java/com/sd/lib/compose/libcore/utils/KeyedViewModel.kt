@@ -21,13 +21,15 @@ inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
     DisposableEffect(viewModelStoreOwner, key) {
         onDispose {
             viewModelStoreOwner.fKeyedVMRemove(
-                clazz = VM::class.java, key = key
+                clazz = VM::class.java,
+                key = key,
             )
         }
     }
 
     return viewModelStoreOwner.fKeyedVM(
-        clazz = VM::class.java, key = key
+        clazz = VM::class.java,
+        key = key,
     )
 }
 
