@@ -142,11 +142,11 @@ private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
     ViewModelStore::class.java.run {
         try {
-            getDeclaredField("mMap")
+            getDeclaredField("map")
         } catch (e: Exception) {
             null
         } ?: try {
-            getDeclaredField("map")
+            getDeclaredField("mMap")
         } catch (e: Exception) {
             null
         } ?: error("map field was not found in ${ViewModelStore::class.java.name}")
@@ -169,7 +169,10 @@ private fun ViewModelStoreOwner.removeViewModel(key: String?) {
 }
 
 private fun <VM : ViewModel> ViewModelStoreOwner.getViewModel(
-    javaClass: Class<VM>, key: String? = null, factory: ViewModelProvider.Factory? = null, extras: CreationExtras = if (this is HasDefaultViewModelProviderFactory) {
+    javaClass: Class<VM>,
+    key: String? = null,
+    factory: ViewModelProvider.Factory? = null,
+    extras: CreationExtras = if (this is HasDefaultViewModelProviderFactory) {
         this.defaultViewModelCreationExtras
     } else {
         CreationExtras.Empty
