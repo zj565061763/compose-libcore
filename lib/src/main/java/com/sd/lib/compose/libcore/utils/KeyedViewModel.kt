@@ -139,21 +139,31 @@ internal class FViewModelContainer : ViewModel() {
 
 private fun ViewModelStoreOwner.removeViewModel(key: String?) {
     if (key.isNullOrEmpty()) return
-
-    val field = with(ViewModelStore::class.java) {
-        getDeclaredField("map") ?: getDeclaredField("mMap") ?: error("map field was not found in ${ViewModelStore::class.java.name}")
-    }.apply {
-        this.isAccessible = true
-    }
-
-    val map = field.get(viewModelStore) as MutableMap<String, ViewModel>
-    val viewModel = map.remove(key) ?: return
-
-    ViewModel::class.java.run {
-        getDeclaredMethod("clear") ?: error("clear method was not found in ${ViewModel::class.java.name}")
-    }.also {
-        it.isAccessible = true
-        it.invoke(viewModel)
+    ViewModelStore::class.java.run {
+        try {
+            getDeclaredField("mMap")
+        } catch (e: Exception) {
+            null
+        } ?: try {
+            getDeclaredField("map")
+        } catch (e: Exception) {
+            null
+        } ?: error("map field was not found in ${ViewModelStore::class.java.name}")
+    }.let { field ->
+        field.isAccessible = true
+        val map = field.get(viewModelStore) as MutableMap<String, ViewModel>
+        map.remove(key)
+    }?.let { viewModel ->
+        ViewModel::class.java.run {
+            try {
+                getDeclaredMethod("clear")
+            } catch (e: Exception) {
+                null
+            } ?: error("clear method was not found in ${ViewModel::class.java.name}")
+        }.let { method ->
+            method.isAccessible = true
+            method.invoke(viewModel)
+        }
     }
 }
 
