@@ -94,8 +94,8 @@ internal class FViewModelContainer : ViewModel() {
     ): Boolean {
         val viewModelInfo = _vmHolder[clazz] ?: return false
         val packKey = packKey(clazz, key)
-        return viewModelInfo.remove(packKey).also {
-            if (it) {
+        return viewModelInfo.remove(packKey).also { remove ->
+            if (remove) {
                 viewModelStoreOwner.removeVM(packKey)
                 if (viewModelInfo.size() <= 0) {
                     _vmHolder.remove(clazz)
