@@ -37,7 +37,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     clazz: Class<VM>,
     key: String,
 ): VM {
-    val container = getViewModel(FViewModelContainer::class.java)
+    val container = getVM(FViewModelContainer::class.java)
     return container.addKey(
         clazz = clazz,
         key = key,
@@ -49,7 +49,7 @@ fun ViewModelStoreOwner.fKeyedVMRemove(
     clazz: Class<out ViewModel>,
     key: String,
 ): Boolean {
-    val container = getViewModel(FViewModelContainer::class.java)
+    val container = getVM(FViewModelContainer::class.java)
     return container.removeKey(
         clazz = clazz,
         key = key,
@@ -58,7 +58,7 @@ fun ViewModelStoreOwner.fKeyedVMRemove(
 }
 
 fun ViewModelStoreOwner.fKeyedVMSize(clazz: Class<out ViewModel>): Int {
-    val container = getViewModel(FViewModelContainer::class.java)
+    val container = getVM(FViewModelContainer::class.java)
     return container.size(clazz)
 }
 
@@ -73,7 +73,7 @@ internal class FViewModelContainer : ViewModel() {
     ): VM {
         val packKey = packKey(clazz, key)
 
-        val viewModel = viewModelStoreOwner.getViewModel(
+        val viewModel = viewModelStoreOwner.getVM(
             javaClass = clazz,
             key = packKey,
         )
@@ -96,7 +96,7 @@ internal class FViewModelContainer : ViewModel() {
         val packKey = packKey(clazz, key)
         return viewModelInfo.remove(packKey).also {
             if (it) {
-                viewModelStoreOwner.removeViewModel(packKey)
+                viewModelStoreOwner.removeVM(packKey)
                 if (viewModelInfo.size() <= 0) {
                     _vmHolder.remove(clazz)
                 }
@@ -137,38 +137,7 @@ internal class FViewModelContainer : ViewModel() {
     }
 }
 
-
-private fun ViewModelStoreOwner.removeViewModel(key: String?) {
-    if (key.isNullOrEmpty()) return
-    ViewModelStore::class.java.run {
-        try {
-            getDeclaredField("map")
-        } catch (e: Exception) {
-            null
-        } ?: try {
-            getDeclaredField("mMap")
-        } catch (e: Exception) {
-            null
-        } ?: error("map field was not found in ${ViewModelStore::class.java.name}")
-    }.let { field ->
-        field.isAccessible = true
-        val map = field.get(viewModelStore) as MutableMap<String, ViewModel>
-        map.remove(key)
-    }?.let { viewModel ->
-        ViewModel::class.java.run {
-            try {
-                getDeclaredMethod("clear")
-            } catch (e: Exception) {
-                null
-            } ?: error("clear method was not found in ${ViewModel::class.java.name}")
-        }.let { method ->
-            method.isAccessible = true
-            method.invoke(viewModel)
-        }
-    }
-}
-
-private fun <VM : ViewModel> ViewModelStoreOwner.getViewModel(
+private fun <VM : ViewModel> ViewModelStoreOwner.getVM(
     javaClass: Class<VM>,
     key: String? = null,
     factory: ViewModelProvider.Factory? = null,
@@ -189,5 +158,38 @@ private fun <VM : ViewModel> ViewModelStoreOwner.getViewModel(
         provider[key, javaClass]
     } else {
         provider[javaClass]
+    }
+}
+
+private fun ViewModelStoreOwner.removeVM(key: String?) {
+    if (key.isNullOrEmpty()) return
+    vmHolder().remove(key)?.let { viewModel ->
+        ViewModel::class.java.run {
+            try {
+                getDeclaredMethod("clear")
+            } catch (e: Exception) {
+                null
+            } ?: error("clear method was not found in ${ViewModel::class.java.name}")
+        }.let { method ->
+            method.isAccessible = true
+            method.invoke(viewModel)
+        }
+    }
+}
+
+private fun ViewModelStoreOwner.vmHolder(): MutableMap<String, ViewModel> {
+    return ViewModelStore::class.java.run {
+        try {
+            getDeclaredField("map")
+        } catch (e: Exception) {
+            null
+        } ?: try {
+            getDeclaredField("mMap")
+        } catch (e: Exception) {
+            null
+        } ?: error("map field was not found in ${ViewModelStore::class.java.name}")
+    }.let { field ->
+        field.isAccessible = true
+        field.get(viewModelStore) as MutableMap<String, ViewModel>
     }
 }
