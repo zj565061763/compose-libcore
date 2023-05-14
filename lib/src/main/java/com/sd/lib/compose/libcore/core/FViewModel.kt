@@ -96,7 +96,7 @@ abstract class FViewModel<I> : ViewModel() {
 
             if (lifecycle == null) {
                 _lifecycle = null
-                if (_isPausedByLifecycle) {
+                if (_isPausedByLifecycle && !_isDestroyed) {
                     _isActiveState = true
                 }
                 return
@@ -157,6 +157,7 @@ abstract class FViewModel<I> : ViewModel() {
                     }
                 }
             }
+
             Lifecycle.Event.ON_START -> {
                 synchronized(this@FViewModel) {
                     if (_isPausedByLifecycle) {
@@ -164,9 +165,11 @@ abstract class FViewModel<I> : ViewModel() {
                     }
                 }
             }
+
             Lifecycle.Event.ON_DESTROY -> {
                 setLifecycle(null)
             }
+
             else -> {}
         }
     }
