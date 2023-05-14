@@ -113,6 +113,7 @@ abstract class FViewModel<I> : ViewModel() {
      * 设置是否处于激活状态
      */
     fun setActiveState(active: Boolean) {
+        if (_isDestroyed) return
         synchronized(this@FViewModel) {
             if (active) {
                 if (!_isPausedByLifecycle) {
