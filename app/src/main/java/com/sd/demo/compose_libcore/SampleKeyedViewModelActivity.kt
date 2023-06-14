@@ -1,7 +1,6 @@
 package com.sd.demo.compose_libcore
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +21,7 @@ import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.utils.*
 import kotlinx.coroutines.flow.filter
 
-class SampleKeyedViewModelActivity : ComponentActivity() {
+class SampleKeyedViewModelActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

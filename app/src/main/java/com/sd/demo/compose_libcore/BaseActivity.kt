@@ -35,6 +35,7 @@ abstract class BaseActivity : ComponentActivity() {
                     val viewModel = superFactory.create(modelClass)
                     if (viewModel is FViewModel<*>) {
                         initViewModel(viewModel)
+                        viewModel.setLifecycle(lifecycle)
                     }
                     return viewModel
                 }
