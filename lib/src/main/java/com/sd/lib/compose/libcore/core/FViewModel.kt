@@ -1,7 +1,5 @@
 package com.sd.lib.compose.libcore.core
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
@@ -31,14 +29,12 @@ abstract class FViewModel<I> : ViewModel() {
                     field = value
                     _isPausedByLifecycle = false
                     _isVMActiveFlow.value = value
-                    _handler.post { onActiveStateChanged() }
                 }
             }
         }
 
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
-    private val _handler = Handler(Looper.getMainLooper())
 
     private val _isRefreshingFlow = MutableStateFlow(false)
     private val _isVMActiveFlow = MutableStateFlow(_isVMActive)
@@ -142,9 +138,9 @@ abstract class FViewModel<I> : ViewModel() {
     protected abstract suspend fun refreshDataImpl()
 
     /**
-     * 激活状态变化（UI线程）
+     * 当前VM激活状态变化（UI线程）
      */
-    protected open fun onActiveStateChanged() {}
+    protected open fun onVMActiveChanged() {}
 
     /**
      * 销毁回调，[onCleared]触发
@@ -187,6 +183,14 @@ abstract class FViewModel<I> : ViewModel() {
         _isVMActive = false
         _isDestroyed = true
         onDestroy()
+    }
+
+    init {
+        viewModelScope.launch {
+            isVMActive.collect {
+                onVMActiveChanged()
+            }
+        }
     }
 }
 
