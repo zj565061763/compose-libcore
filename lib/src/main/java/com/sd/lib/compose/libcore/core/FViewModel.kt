@@ -54,9 +54,9 @@ abstract class FViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isVMActive.value || (intent is IgnoreActiveStateIntent)) {
+        if (isVMActive.value || (intent is IgnoreVMActiveIntent)) {
             viewModelScope.launch {
-                if (isVMActive.value || (intent is IgnoreActiveStateIntent)) {
+                if (isVMActive.value || (intent is IgnoreVMActiveIntent)) {
                     handleIntent(intent)
                 }
             }
@@ -115,9 +115,9 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
-     * 设置是否处于激活状态
+     * 设置当前VM是否处于激活状态
      */
-    fun setActiveState(active: Boolean) {
+    fun setVMActive(active: Boolean) {
         if (_isDestroyed) return
         synchronized(this@FViewModel) {
             if (active) {
@@ -189,4 +189,4 @@ abstract class FViewModel<I> : ViewModel() {
     }
 }
 
-interface IgnoreActiveStateIntent
+interface IgnoreVMActiveIntent
