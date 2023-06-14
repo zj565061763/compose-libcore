@@ -22,6 +22,7 @@ abstract class FViewModel<I> : ViewModel() {
             field = value
         }
 
+    @get:Synchronized
     private var _isVMActive = true
         set(value) {
             if (_isDestroyed) return
@@ -54,9 +55,9 @@ abstract class FViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isVMActive.value || (intent is IgnoreVMActiveIntent)) {
+        if (_isVMActive || (intent is IgnoreVMActiveIntent)) {
             viewModelScope.launch {
-                if (isVMActive.value || (intent is IgnoreVMActiveIntent)) {
+                if (_isVMActive || (intent is IgnoreVMActiveIntent)) {
                     handleIntent(intent)
                 }
             }
@@ -70,9 +71,9 @@ abstract class FViewModel<I> : ViewModel() {
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
-        if (!isVMActive.value) return
+        if (!_isVMActive) return
         viewModelScope.launch {
-            if (isVMActive.value) {
+            if (_isVMActive) {
                 try {
                     vmMutator.mutate {
                         if (notifyRefreshing) {
@@ -157,7 +158,7 @@ abstract class FViewModel<I> : ViewModel() {
         when (event) {
             Lifecycle.Event.ON_STOP -> {
                 synchronized(this@FViewModel) {
-                    if (isVMActive.value) {
+                    if (_isVMActive) {
                         _isVMActive = false
                         _isPausedByLifecycle = true
                     }
