@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.sd.lib.coroutine.FMutator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
@@ -37,7 +38,7 @@ abstract class FViewModel<I> : ViewModel() {
     private val _isRefreshing = MutableStateFlow(false)
 
     /** 是否正在刷新中 */
-    val isRefreshing = _isRefreshing.asStateFlow()
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
     val vmMutator = FMutator()
 
