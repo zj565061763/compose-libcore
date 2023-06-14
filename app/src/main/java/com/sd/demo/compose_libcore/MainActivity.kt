@@ -15,9 +15,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.core.FViewModel
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,6 +71,14 @@ class MainVM : FViewModel<Unit>() {
     override fun onVMActiveChanged() {
         super.onVMActiveChanged()
         logMsg { "onVMActiveChanged" }
+    }
+
+    init {
+        viewModelScope.launch {
+            isVMActive.collect {
+                logMsg { "isVMActive $it" }
+            }
+        }
     }
 }
 
