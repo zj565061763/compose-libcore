@@ -1,6 +1,5 @@
 package com.sd.demo.compose_libcore
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -21,23 +20,27 @@ class MainActivity : BaseActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                Content(this)
+                Content(
+                    onClickSampleKeyedViewModel = {
+                        startActivity(Intent(this, SampleKeyedViewModelActivity::class.java))
+                    },
+                )
             }
         }
     }
 }
 
 @Composable
-private fun Content(activity: Activity) {
+private fun Content(
+    onClickSampleKeyedViewModel: () -> Unit,
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(5.dp),
     ) {
         Button(
-            onClick = {
-                activity.startActivity(Intent(activity, SampleKeyedViewModelActivity::class.java))
-            }
+            onClick = onClickSampleKeyedViewModel
         ) {
             Text(text = "Sample KeyedViewModel")
         }
