@@ -75,7 +75,7 @@ class MainVM : FViewModel<Unit>() {
 
     init {
         viewModelScope.launch {
-            isVMActive.collect {
+            isVMActiveFlow.collect {
                 logMsg { "isVMActive $it" }
             }
         }

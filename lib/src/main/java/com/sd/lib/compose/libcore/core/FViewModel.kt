@@ -43,10 +43,10 @@ abstract class FViewModel<I> : ViewModel() {
     private val _isVMActiveFlow = MutableStateFlow(_isVMActive)
 
     /** 是否正在刷新中 */
-    val isRefreshing: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
+    val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
     /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
-    val isVMActive: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
+    val isVMActiveFlow: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
 
     val vmMutator = FMutator()
 
