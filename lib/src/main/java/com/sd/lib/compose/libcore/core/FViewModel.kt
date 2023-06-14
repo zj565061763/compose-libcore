@@ -1,5 +1,7 @@
 package com.sd.lib.compose.libcore.core
 
+import android.os.Handler
+import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
@@ -28,9 +30,10 @@ abstract class FViewModel<I> : ViewModel() {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    _isVMActiveFlow.value = value
+                    Handler(Looper.getMainLooper()).post { onVMActiveChanged() }
                 }
             }
+            _isVMActiveFlow.value = value
         }
 
     private var _lifecycle: WeakReference<Lifecycle>? = null
@@ -183,14 +186,6 @@ abstract class FViewModel<I> : ViewModel() {
         _isVMActive = false
         _isDestroyed = true
         onDestroy()
-    }
-
-    init {
-        viewModelScope.launch {
-            isVMActive.collect {
-                onVMActiveChanged()
-            }
-        }
     }
 }
 
