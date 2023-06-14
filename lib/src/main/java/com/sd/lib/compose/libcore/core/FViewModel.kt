@@ -48,6 +48,9 @@ abstract class FViewModel<I> : ViewModel() {
     /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
     val isVMActiveFlow: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
 
+    /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
+    val isVMActive: Boolean get() = _isVMActive
+
     val vmMutator = FMutator()
 
     /**

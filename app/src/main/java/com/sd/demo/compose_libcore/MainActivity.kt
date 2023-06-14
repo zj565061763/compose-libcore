@@ -70,13 +70,13 @@ class MainVM : FViewModel<Unit>() {
 
     override fun onVMActiveChanged() {
         super.onVMActiveChanged()
-        logMsg { "onVMActiveChanged" }
+        logMsg { "onVMActiveChanged isVMActive:$isVMActive" }
     }
 
     init {
         viewModelScope.launch {
             isVMActiveFlow.collect {
-                logMsg { "isVMActive $it" }
+                logMsg { "flow isVMActive $it" }
             }
         }
     }
