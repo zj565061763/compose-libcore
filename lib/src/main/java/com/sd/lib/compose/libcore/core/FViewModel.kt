@@ -17,15 +17,19 @@ import java.lang.ref.WeakReference
 abstract class FViewModel<I> : ViewModel() {
     @Volatile
     private var _isDestroyed = false
+        set(value) {
+            require(value) { "Require true value." }
+            field = value
+        }
 
-    @Volatile
-    private var _isActiveState = true
+    private var _isVMActive = true
         set(value) {
             if (_isDestroyed) return
             synchronized(this@FViewModel) {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
+                    _isVMActiveFlow.value = value
                     _handler.post { onActiveStateChanged() }
                 }
             }
@@ -35,23 +39,24 @@ abstract class FViewModel<I> : ViewModel() {
     private var _isPausedByLifecycle = false
     private val _handler = Handler(Looper.getMainLooper())
 
-    private val _isRefreshing = MutableStateFlow(false)
+    private val _isRefreshingFlow = MutableStateFlow(false)
+    private val _isVMActiveFlow = MutableStateFlow(_isVMActive)
 
     /** 是否正在刷新中 */
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+    val isRefreshing: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
+
+    /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
+    val isVMActive: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
 
     val vmMutator = FMutator()
-
-    /** 设置当前VM是否处于激活状态，只有激活状态才会处理事件 */
-    val isActiveState: Boolean get() = _isActiveState
 
     /**
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isActiveState || (intent is IgnoreActiveStateIntent)) {
+        if (isVMActive.value || (intent is IgnoreActiveStateIntent)) {
             viewModelScope.launch {
-                if (isActiveState || (intent is IgnoreActiveStateIntent)) {
+                if (isVMActive.value || (intent is IgnoreActiveStateIntent)) {
                     handleIntent(intent)
                 }
             }
@@ -65,20 +70,20 @@ abstract class FViewModel<I> : ViewModel() {
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
-        if (!isActiveState) return
+        if (!isVMActive.value) return
         viewModelScope.launch {
-            if (isActiveState) {
+            if (isVMActive.value) {
                 try {
                     vmMutator.mutate {
                         if (notifyRefreshing) {
-                            _isRefreshing.value = true
+                            _isRefreshingFlow.value = true
                         }
                         delay(delayTime)
                         refreshDataImpl()
                     }
                 } finally {
                     if (notifyRefreshing) {
-                        _isRefreshing.value = false
+                        _isRefreshingFlow.value = false
                     }
                 }
             }
@@ -97,15 +102,14 @@ abstract class FViewModel<I> : ViewModel() {
 
             if (lifecycle == null) {
                 _lifecycle = null
-                if (_isPausedByLifecycle && !_isDestroyed) {
-                    _isActiveState = true
+                if (_isPausedByLifecycle) {
+                    _isVMActive = true
                 }
-                return
-            }
-
-            if (!_isDestroyed) {
-                _lifecycle = WeakReference(lifecycle)
-                lifecycle.addObserver(_lifecycleObserver)
+            } else {
+                if (!_isDestroyed) {
+                    _lifecycle = WeakReference(lifecycle)
+                    lifecycle.addObserver(_lifecycleObserver)
+                }
             }
         }
     }
@@ -118,10 +122,10 @@ abstract class FViewModel<I> : ViewModel() {
         synchronized(this@FViewModel) {
             if (active) {
                 if (!_isPausedByLifecycle) {
-                    _isActiveState = true
+                    _isVMActive = true
                 }
             } else {
-                _isActiveState = false
+                _isVMActive = false
             }
         }
     }
@@ -153,8 +157,8 @@ abstract class FViewModel<I> : ViewModel() {
         when (event) {
             Lifecycle.Event.ON_STOP -> {
                 synchronized(this@FViewModel) {
-                    if (isActiveState) {
-                        _isActiveState = false
+                    if (isVMActive.value) {
+                        _isVMActive = false
                         _isPausedByLifecycle = true
                     }
                 }
@@ -163,7 +167,7 @@ abstract class FViewModel<I> : ViewModel() {
             Lifecycle.Event.ON_START -> {
                 synchronized(this@FViewModel) {
                     if (_isPausedByLifecycle) {
-                        _isActiveState = true
+                        _isVMActive = true
                     }
                 }
             }
@@ -179,7 +183,7 @@ abstract class FViewModel<I> : ViewModel() {
     final override fun onCleared() {
         super.onCleared()
         setLifecycle(null)
-        _isActiveState = false
+        _isVMActive = false
         _isDestroyed = true
         onDestroy()
     }
