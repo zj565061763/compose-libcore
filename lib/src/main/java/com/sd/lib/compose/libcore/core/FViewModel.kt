@@ -72,27 +72,39 @@ abstract class FViewModel<I> : ViewModel() {
 
     /**
      * 刷新数据
+     * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
+     * @param delayTime 延迟多少毫秒后执行
+     * @param onCancel 如果当前VM未激活则会触发此回调
+     * @param onRefresh 成功发起了刷新数据，在[refreshDataImpl]之前触发
      */
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
+        onCancel: (() -> Unit)? = null,
+        onRefresh: (() -> Unit)? = null,
     ) {
-        if (!isVMActive) return
+        if (!isVMActive) {
+            onCancel?.invoke()
+            return
+        }
         viewModelScope.launch {
-            if (isVMActive) {
-                try {
-                    vmMutator.mutate {
-                        if (notifyRefreshing) {
-                            _isRefreshingFlow.value = true
-                        }
-                        delay(delayTime)
-                        _refreshDataWhenActive = false
-                        refreshDataImpl()
-                    }
-                } finally {
+            if (!isVMActive) {
+                onCancel?.invoke()
+                return@launch
+            }
+            try {
+                vmMutator.mutate {
                     if (notifyRefreshing) {
-                        _isRefreshingFlow.value = false
+                        _isRefreshingFlow.value = true
                     }
+                    delay(delayTime)
+                    _refreshDataWhenActive = false
+                    onRefresh?.invoke()
+                    refreshDataImpl()
+                }
+            } finally {
+                if (notifyRefreshing) {
+                    _isRefreshingFlow.value = false
                 }
             }
         }
@@ -103,11 +115,11 @@ abstract class FViewModel<I> : ViewModel() {
      * 如果当前VM处于未激活状态则等到激活状态后触发[refreshData]
      */
     fun refreshDataWhenActive() {
-        if (isVMActive) {
-            refreshData()
-        } else {
-            _refreshDataWhenActive = true
-        }
+        refreshData(
+            onCancel = {
+                _refreshDataWhenActive = true
+            },
+        )
     }
 
     /**
