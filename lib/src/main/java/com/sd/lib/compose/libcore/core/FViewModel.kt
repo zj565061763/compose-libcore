@@ -97,8 +97,8 @@ abstract class FViewModel<I> : ViewModel() {
                     if (notifyRefreshing) {
                         _isRefreshingFlow.value = true
                     }
-                    delay(delayTime)
                     _refreshDataWhenActive = false
+                    delay(delayTime)
                     onRefresh?.invoke()
                     refreshDataImpl()
                 }
@@ -163,6 +163,9 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     private fun notifyVMActiveChanged() {
+        if (_refreshDataWhenActive) {
+            refreshData()
+        }
         Handler(Looper.getMainLooper()).post {
             onVMActiveChanged()
         }
