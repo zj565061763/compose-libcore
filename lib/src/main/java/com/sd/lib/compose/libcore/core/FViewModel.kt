@@ -41,7 +41,7 @@ abstract class FViewModel<I> : ViewModel() {
     private var _isPausedByLifecycle = false
 
     @Volatile
-    private var _hasRefreshData = false
+    private var _refreshDataWhenActive = false
 
     private val _isRefreshingFlow = MutableStateFlow(false)
     private val _isVMActiveFlow = MutableStateFlow(isVMActive)
@@ -86,7 +86,7 @@ abstract class FViewModel<I> : ViewModel() {
                             _isRefreshingFlow.value = true
                         }
                         delay(delayTime)
-                        _hasRefreshData = true
+                        _refreshDataWhenActive = false
                         refreshDataImpl()
                     }
                 } finally {
@@ -99,12 +99,14 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
-     * 如果[refreshDataImpl]还未执行过则会触发[refreshData]方法，
-     * 如果[refreshDataImpl]已经执行过了则不会执行任何操作。
+     * 如果当前VM处于激活状态则触发[refreshData]，
+     * 如果当前VM处于未激活状态则等到激活状态后触发[refreshData]
      */
-    fun refreshDataIfNever() {
-        if (!_hasRefreshData) {
+    fun refreshDataWhenActive() {
+        if (isVMActive) {
             refreshData()
+        } else {
+            _refreshDataWhenActive = true
         }
     }
 
