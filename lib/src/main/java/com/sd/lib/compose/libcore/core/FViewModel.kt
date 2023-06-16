@@ -40,7 +40,7 @@ abstract class FViewModel<I> : ViewModel() {
     private var _isPausedByLifecycle = false
 
     private val _isRefreshingFlow = MutableStateFlow(false)
-    private val _isVMActiveFlow = MutableStateFlow(_isVMActive)
+    private val _isVMActiveFlow = MutableStateFlow(isVMActive)
 
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
@@ -57,9 +57,9 @@ abstract class FViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (_isVMActive || (intent is IgnoreVMActiveIntent)) {
+        if (isVMActive || (intent is IgnoreVMActiveIntent)) {
             viewModelScope.launch {
-                if (_isVMActive || (intent is IgnoreVMActiveIntent)) {
+                if (isVMActive || (intent is IgnoreVMActiveIntent)) {
                     handleIntent(intent)
                 }
             }
@@ -73,9 +73,9 @@ abstract class FViewModel<I> : ViewModel() {
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
-        if (!_isVMActive) return
+        if (!isVMActive) return
         viewModelScope.launch {
-            if (_isVMActive) {
+            if (isVMActive) {
                 try {
                     vmMutator.mutate {
                         if (notifyRefreshing) {
@@ -160,7 +160,7 @@ abstract class FViewModel<I> : ViewModel() {
         when (event) {
             Lifecycle.Event.ON_PAUSE -> {
                 synchronized(this@FViewModel) {
-                    if (_isVMActive) {
+                    if (isVMActive) {
                         _isVMActive = false
                         _isPausedByLifecycle = true
                     }
