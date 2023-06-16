@@ -23,9 +23,10 @@ abstract class FViewModel<I> : ViewModel() {
         }
 
     @get:Synchronized
-    private var _isVMActive = true
+    private var _isVMActive: Boolean? = null
         set(value) {
             if (_isDestroyed) return
+            requireNotNull(value) { "Require not null value." }
             synchronized(this@FViewModel) {
                 if (field != value) {
                     field = value
@@ -49,7 +50,7 @@ abstract class FViewModel<I> : ViewModel() {
     val isVMActiveFlow: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
 
     /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
-    val isVMActive: Boolean get() = _isVMActive
+    val isVMActive: Boolean get() = _isVMActive ?: false
 
     val vmMutator = FMutator()
 
@@ -169,7 +170,7 @@ abstract class FViewModel<I> : ViewModel() {
 
             Lifecycle.Event.ON_RESUME -> {
                 synchronized(this@FViewModel) {
-                    if (_isPausedByLifecycle) {
+                    if (_isPausedByLifecycle || _isVMActive == null) {
                         _isVMActive = true
                     }
                 }
