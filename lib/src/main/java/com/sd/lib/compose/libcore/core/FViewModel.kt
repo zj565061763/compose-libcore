@@ -31,7 +31,7 @@ abstract class FViewModel<I> : ViewModel() {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    Handler(Looper.getMainLooper()).post { onVMActiveChanged() }
+                    notifyVMActiveChanged()
                 }
             }
             _isVMActiveFlow.value = value
@@ -159,6 +159,12 @@ abstract class FViewModel<I> : ViewModel() {
             } else {
                 _isVMActive = false
             }
+        }
+    }
+
+    private fun notifyVMActiveChanged() {
+        Handler(Looper.getMainLooper()).post {
+            onVMActiveChanged()
         }
     }
 
