@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -52,10 +51,6 @@ private fun Content(
             Text(text = "Sample KeyedViewModel")
         }
     }
-
-    LaunchedEffect(vm) {
-        vm.refreshData()
-    }
 }
 
 class MainVM : FViewModel<Unit>() {
@@ -63,12 +58,17 @@ class MainVM : FViewModel<Unit>() {
     }
 
     override suspend fun refreshDataImpl() {
-        logMsg { "refreshDataImpl" }
+        logMsg { "MainVM refreshDataImpl" }
     }
 
     override fun onVMActiveChanged() {
         super.onVMActiveChanged()
-        logMsg { "onVMActiveChanged isVMActive:$isVMActive" }
+        logMsg { "MainVM onVMActiveChanged isVMActive:$isVMActive" }
+    }
+
+    init {
+        logMsg { "MainVM init isVMActive:$isVMActive" }
+        refreshDataWhenActive()
     }
 }
 
