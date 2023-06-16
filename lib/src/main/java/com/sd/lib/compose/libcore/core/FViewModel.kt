@@ -158,7 +158,7 @@ abstract class FViewModel<I> : ViewModel() {
      */
     private val _lifecycleObserver = LifecycleEventObserver { _, event ->
         when (event) {
-            Lifecycle.Event.ON_STOP -> {
+            Lifecycle.Event.ON_PAUSE -> {
                 synchronized(this@FViewModel) {
                     if (_isVMActive) {
                         _isVMActive = false
@@ -167,7 +167,7 @@ abstract class FViewModel<I> : ViewModel() {
                 }
             }
 
-            Lifecycle.Event.ON_START -> {
+            Lifecycle.Event.ON_RESUME -> {
                 synchronized(this@FViewModel) {
                     if (_isPausedByLifecycle) {
                         _isVMActive = true
