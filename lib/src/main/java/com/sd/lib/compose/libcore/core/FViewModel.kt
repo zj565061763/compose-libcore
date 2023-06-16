@@ -163,10 +163,10 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     private fun notifyVMActiveChanged() {
-        if (_refreshDataWhenActive) {
-            refreshData()
-        }
         Handler(Looper.getMainLooper()).post {
+            if (_refreshDataWhenActive) {
+                refreshData()
+            }
             onVMActiveChanged()
         }
     }
