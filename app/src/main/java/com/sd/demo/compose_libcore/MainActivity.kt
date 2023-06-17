@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.core.FViewModel
+import com.sd.lib.compose.libcore.core.FActiveViewModel
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +53,7 @@ private fun Content(
     }
 }
 
-class MainVM : FViewModel<Unit>() {
+class MainVM : FActiveViewModel<Unit>() {
     override suspend fun handleIntent(intent: Unit) {
     }
 
