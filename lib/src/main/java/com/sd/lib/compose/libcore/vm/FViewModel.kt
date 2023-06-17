@@ -1,7 +1,9 @@
 package com.sd.lib.compose.libcore.vm
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sd.lib.compose.libcore.utils.libCheckMainThread
 import com.sd.lib.coroutine.FMutator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -61,30 +63,38 @@ abstract class FViewModel<I> : ViewModel() {
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
+    /**
+     * 获取扩展对象，此方法必须在主线程调用
+     */
+    @MainThread
     fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
-        synchronized(this@FViewModel) {
-            val cache = _extHolder[clazz]
-            if (cache != null) return cache as T
-            return createExt(clazz).also {
-                if (!isDestroyed) {
-                    _extHolder[clazz] = it
-                    it.init(this@FViewModel)
-                }
+        libCheckMainThread()
+        val cache = _extHolder[clazz]
+        if (cache != null) return cache as T
+        return createExt(clazz).also { ext ->
+            if (!isDestroyed) {
+                _extHolder[clazz] = ext
+                ext.init(this@FViewModel)
             }
         }
     }
 
+    /**
+     * 创建扩展对象
+     */
     protected open fun <T : FViewModelExt> createExt(clazz: Class<T>): T {
         return clazz.newInstance()
     }
 
+    /**
+     * 销毁并清空扩展对象
+     */
+    @MainThread
     private fun destroyExt() {
-        synchronized(this@FViewModel) {
-            while (_extHolder.isNotEmpty()) {
-                _extHolder.keys.toList().forEach { key ->
-                    _extHolder.remove(key)?.onDestroy()
-                }
+        libCheckMainThread()
+        while (_extHolder.isNotEmpty()) {
+            _extHolder.keys.toList().forEach { key ->
+                _extHolder.remove(key)?.destroy()
             }
         }
     }
@@ -112,14 +122,23 @@ abstract class FViewModel<I> : ViewModel() {
     }
 }
 
+@MainThread
 inline fun <reified T : FViewModelExt> FViewModel<*>.ext(): T {
     return getExt(T::class.java)
 }
 
 interface FViewModelExt {
+    /**
+     * 初始化（主线程）
+     */
+    @MainThread
     fun init(viewModel: FViewModel<*>)
 
-    fun onDestroy()
+    /**
+     * 销毁（主线程）
+     */
+    @MainThread
+    fun destroy()
 }
 
 abstract class BaseViewModelExt : FViewModelExt {
@@ -128,10 +147,24 @@ abstract class BaseViewModelExt : FViewModelExt {
     protected val vm: FViewModel<*> get() = _vm
 
     final override fun init(viewModel: FViewModel<*>) {
+        libCheckMainThread()
         if (this::_vm.isInitialized) error("$this has been initialized.")
         _vm = viewModel
         onInit()
     }
 
+    final override fun destroy() {
+        libCheckMainThread()
+        onDestroy()
+    }
+
+    /**
+     * 初始化（主线程）
+     */
     protected abstract fun onInit()
+
+    /**
+     * 销毁（主线程）
+     */
+    protected abstract fun onDestroy()
 }
