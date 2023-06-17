@@ -4,6 +4,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +26,11 @@ interface VMExtActive {
      * 设置[Lifecycle]
      */
     fun setLifecycle(lifecycle: Lifecycle?)
+
+    /**
+     * 收集激活状态变化
+     */
+    fun collectActive(collector: FlowCollector<Boolean>)
 }
 
 internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
@@ -82,6 +88,12 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
                     lifecycle.addObserver(_lifecycleObserver)
                 }
             }
+        }
+    }
+
+    override fun collectActive(collector: FlowCollector<Boolean>) {
+        vm.viewModelScope.launch {
+            isActiveFlow.collect(collector)
         }
     }
 
