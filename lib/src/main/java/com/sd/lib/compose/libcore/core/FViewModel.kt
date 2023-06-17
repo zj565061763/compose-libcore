@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
+interface IgnoreVMActiveIntent
+
 abstract class FViewModel<I> : ViewModel() {
     @Volatile
     private var _isDestroyed = false
@@ -41,7 +43,7 @@ abstract class FViewModel<I> : ViewModel() {
     private var _isPausedByLifecycle = false
 
     @Volatile
-    private var _refreshDataWhenActive = false
+    private var _refreshData: RefreshData? = null
 
     private val _isRefreshingFlow = MutableStateFlow(false)
     private val _isVMActiveFlow = MutableStateFlow(isVMActive)
@@ -74,52 +76,41 @@ abstract class FViewModel<I> : ViewModel() {
      * 刷新数据
      * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
      * @param delayTime 延迟多少毫秒后执行
-     * @param onCancel 如果当前VM未激活则会触发此回调
-     * @param onRefresh 成功发起了刷新数据，在[refreshDataImpl]之前触发
      */
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
-        onCancel: (() -> Unit)? = null,
-        onRefresh: (() -> Unit)? = null,
     ) {
-        if (!isVMActive) {
-            onCancel?.invoke()
-            return
-        }
-        viewModelScope.launch {
-            if (!isVMActive) {
-                onCancel?.invoke()
-                return@launch
-            }
-            try {
-                vmMutator.mutate {
-                    if (notifyRefreshing) {
-                        _isRefreshingFlow.value = true
-                    }
-                    _refreshDataWhenActive = false
-                    delay(delayTime)
-                    onRefresh?.invoke()
-                    refreshDataImpl()
-                }
-            } finally {
-                if (notifyRefreshing) {
-                    _isRefreshingFlow.value = false
-                }
-            }
-        }
+        refreshDataInternal(
+            RefreshData(
+                notifyRefreshing = notifyRefreshing,
+                delayTime = delayTime,
+            )
+        )
     }
 
-    /**
-     * 如果当前VM处于激活状态则触发[refreshData]，
-     * 如果当前VM处于未激活状态则等到激活状态后触发[refreshData]
-     */
-    fun refreshDataWhenActive() {
-        refreshData(
-            onCancel = {
-                _refreshDataWhenActive = true
-            },
-        )
+    private fun refreshDataInternal(data: RefreshData?) {
+        if (data == null) return
+        viewModelScope.launch {
+            if (isVMActive) {
+                _refreshData = null
+                try {
+                    vmMutator.mutate {
+                        if (data.notifyRefreshing) {
+                            _isRefreshingFlow.value = true
+                        }
+                        delay(data.delayTime)
+                        refreshDataImpl()
+                    }
+                } finally {
+                    if (data.notifyRefreshing) {
+                        _isRefreshingFlow.value = false
+                    }
+                }
+            } else {
+                _refreshData = data
+            }
+        }
     }
 
     /**
@@ -164,9 +155,7 @@ abstract class FViewModel<I> : ViewModel() {
 
     private fun notifyVMActiveChanged() {
         Handler(Looper.getMainLooper()).post {
-            if (_refreshDataWhenActive) {
-                refreshData()
-            }
+            refreshDataInternal(_refreshData)
             onVMActiveChanged()
         }
     }
@@ -230,4 +219,7 @@ abstract class FViewModel<I> : ViewModel() {
     }
 }
 
-interface IgnoreVMActiveIntent
+private data class RefreshData(
+    val notifyRefreshing: Boolean,
+    val delayTime: Long,
+)

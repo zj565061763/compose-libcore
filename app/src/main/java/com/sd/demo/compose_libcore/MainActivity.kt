@@ -68,7 +68,7 @@ class MainVM : FViewModel<Unit>() {
 
     init {
         logMsg { "MainVM init isVMActive:$isVMActive" }
-        refreshDataWhenActive()
+        refreshData()
     }
 }
 
