@@ -66,8 +66,7 @@ class MainVM : FViewModel<Unit>() {
         extActive().collectActive {
             logMsg { "MainVM isActive:$it" }
         }
-
-        refreshData()
+        extActive().refreshDataWhenActive()
     }
 }
 

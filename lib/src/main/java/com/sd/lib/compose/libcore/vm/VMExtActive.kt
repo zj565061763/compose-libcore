@@ -31,6 +31,11 @@ interface VMExtActive {
      * 收集激活状态变化
      */
     fun collectActive(collector: FlowCollector<Boolean>)
+
+    /**
+     * 每次当状态变为激活时刷新数据
+     */
+    fun refreshDataWhenActive()
 }
 
 internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
@@ -94,6 +99,12 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     override fun collectActive(collector: FlowCollector<Boolean>) {
         vm.viewModelScope.launch {
             isActiveFlow.collect(collector)
+        }
+    }
+
+    override fun refreshDataWhenActive() {
+        collectActive {
+            if (it) vm.refreshData()
         }
     }
 
