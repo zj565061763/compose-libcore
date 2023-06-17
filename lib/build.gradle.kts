@@ -44,6 +44,7 @@ dependencies {
 
     api(libs.androidx.activity.compose)
     api(libs.androidx.lifecycle.viewmodelCompose)
+    api(libs.androidx.lifecycle.runtimeCompose)
     api(libs.androidx.lifecycle.process)
     api(libs.sd.coroutine)
 }

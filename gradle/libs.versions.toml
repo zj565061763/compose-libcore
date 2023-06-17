@@ -21,6 +21,7 @@ androidx-compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4
 
 androidx-activity-compose = "androidx.activity:activity-compose:1.7.1"
 androidx-lifecycle-viewmodelCompose = "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
+androidx-lifecycle-runtimeCompose = "androidx.lifecycle:lifecycle-runtime-compose:2.6.1"
 androidx-lifecycle-process = "androidx.lifecycle:lifecycle-process:2.6.1"
 
 junit = "junit:junit:4.13.2"
