@@ -87,19 +87,6 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
-     * 销毁并清空扩展对象
-     */
-    @MainThread
-    private fun destroyExt() {
-        libCheckMainThread()
-        while (_extHolder.isNotEmpty()) {
-            _extHolder.keys.toList().forEach { key ->
-                _extHolder.remove(key)?.destroy()
-            }
-        }
-    }
-
-    /**
      * 处理意图，[viewModelScope]触发
      */
     protected abstract suspend fun handleIntent(intent: I)
@@ -119,6 +106,19 @@ abstract class FViewModel<I> : ViewModel() {
         destroyExt()
         isDestroyed = true
         onDestroy()
+    }
+
+    /**
+     * 销毁并清空扩展对象
+     */
+    @MainThread
+    private fun destroyExt() {
+        libCheckMainThread()
+        while (_extHolder.isNotEmpty()) {
+            _extHolder.keys.toList().forEach { key ->
+                _extHolder.remove(key)?.destroy()
+            }
+        }
     }
 }
 
