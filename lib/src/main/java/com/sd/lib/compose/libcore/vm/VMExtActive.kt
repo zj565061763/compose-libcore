@@ -4,6 +4,9 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -11,7 +14,7 @@ interface VMExtActive {
     /**
      * 是否处于激活状态
      */
-    val isExtActive: Boolean
+    val isActiveFlow: StateFlow<Boolean>
 
     /**
      * 设置激活状态
@@ -26,7 +29,7 @@ interface VMExtActive {
 
 internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     @get:Synchronized
-    private var _isExtActive: Boolean? = null
+    private var _isActive: Boolean? = null
         set(value) {
             if (vm.isDestroyed) return
             requireNotNull(value) { "Require not null value." }
@@ -34,7 +37,9 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    notifyActiveChanged()
+                    vm.viewModelScope.launch(Dispatchers.Main) {
+                        _isActiveFlow.value = _isActive ?: false
+                    }
                 }
             }
         }
@@ -42,8 +47,22 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
 
-    override val isExtActive: Boolean
-        get() = _isExtActive ?: false
+    private var _isActiveFlow = MutableStateFlow(_isActive ?: false)
+
+    override val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
+
+    override fun setActive(active: Boolean) {
+        if (vm.isDestroyed) return
+        synchronized(this@InternalVMExtActive) {
+            if (active) {
+                if (!_isPausedByLifecycle) {
+                    _isActive = true
+                }
+            } else {
+                _isActive = false
+            }
+        }
+    }
 
     override fun setLifecycle(lifecycle: Lifecycle?) {
         synchronized(this@InternalVMExtActive) {
@@ -55,7 +74,7 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
             if (lifecycle == null) {
                 _lifecycle = null
                 if (_isPausedByLifecycle) {
-                    _isExtActive = true
+                    _isActive = true
                 }
             } else {
                 if (!vm.isDestroyed) {
@@ -63,25 +82,6 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
                     lifecycle.addObserver(_lifecycleObserver)
                 }
             }
-        }
-    }
-
-    override fun setActive(active: Boolean) {
-        if (vm.isDestroyed) return
-        synchronized(this@InternalVMExtActive) {
-            if (active) {
-                if (!_isPausedByLifecycle) {
-                    _isExtActive = true
-                }
-            } else {
-                _isExtActive = false
-            }
-        }
-    }
-
-    private fun notifyActiveChanged() {
-        vm.viewModelScope.launch(Dispatchers.Main) {
-            // TODO notify
         }
     }
 
@@ -97,8 +97,8 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         when (event) {
             Lifecycle.Event.ON_PAUSE -> {
                 synchronized(this@InternalVMExtActive) {
-                    if (isExtActive) {
-                        _isExtActive = false
+                    if (_isActive == true) {
+                        _isActive = false
                         _isPausedByLifecycle = true
                     }
                 }
@@ -106,8 +106,8 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
 
             Lifecycle.Event.ON_RESUME -> {
                 synchronized(this@InternalVMExtActive) {
-                    if (_isPausedByLifecycle || _isExtActive == null) {
-                        _isExtActive = true
+                    if (_isPausedByLifecycle || _isActive == null) {
+                        _isActive = true
                     }
                 }
             }

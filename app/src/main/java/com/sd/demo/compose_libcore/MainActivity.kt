@@ -14,10 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.vm.FViewModel
 import com.sd.lib.compose.libcore.vm.extActive
+import kotlinx.coroutines.launch
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,8 +65,10 @@ class MainVM : FViewModel<Unit>() {
     }
 
     init {
-        extActive().run {
-            logMsg { "MainVM init isExtActive:${isExtActive}" }
+        viewModelScope.launch {
+            extActive().isActiveFlow.collect {
+                logMsg { "MainVM isActive:$it" }
+            }
         }
 
         refreshData()
