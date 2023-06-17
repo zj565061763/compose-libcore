@@ -6,7 +6,9 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.sd.lib.compose.dialogview.FDialogProgress
-import com.sd.lib.compose.libcore.core.FActiveViewModel
+import com.sd.lib.compose.libcore.vm.FViewModel
+import com.sd.lib.compose.libcore.vm.FViewModelExtActive
+import com.sd.lib.compose.libcore.vm.ext
 import java.util.concurrent.atomic.AtomicInteger
 
 abstract class BaseActivity : ComponentActivity() {
@@ -33,8 +35,8 @@ abstract class BaseActivity : ComponentActivity() {
             return object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
                     val viewModel = superFactory.create(modelClass)
-                    if (viewModel is FActiveViewModel<*>) {
-                        viewModel.setLifecycle(lifecycle)
+                    if (viewModel is FViewModel<*>) {
+                        viewModel.ext<FViewModelExtActive>().setLifecycle(lifecycle)
                     }
                     return viewModel
                 }

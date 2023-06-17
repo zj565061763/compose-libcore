@@ -1,6 +1,5 @@
-package com.sd.lib.compose.libcore.core
+package com.sd.lib.compose.libcore.vm
 
-import androidx.annotation.CallSuper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
@@ -8,13 +7,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
-abstract class FActiveViewModel<I> : FViewModel<I>() {
+class FViewModelExtActive : BaseViewModelExt() {
     @get:Synchronized
     private var _isVMActive: Boolean? = null
         set(value) {
-            if (isDestroyed) return
+            if (vm.isDestroyed) return
             requireNotNull(value) { "Require not null value." }
-            synchronized(this@FActiveViewModel) {
+            synchronized(this@FViewModelExtActive) {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
@@ -33,7 +32,7 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
      * 观察生命周期
      */
     fun setLifecycle(lifecycle: Lifecycle?) {
-        synchronized(this@FActiveViewModel) {
+        synchronized(this@FViewModelExtActive) {
             val old = _lifecycle?.get()
             if (old === lifecycle) return
 
@@ -45,7 +44,7 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
                     _isVMActive = true
                 }
             } else {
-                if (!isDestroyed) {
+                if (!vm.isDestroyed) {
                     _lifecycle = WeakReference(lifecycle)
                     lifecycle.addObserver(_lifecycleObserver)
                 }
@@ -57,8 +56,8 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
      * 设置当前VM是否处于激活状态
      */
     fun setVMActive(active: Boolean) {
-        if (isDestroyed) return
-        synchronized(this@FActiveViewModel) {
+        if (vm.isDestroyed) return
+        synchronized(this@FViewModelExtActive) {
             if (active) {
                 if (!_isPausedByLifecycle) {
                     _isVMActive = true
@@ -70,28 +69,23 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
     }
 
     private fun notifyVMActiveChanged() {
-        viewModelScope.launch(Dispatchers.Main) {
-            onVMActiveChanged()
+        vm.viewModelScope.launch(Dispatchers.Main) {
+            // TODO notify
         }
     }
-
-    /**
-     * 当前VM激活状态变化（UI线程）
-     */
-    protected open fun onVMActiveChanged() {}
 
     /**
      * 生命周期观察者
      */
     private val _lifecycleObserver = LifecycleEventObserver { _, event ->
-        if (isDestroyed) {
+        if (vm.isDestroyed) {
             setLifecycle(null)
             return@LifecycleEventObserver
         }
 
         when (event) {
             Lifecycle.Event.ON_PAUSE -> {
-                synchronized(this@FActiveViewModel) {
+                synchronized(this@FViewModelExtActive) {
                     if (isVMActive) {
                         _isVMActive = false
                         _isPausedByLifecycle = true
@@ -100,7 +94,7 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
             }
 
             Lifecycle.Event.ON_RESUME -> {
-                synchronized(this@FActiveViewModel) {
+                synchronized(this@FViewModelExtActive) {
                     if (_isPausedByLifecycle || _isVMActive == null) {
                         _isVMActive = true
                     }
@@ -115,9 +109,11 @@ abstract class FActiveViewModel<I> : FViewModel<I>() {
         }
     }
 
-    @CallSuper
+    override fun onInit() {
+
+    }
+
     override fun onDestroy() {
-        super.onDestroy()
         setLifecycle(null)
     }
 }

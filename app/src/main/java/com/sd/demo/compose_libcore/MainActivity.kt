@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.core.FActiveViewModel
+import com.sd.lib.compose.libcore.vm.FViewModel
+import com.sd.lib.compose.libcore.vm.FViewModelExtActive
+import com.sd.lib.compose.libcore.vm.ext
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +55,7 @@ private fun Content(
     }
 }
 
-class MainVM : FActiveViewModel<Unit>() {
+class MainVM : FViewModel<Unit>() {
     override suspend fun handleIntent(intent: Unit) {
     }
 
@@ -61,13 +63,16 @@ class MainVM : FActiveViewModel<Unit>() {
         logMsg { "MainVM refreshDataImpl" }
     }
 
-    override fun onVMActiveChanged() {
-        super.onVMActiveChanged()
-        logMsg { "MainVM onVMActiveChanged isVMActive:$isVMActive" }
-    }
+//    override fun onVMActiveChanged() {
+//        super.onVMActiveChanged()
+//        logMsg { "MainVM onVMActiveChanged isVMActive:$isVMActive" }
+//    }
 
     init {
-        logMsg { "MainVM init isVMActive:$isVMActive" }
+        ext<FViewModelExtActive>().run {
+            logMsg { "MainVM init isVMActive:${isVMActive}" }
+        }
+
         refreshData()
     }
 }

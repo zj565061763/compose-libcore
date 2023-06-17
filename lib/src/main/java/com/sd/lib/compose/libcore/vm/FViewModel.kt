@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore.core
+package com.sd.lib.compose.libcore.vm
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -16,6 +16,8 @@ abstract class FViewModel<I> : ViewModel() {
             require(value) { "Require true value." }
             field = value
         }
+
+    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
 
     private val _isRefreshingFlow = MutableStateFlow(false)
 
@@ -59,6 +61,34 @@ abstract class FViewModel<I> : ViewModel() {
         }
     }
 
+    @Suppress("UNCHECKED_CAST")
+    fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
+        synchronized(this@FViewModel) {
+            val cache = _extHolder[clazz]
+            if (cache != null) return cache as T
+            return createExt(clazz).also {
+                if (!isDestroyed) {
+                    _extHolder[clazz] = it
+                    it.init(this@FViewModel)
+                }
+            }
+        }
+    }
+
+    protected open fun <T : FViewModelExt> createExt(clazz: Class<T>): T {
+        return clazz.newInstance()
+    }
+
+    private fun destroyExt() {
+        synchronized(this@FViewModel) {
+            while (_extHolder.isNotEmpty()) {
+                _extHolder.keys.toList().forEach { key ->
+                    _extHolder.remove(key)?.onDestroy()
+                }
+            }
+        }
+    }
+
     /**
      * 处理意图，[viewModelScope]触发
      */
@@ -76,7 +106,32 @@ abstract class FViewModel<I> : ViewModel() {
 
     final override fun onCleared() {
         super.onCleared()
+        destroyExt()
         isDestroyed = true
         onDestroy()
     }
+}
+
+inline fun <reified T : FViewModelExt> FViewModel<*>.ext(): T {
+    return getExt(T::class.java)
+}
+
+interface FViewModelExt {
+    fun init(viewModel: FViewModel<*>)
+
+    fun onDestroy()
+}
+
+abstract class BaseViewModelExt : FViewModelExt {
+    private lateinit var _vm: FViewModel<*>
+
+    protected val vm: FViewModel<*> get() = _vm
+
+    final override fun init(viewModel: FViewModel<*>) {
+        if (this::_vm.isInitialized) error("$this has been initialized.")
+        _vm = viewModel
+        onInit()
+    }
+
+    protected abstract fun onInit()
 }
