@@ -5,10 +5,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
@@ -19,9 +19,9 @@ fun FViewModel<*>.extActive(): VMExtActive {
 
 interface VMExtActive {
     /**
-     * 是否处于激活状态
+     * 是否处于激活状态，null表示初始状态
      */
-    val isActiveFlow: StateFlow<Boolean>
+    val isActiveFlow: StateFlow<Boolean?>
 
     /**
      * 设置激活状态
@@ -34,14 +34,14 @@ interface VMExtActive {
     fun setLifecycle(lifecycle: Lifecycle?)
 
     /**
-     * 收集激活状态变化
+     * 每次状态变为激活时触发
      */
-    fun collectActive(collector: FlowCollector<Boolean>)
+    fun onActive(callback: suspend () -> Unit)
 
     /**
-     * 每次当状态变为激活时刷新数据
+     * 每次状态变为未激活时触发
      */
-    fun refreshDataWhenActive()
+    fun onInactive(callback: suspend () -> Unit)
 }
 
 private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
@@ -55,7 +55,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
                     field = value
                     _isPausedByLifecycle = false
                     vm.viewModelScope.launch(Dispatchers.Main) {
-                        _isActiveFlow.value = _isActive ?: false
+                        _isActiveFlow.value = _isActive
                     }
                 }
             }
@@ -64,9 +64,9 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
 
-    private var _isActiveFlow = MutableStateFlow(_isActive ?: false)
+    private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(_isActive)
 
-    override val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
+    override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
 
     override fun setActive(active: Boolean) {
         if (vm.isDestroyed) return
@@ -102,15 +102,19 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    override fun collectActive(collector: FlowCollector<Boolean>) {
+    override fun onActive(callback: suspend () -> Unit) {
         vm.viewModelScope.launch {
-            isActiveFlow.collect(collector)
+            isActiveFlow
+                .filter { it == true }
+                .collect { callback() }
         }
     }
 
-    override fun refreshDataWhenActive() {
-        collectActive {
-            if (it) vm.refreshData()
+    override fun onInactive(callback: suspend () -> Unit) {
+        vm.viewModelScope.launch {
+            isActiveFlow
+                .filter { it == false }
+                .collect { callback() }
         }
     }
 
