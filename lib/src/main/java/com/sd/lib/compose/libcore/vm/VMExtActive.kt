@@ -34,7 +34,7 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    notifyVMActiveChanged()
+                    notifyActiveChanged()
                 }
             }
         }
@@ -79,7 +79,7 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    private fun notifyVMActiveChanged() {
+    private fun notifyActiveChanged() {
         vm.viewModelScope.launch(Dispatchers.Main) {
             // TODO notify
         }

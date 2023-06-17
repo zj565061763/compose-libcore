@@ -62,11 +62,6 @@ class MainVM : FViewModel<Unit>() {
         logMsg { "MainVM refreshDataImpl" }
     }
 
-//    override fun onVMActiveChanged() {
-//        super.onVMActiveChanged()
-//        logMsg { "MainVM onVMActiveChanged isVMActive:$isVMActive" }
-//    }
-
     init {
         extActive().run {
             logMsg { "MainVM init isExtActive:${isExtActive}" }
