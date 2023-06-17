@@ -122,16 +122,6 @@ abstract class FViewModel<I> : ViewModel() {
     }
 }
 
-@MainThread
-inline fun <reified T : FViewModelExt> FViewModel<*>.ext(): T {
-    return getExt(T::class.java)
-}
-
-@MainThread
-fun FViewModel<*>.extActive(): VMExtActive {
-    return getExt(InternalVMExtActive::class.java)
-}
-
 interface FViewModelExt {
     /**
      * 初始化（主线程）

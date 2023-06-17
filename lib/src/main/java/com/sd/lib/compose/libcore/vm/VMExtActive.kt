@@ -1,5 +1,6 @@
 package com.sd.lib.compose.libcore.vm
 
+import androidx.annotation.MainThread
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
+
+@MainThread
+fun FViewModel<*>.extActive(): VMExtActive {
+    return getExt(InternalVMExtActive::class.java)
+}
 
 interface VMExtActive {
     /**
@@ -38,7 +44,7 @@ interface VMExtActive {
     fun refreshDataWhenActive()
 }
 
-internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
+private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     @get:Synchronized
     private var _isActive: Boolean? = null
         set(value) {
