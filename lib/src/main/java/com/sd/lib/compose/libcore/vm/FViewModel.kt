@@ -128,8 +128,8 @@ inline fun <reified T : FViewModelExt> FViewModel<*>.ext(): T {
 }
 
 @MainThread
-fun FViewModel<*>.extActive(): FViewModelExtActive {
-    return getExt(FViewModelExtActive::class.java)
+fun FViewModel<*>.extActive(): VMExtActive {
+    return getExt(InternalVMExtActive::class.java)
 }
 
 interface FViewModelExt {

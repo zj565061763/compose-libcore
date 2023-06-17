@@ -69,7 +69,7 @@ class MainVM : FViewModel<Unit>() {
 
     init {
         extActive().run {
-            logMsg { "MainVM init isVMActive:${isVMActive}" }
+            logMsg { "MainVM init isExtActive:${isExtActive}" }
         }
 
         refreshData()

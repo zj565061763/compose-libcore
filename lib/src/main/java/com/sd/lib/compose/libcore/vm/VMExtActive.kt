@@ -7,13 +7,30 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 
-class FViewModelExtActive : BaseViewModelExt() {
+interface VMExtActive {
+    /**
+     * 是否处于激活状态
+     */
+    val isExtActive: Boolean
+
+    /**
+     * 设置激活状态
+     */
+    fun setExtActive(active: Boolean)
+
+    /**
+     * 设置[Lifecycle]
+     */
+    fun setLifecycle(lifecycle: Lifecycle?)
+}
+
+internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     @get:Synchronized
-    private var _isVMActive: Boolean? = null
+    private var _isExtActive: Boolean? = null
         set(value) {
             if (vm.isDestroyed) return
             requireNotNull(value) { "Require not null value." }
-            synchronized(this@FViewModelExtActive) {
+            synchronized(this@InternalVMExtActive) {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
@@ -25,14 +42,11 @@ class FViewModelExtActive : BaseViewModelExt() {
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
 
-    /** 当前VM是否处于激活状态 */
-    val isVMActive: Boolean get() = _isVMActive ?: false
+    override val isExtActive: Boolean
+        get() = _isExtActive ?: false
 
-    /**
-     * 设置[Lifecycle]
-     */
-    fun setLifecycle(lifecycle: Lifecycle?) {
-        synchronized(this@FViewModelExtActive) {
+    override fun setLifecycle(lifecycle: Lifecycle?) {
+        synchronized(this@InternalVMExtActive) {
             val old = _lifecycle?.get()
             if (old === lifecycle) return
 
@@ -41,7 +55,7 @@ class FViewModelExtActive : BaseViewModelExt() {
             if (lifecycle == null) {
                 _lifecycle = null
                 if (_isPausedByLifecycle) {
-                    _isVMActive = true
+                    _isExtActive = true
                 }
             } else {
                 if (!vm.isDestroyed) {
@@ -52,18 +66,15 @@ class FViewModelExtActive : BaseViewModelExt() {
         }
     }
 
-    /**
-     * 设置当前VM是否处于激活状态
-     */
-    fun setVMActive(active: Boolean) {
+    override fun setExtActive(active: Boolean) {
         if (vm.isDestroyed) return
-        synchronized(this@FViewModelExtActive) {
+        synchronized(this@InternalVMExtActive) {
             if (active) {
                 if (!_isPausedByLifecycle) {
-                    _isVMActive = true
+                    _isExtActive = true
                 }
             } else {
-                _isVMActive = false
+                _isExtActive = false
             }
         }
     }
@@ -85,18 +96,18 @@ class FViewModelExtActive : BaseViewModelExt() {
 
         when (event) {
             Lifecycle.Event.ON_PAUSE -> {
-                synchronized(this@FViewModelExtActive) {
-                    if (isVMActive) {
-                        _isVMActive = false
+                synchronized(this@InternalVMExtActive) {
+                    if (isExtActive) {
+                        _isExtActive = false
                         _isPausedByLifecycle = true
                     }
                 }
             }
 
             Lifecycle.Event.ON_RESUME -> {
-                synchronized(this@FViewModelExtActive) {
-                    if (_isPausedByLifecycle || _isVMActive == null) {
-                        _isVMActive = true
+                synchronized(this@InternalVMExtActive) {
+                    if (_isPausedByLifecycle || _isExtActive == null) {
+                        _isExtActive = true
                     }
                 }
             }
