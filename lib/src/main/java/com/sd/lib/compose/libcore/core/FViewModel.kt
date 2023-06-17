@@ -63,11 +63,9 @@ abstract class FViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isVMActive || (intent is IgnoreVMActiveIntent)) {
-            viewModelScope.launch {
-                if (isVMActive || (intent is IgnoreVMActiveIntent)) {
-                    handleIntent(intent)
-                }
+        viewModelScope.launch {
+            if (isVMActive || (intent is IgnoreVMActiveIntent)) {
+                handleIntent(intent)
             }
         }
     }
