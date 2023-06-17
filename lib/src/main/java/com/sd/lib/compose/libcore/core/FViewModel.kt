@@ -36,7 +36,6 @@ abstract class FViewModel<I> : ViewModel() {
                     notifyVMActiveChanged()
                 }
             }
-            _isVMActiveFlow.value = value
         }
 
     private var _lifecycle: WeakReference<Lifecycle>? = null
@@ -46,13 +45,9 @@ abstract class FViewModel<I> : ViewModel() {
     private var _refreshData: RefreshData? = null
 
     private val _isRefreshingFlow = MutableStateFlow(false)
-    private val _isVMActiveFlow = MutableStateFlow(isVMActive)
 
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
-
-    /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
-    val isVMActiveFlow: StateFlow<Boolean> = _isVMActiveFlow.asStateFlow()
 
     /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
     val isVMActive: Boolean get() = _isVMActive ?: false
