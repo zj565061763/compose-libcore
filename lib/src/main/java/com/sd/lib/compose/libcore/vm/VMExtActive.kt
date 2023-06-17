@@ -34,12 +34,12 @@ interface VMExtActive {
     fun setLifecycle(lifecycle: Lifecycle?)
 
     /**
-     * 每次状态变为激活时触发
+     * 每次状态变为激活时触发[callback]
      */
     fun onActive(callback: suspend () -> Unit)
 
     /**
-     * 每次状态变为未激活时触发
+     * 每次状态变为未激活时触发[callback]
      */
     fun onInactive(callback: suspend () -> Unit)
 }
