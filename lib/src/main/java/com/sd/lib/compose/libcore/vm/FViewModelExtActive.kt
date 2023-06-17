@@ -25,11 +25,11 @@ class FViewModelExtActive : BaseViewModelExt() {
     private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
 
-    /** 当前VM是否处于激活状态，只有激活状态才会处理事件 */
+    /** 当前VM是否处于激活状态 */
     val isVMActive: Boolean get() = _isVMActive ?: false
 
     /**
-     * 观察生命周期
+     * 设置[Lifecycle]
      */
     fun setLifecycle(lifecycle: Lifecycle?) {
         synchronized(this@FViewModelExtActive) {
@@ -110,7 +110,6 @@ class FViewModelExtActive : BaseViewModelExt() {
     }
 
     override fun onInit() {
-
     }
 
     override fun onDestroy() {
