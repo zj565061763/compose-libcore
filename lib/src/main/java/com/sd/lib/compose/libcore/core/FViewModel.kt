@@ -1,12 +1,11 @@
 package com.sd.lib.compose.libcore.core
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sd.lib.coroutine.FMutator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -147,7 +146,7 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     private fun notifyVMActiveChanged() {
-        Handler(Looper.getMainLooper()).post {
+        viewModelScope.launch(Dispatchers.Main) {
             refreshDataInternal(_refreshData)
             onVMActiveChanged()
         }
