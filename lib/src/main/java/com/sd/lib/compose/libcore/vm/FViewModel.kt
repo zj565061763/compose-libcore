@@ -127,6 +127,11 @@ inline fun <reified T : FViewModelExt> FViewModel<*>.ext(): T {
     return getExt(T::class.java)
 }
 
+@MainThread
+fun FViewModel<*>.extActive(): FViewModelExtActive {
+    return getExt(FViewModelExtActive::class.java)
+}
+
 interface FViewModelExt {
     /**
      * 初始化（主线程）

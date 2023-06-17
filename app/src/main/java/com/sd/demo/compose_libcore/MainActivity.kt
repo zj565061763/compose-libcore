@@ -17,8 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.vm.FViewModel
-import com.sd.lib.compose.libcore.vm.FViewModelExtActive
-import com.sd.lib.compose.libcore.vm.ext
+import com.sd.lib.compose.libcore.vm.extActive
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -69,7 +68,7 @@ class MainVM : FViewModel<Unit>() {
 //    }
 
     init {
-        ext<FViewModelExtActive>().run {
+        extActive().run {
             logMsg { "MainVM init isVMActive:${isVMActive}" }
         }
 
