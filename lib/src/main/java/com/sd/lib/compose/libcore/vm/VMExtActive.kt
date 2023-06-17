@@ -16,7 +16,7 @@ interface VMExtActive {
     /**
      * 设置激活状态
      */
-    fun setExtActive(active: Boolean)
+    fun setActive(active: Boolean)
 
     /**
      * 设置[Lifecycle]
@@ -66,7 +66,7 @@ internal class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    override fun setExtActive(active: Boolean) {
+    override fun setActive(active: Boolean) {
         if (vm.isDestroyed) return
         synchronized(this@InternalVMExtActive) {
             if (active) {
