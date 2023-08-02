@@ -38,6 +38,14 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
+     * 外部触发意图
+     */
+    suspend fun intent(intent: I) {
+        if (isDestroyed) return
+        handleIntent(intent)
+    }
+
+    /**
      * 刷新数据
      * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
      * @param delayTime 延迟多少毫秒后执行
