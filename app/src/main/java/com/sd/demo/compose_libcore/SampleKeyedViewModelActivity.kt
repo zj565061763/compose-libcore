@@ -37,13 +37,12 @@ class SampleKeyedViewModelActivity : BaseActivity() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content() {
-    val pagerState = rememberPagerState()
+    val pagerState = rememberPagerState { 20 }
 
     HorizontalPager(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
-        pageCount = 20,
         state = pagerState,
     ) { index ->
         PageView(
