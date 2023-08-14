@@ -177,6 +177,7 @@ private fun ViewModelStoreOwner.removeVM(key: String?) {
     }
 }
 
+@Suppress("UNCHECKED_CAST")
 private fun ViewModelStoreOwner.vmHolder(): MutableMap<String, ViewModel> {
     return ViewModelStore::class.java.run {
         try {

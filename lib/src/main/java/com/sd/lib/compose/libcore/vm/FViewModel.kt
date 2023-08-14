@@ -74,6 +74,7 @@ abstract class FViewModel<I> : ViewModel() {
     /**
      * 获取扩展对象，此方法必须在主线程调用
      */
+    @Suppress("UNCHECKED_CAST")
     @MainThread
     fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
         libCheckMainThread()
@@ -91,7 +92,7 @@ abstract class FViewModel<I> : ViewModel() {
      * 创建扩展对象
      */
     protected open fun <T : FViewModelExt> createExt(clazz: Class<T>): T {
-        return clazz.newInstance()
+        return clazz.getDeclaredConstructor().newInstance()
     }
 
     /**
