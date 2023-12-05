@@ -39,6 +39,7 @@ private fun Content(
     onClickSampleKeyedViewModel: () -> Unit,
     vm: MainVM = viewModel()
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxSize()
