@@ -72,7 +72,9 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         if (vm.isDestroyed) return
         synchronized(this@InternalVMExtActive) {
             if (active) {
-                if (!_isPausedByLifecycle) {
+                if (_isPausedByLifecycle) {
+                    // ignore
+                } else {
                     _isActive = true
                 }
             } else {
