@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.utils.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class SampleKeyedViewModelActivity : BaseActivity() {
 
@@ -66,15 +67,21 @@ private fun PageView(
 
 class PageViewModel : ViewModel() {
     init {
-        logMsg { "$this init" }
+        sCounter.incrementAndGet()
+        logMsg { "$this init ${sCounter.get()}" }
     }
 
     override fun onCleared() {
         super.onCleared()
-        logMsg { "$this onCleared" }
+        sCounter.decrementAndGet()
+        logMsg { "$this onCleared ${sCounter.get()}" }
     }
 
     override fun toString(): String {
         return "${javaClass.simpleName}@${Integer.toHexString(hashCode())}"
+    }
+
+    companion object {
+        private val sCounter = AtomicInteger(0)
     }
 }
