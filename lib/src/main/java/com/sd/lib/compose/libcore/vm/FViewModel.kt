@@ -115,8 +115,8 @@ abstract class FViewModel<I> : ViewModel() {
 
     final override fun onCleared() {
         super.onCleared()
-        destroyExt()
         isDestroyed = true
+        destroyExt()
         onDestroy()
     }
 
@@ -127,7 +127,7 @@ abstract class FViewModel<I> : ViewModel() {
     private fun destroyExt() {
         libCheckMainThread()
         while (_extHolder.isNotEmpty()) {
-            _extHolder.keys.toList().forEach { key ->
+            _extHolder.keys.toMutableList().forEach { key ->
                 _extHolder.remove(key)?.destroy()
             }
         }
