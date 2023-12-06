@@ -37,8 +37,7 @@ fun <VM : ViewModel> ViewModelStoreOwner.fKeyedVM(
     clazz: Class<VM>,
     key: String,
 ): VM {
-    val container = getVM(FViewModelContainer::class.java)
-    return container.addKey(
+    return getVM(FViewModelContainer::class.java).addKey(
         clazz = clazz,
         key = key,
         viewModelStoreOwner = this,
@@ -49,8 +48,7 @@ fun ViewModelStoreOwner.fKeyedVMRemove(
     clazz: Class<out ViewModel>,
     key: String,
 ): Boolean {
-    val container = getVM(FViewModelContainer::class.java)
-    return container.removeKey(
+    return getVM(FViewModelContainer::class.java).removeKey(
         clazz = clazz,
         key = key,
         viewModelStoreOwner = this,
@@ -58,8 +56,7 @@ fun ViewModelStoreOwner.fKeyedVMRemove(
 }
 
 fun ViewModelStoreOwner.fKeyedVMSize(clazz: Class<out ViewModel>): Int {
-    val container = getVM(FViewModelContainer::class.java)
-    return container.size(clazz)
+    return getVM(FViewModelContainer::class.java).size(clazz)
 }
 
 internal class FViewModelContainer : ViewModel() {
@@ -145,7 +142,7 @@ private fun <VM : ViewModel> ViewModelStoreOwner.getVM(
         this.defaultViewModelCreationExtras
     } else {
         CreationExtras.Empty
-    }
+    },
 ): VM {
     val provider = if (factory != null) {
         ViewModelProvider(this.viewModelStore, factory, extras)
