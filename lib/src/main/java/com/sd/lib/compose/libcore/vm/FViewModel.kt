@@ -33,6 +33,7 @@ abstract class FViewModel<I> : ViewModel() {
      * 外部触发意图
      */
     fun dispatch(intent: I) {
+        if (isDestroyed) return
         viewModelScope.launch {
             handleIntent(intent)
         }
