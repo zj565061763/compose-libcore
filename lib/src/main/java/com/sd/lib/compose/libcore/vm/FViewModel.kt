@@ -56,6 +56,7 @@ abstract class FViewModel<I> : ViewModel() {
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
+        if (isDestroyed) return
         viewModelScope.launch {
             try {
                 vmMutator.mutate {
