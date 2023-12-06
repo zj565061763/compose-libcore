@@ -11,16 +11,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.utils.*
-import kotlinx.coroutines.flow.filter
 
 class SampleKeyedViewModelActivity : BaseActivity() {
 
@@ -49,15 +45,6 @@ private fun Content() {
             index = index,
             viewModel = fDisposableViewModel(),
         )
-    }
-
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    LaunchedEffect(pagerState, viewModelStoreOwner) {
-        snapshotFlow { pagerState.isScrollInProgress }
-            .filter { !it }
-            .collect {
-                logMsg { "size ${viewModelStoreOwner.fKeyedVMSize(PageViewModel::class.java)}" }
-            }
     }
 }
 
