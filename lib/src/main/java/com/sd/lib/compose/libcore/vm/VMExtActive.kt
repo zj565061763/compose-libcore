@@ -1,8 +1,6 @@
 package com.sd.lib.compose.libcore.vm
 
 import androidx.annotation.MainThread
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
-import java.lang.ref.WeakReference
 
 @MainThread
 fun FViewModel<*>.extActive(): VMExtActive {
@@ -24,14 +21,14 @@ interface VMExtActive {
     val isActiveFlow: StateFlow<Boolean?>
 
     /**
-     * 设置激活状态
+     * 设置激活状态，处理业务逻辑的时候调用
      */
     fun setActive(active: Boolean)
 
     /**
-     * 设置[Lifecycle]
+     * 设置激活状态，由外部UI生命周期触发，业务逻辑不能调用此方法
      */
-    fun setLifecycle(lifecycle: Lifecycle?)
+    fun setLifecycleActive(active: Boolean)
 
     /**
      * 每次状态变为激活时触发[callback]
@@ -61,9 +58,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
             }
         }
 
-    private var _lifecycle: WeakReference<Lifecycle>? = null
     private var _isPausedByLifecycle = false
-
     private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(_isActive)
 
     override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
@@ -83,28 +78,24 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    override fun setLifecycle(lifecycle: Lifecycle?) {
+    override fun setLifecycleActive(active: Boolean) {
+        if (vm.isDestroyed) return
         synchronized(this@InternalVMExtActive) {
-            val old = _lifecycle?.get()
-            if (old === lifecycle) return
-
-            old?.removeObserver(_lifecycleObserver)
-
-            if (lifecycle == null) {
-                _lifecycle = null
-                if (_isPausedByLifecycle) {
+            if (active) {
+                if (_isPausedByLifecycle || _isActive == null) {
                     _isActive = true
                 }
             } else {
-                if (!vm.isDestroyed) {
-                    _lifecycle = WeakReference(lifecycle)
-                    lifecycle.addObserver(_lifecycleObserver)
+                if (_isActive == true) {
+                    _isActive = false
+                    _isPausedByLifecycle = true
                 }
             }
         }
     }
 
     override fun onActive(callback: suspend () -> Unit) {
+        if (vm.isDestroyed) return
         vm.viewModelScope.launch {
             isActiveFlow
                 .filter { it == true }
@@ -113,6 +104,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     }
 
     override fun onInactive(callback: suspend () -> Unit) {
+        if (vm.isDestroyed) return
         vm.viewModelScope.launch {
             isActiveFlow
                 .filter { it == false }
@@ -120,45 +112,9 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    /**
-     * 生命周期观察者
-     */
-    private val _lifecycleObserver = LifecycleEventObserver { _, event ->
-        if (vm.isDestroyed) {
-            setLifecycle(null)
-            return@LifecycleEventObserver
-        }
-
-        when (event) {
-            Lifecycle.Event.ON_PAUSE -> {
-                synchronized(this@InternalVMExtActive) {
-                    if (_isActive == true) {
-                        _isActive = false
-                        _isPausedByLifecycle = true
-                    }
-                }
-            }
-
-            Lifecycle.Event.ON_RESUME -> {
-                synchronized(this@InternalVMExtActive) {
-                    if (_isPausedByLifecycle || _isActive == null) {
-                        _isActive = true
-                    }
-                }
-            }
-
-            Lifecycle.Event.ON_DESTROY -> {
-                setLifecycle(null)
-            }
-
-            else -> {}
-        }
-    }
-
     override fun onInit() {
     }
 
     override fun onDestroy() {
-        setLifecycle(null)
     }
 }
