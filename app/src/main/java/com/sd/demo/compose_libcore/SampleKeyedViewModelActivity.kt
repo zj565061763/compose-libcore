@@ -35,7 +35,6 @@ class SampleKeyedViewModelActivity : BaseActivity() {
 @Composable
 private fun Content() {
     val pagerState = rememberPagerState { 20 }
-
     HorizontalPager(
         modifier = Modifier
             .fillMaxSize()
@@ -65,7 +64,7 @@ private fun PageView(
     }
 }
 
-class PageViewModel : ViewModel() {
+private class PageViewModel : ViewModel() {
     init {
         sCounter.incrementAndGet()
         logMsg { "$this init ${sCounter.get()}" }

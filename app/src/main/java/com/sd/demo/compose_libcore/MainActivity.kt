@@ -1,16 +1,21 @@
 package com.sd.demo.compose_libcore
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -25,8 +30,14 @@ class MainActivity : BaseActivity() {
         setContent {
             AppTheme {
                 Content(
-                    onClickSampleKeyedViewModel = {
-                        startActivity(Intent(this, SampleKeyedViewModelActivity::class.java))
+                    listActivity = remember {
+                        listOf(
+                            SampleLifecycleActivity::class.java,
+                            SampleKeyedViewModelActivity::class.java,
+                        )
+                    },
+                    onClickActivity = {
+                        startActivity(Intent(this, it))
                     },
                 )
             }
@@ -36,21 +47,27 @@ class MainActivity : BaseActivity() {
 
 @Composable
 private fun Content(
-    onClickSampleKeyedViewModel: () -> Unit,
-    vm: MainVM = viewModel()
+    vm: MainVM = viewModel(),
+    listActivity: List<Class<out Activity>>,
+    onClickActivity: (Class<out Activity>) -> Unit,
 ) {
-
-    Column(
+    val onClickActivityUpdated by rememberUpdatedState(onClickActivity)
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .statusBarsPadding(),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(5.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Button(
-            onClick = onClickSampleKeyedViewModel
-        ) {
-            Text(text = "Sample KeyedViewModel")
+        items(
+            listActivity,
+            key = { it },
+        ) { item ->
+            Button(
+                onClick = { onClickActivityUpdated(item) }
+            ) {
+                Text(text = item.simpleName)
+            }
         }
     }
 }
@@ -75,6 +92,6 @@ class MainVM : FViewModel<Unit>() {
     }
 }
 
-inline fun logMsg(block: () -> String) {
-    Log.i("libcore-demo", block())
+inline fun logMsg(block: () -> Any?) {
+    Log.i("libcore-demo", block().toString())
 }
