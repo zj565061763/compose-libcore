@@ -14,15 +14,14 @@ import androidx.lifecycle.LifecycleOwner
  */
 @Composable
 fun FLifecycleOnStart(
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    vararg keys: Any?,
     callback: () -> Unit,
 ) {
-    val callbackUpdate by rememberUpdatedState(callback)
-    FLifecycleEvent(lifecycleOwner) { event ->
-        if (event == Lifecycle.Event.ON_START) {
-            callbackUpdate()
-        }
-    }
+    FLifecycleTargetEvent(
+        targetEvent = Lifecycle.Event.ON_START,
+        keys = keys,
+        callback = callback,
+    )
 }
 
 /**
@@ -30,26 +29,29 @@ fun FLifecycleOnStart(
  */
 @Composable
 fun FLifecycleOnStop(
-    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    vararg keys: Any?,
     callback: () -> Unit,
 ) {
-    val callbackUpdate by rememberUpdatedState(callback)
-    FLifecycleEvent(lifecycleOwner) { event ->
-        if (event == Lifecycle.Event.ON_STOP) {
-            callbackUpdate()
-        }
-    }
+    FLifecycleTargetEvent(
+        targetEvent = Lifecycle.Event.ON_STOP,
+        keys = keys,
+        callback = callback,
+    )
 }
 
 @Composable
-private fun FLifecycleEvent(
-    lifecycleOwner: LifecycleOwner,
-    callback: (Lifecycle.Event) -> Unit,
+private fun FLifecycleTargetEvent(
+    lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
+    targetEvent: Lifecycle.Event,
+    vararg keys: Any?,
+    callback: () -> Unit,
 ) {
     val callbackUpdate by rememberUpdatedState(callback)
-    DisposableEffect(lifecycleOwner) {
+    DisposableEffect(lifecycleOwner, targetEvent, *keys) {
         val observer = LifecycleEventObserver { _, event ->
-            callbackUpdate(event)
+            if (event == targetEvent) {
+                callbackUpdate()
+            }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
