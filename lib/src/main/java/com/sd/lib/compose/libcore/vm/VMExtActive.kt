@@ -45,15 +45,12 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     @get:Synchronized
     private var _isActive: Boolean? = null
         set(value) {
-            if (vm.isDestroyed) return
             requireNotNull(value) { "Require not null value." }
             synchronized(this@InternalVMExtActive) {
                 if (field != value) {
                     field = value
                     _isPausedByLifecycle = false
-                    vm.viewModelScope.launch(Dispatchers.Main) {
-                        _isActiveFlow.value = _isActive
-                    }
+                    updateActiveFlow()
                 }
             }
         }
@@ -64,7 +61,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
 
     override fun setActive(active: Boolean) {
-        if (vm.isDestroyed) return
+        viewModel ?: return
         synchronized(this@InternalVMExtActive) {
             if (active) {
                 if (_isPausedByLifecycle) {
@@ -79,7 +76,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     }
 
     override fun setLifecycleActive(active: Boolean) {
-        if (vm.isDestroyed) return
+        viewModel ?: return
         synchronized(this@InternalVMExtActive) {
             if (active) {
                 if (_isPausedByLifecycle || _isActive == null) {
@@ -95,7 +92,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     }
 
     override fun onActive(callback: suspend () -> Unit) {
-        if (vm.isDestroyed) return
+        val vm = viewModel ?: return
         vm.viewModelScope.launch {
             isActiveFlow
                 .filter { it == true }
@@ -104,11 +101,18 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     }
 
     override fun onInactive(callback: suspend () -> Unit) {
-        if (vm.isDestroyed) return
+        val vm = viewModel ?: return
         vm.viewModelScope.launch {
             isActiveFlow
                 .filter { it == false }
                 .collect { callback() }
+        }
+    }
+
+    private fun updateActiveFlow() {
+        val vm = viewModel ?: return
+        vm.viewModelScope.launch(Dispatchers.Main) {
+            _isActiveFlow.value = _isActive
         }
     }
 

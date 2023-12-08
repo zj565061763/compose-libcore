@@ -149,19 +149,20 @@ interface FViewModelExt {
 }
 
 abstract class BaseViewModelExt : FViewModelExt {
-    private lateinit var _vm: FViewModel<*>
-
-    protected val vm: FViewModel<*> get() = _vm
+    private var _viewModel: FViewModel<*>? = null
+    protected val viewModel by ::_viewModel
 
     final override fun init(viewModel: FViewModel<*>) {
         libCheckMainThread()
-        if (this::_vm.isInitialized) error("$this has been initialized.")
-        _vm = viewModel
+        check(_viewModel == null) { "$this has been initialized." }
+        _viewModel = viewModel
         onInit()
     }
 
     final override fun destroy() {
         libCheckMainThread()
+        /** 提前置为null，不允许[onDestroy]里面继续访问[viewModel] */
+        _viewModel = null
         onDestroy()
     }
 
