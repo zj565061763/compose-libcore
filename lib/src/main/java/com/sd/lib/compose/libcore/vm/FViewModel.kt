@@ -19,21 +19,35 @@ abstract class FViewModel<I> : ViewModel() {
             field = value
         }
 
-    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
+    private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    /** 是否处于激活状态，默认true */
+    val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
 
     private val _isRefreshingFlow = MutableStateFlow(false)
-
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
+
+    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
 
     /** 互斥修改器 */
     protected val vmMutator = FMutator()
 
     /**
+     * 设置激活状态
+     */
+    fun setActive(active: Boolean) {
+        viewModelScope.launch {
+            if (_isActiveFlow.value != active) {
+                _isActiveFlow.value = active
+                if (active) onActive() else onInActive()
+            }
+        }
+    }
+
+    /**
      * 外部触发意图
      */
     fun dispatch(intent: I) {
-        if (isDestroyed) return
         viewModelScope.launch {
             handleIntent(intent)
         }
@@ -44,7 +58,9 @@ abstract class FViewModel<I> : ViewModel() {
      */
     suspend fun intent(intent: I) {
         if (isDestroyed) return
-        handleIntent(intent)
+        if (isActiveFlow.value) {
+            handleIntent(intent)
+        }
     }
 
     /**
@@ -52,23 +68,25 @@ abstract class FViewModel<I> : ViewModel() {
      * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
      * @param delayTime 延迟多少毫秒后执行
      */
+    @JvmOverloads
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
     ) {
-        if (isDestroyed) return
         viewModelScope.launch {
-            try {
-                vmMutator.mutate {
-                    if (notifyRefreshing) {
-                        _isRefreshingFlow.value = true
+            if (isActiveFlow.value) {
+                try {
+                    vmMutator.mutate {
+                        if (notifyRefreshing) {
+                            _isRefreshingFlow.value = true
+                        }
+                        delay(delayTime)
+                        refreshDataImpl()
                     }
-                    delay(delayTime)
-                    refreshDataImpl()
-                }
-            } finally {
-                if (notifyRefreshing) {
-                    _isRefreshingFlow.value = false
+                } finally {
+                    if (notifyRefreshing) {
+                        _isRefreshingFlow.value = false
+                    }
                 }
             }
         }
@@ -82,20 +100,16 @@ abstract class FViewModel<I> : ViewModel() {
     fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
         libCheckMainThread()
         val cache = _extHolder[clazz]
-        if (cache != null) return cache as T
-        return createExt(clazz).also { ext ->
-            if (!isDestroyed) {
-                _extHolder[clazz] = ext
-                ext.init(this@FViewModel)
+        return if (cache != null) {
+            cache as T
+        } else {
+            clazz.getDeclaredConstructor().newInstance().also { ext ->
+                if (!isDestroyed) {
+                    _extHolder[clazz] = ext
+                    ext.init(this@FViewModel)
+                }
             }
         }
-    }
-
-    /**
-     * 创建扩展对象
-     */
-    protected open fun <T : FViewModelExt> createExt(clazz: Class<T>): T {
-        return clazz.getDeclaredConstructor().newInstance()
     }
 
     /**
@@ -109,12 +123,23 @@ abstract class FViewModel<I> : ViewModel() {
     protected abstract suspend fun refreshDataImpl()
 
     /**
+     * 未激活 -> 激活，[viewModelScope]触发
+     */
+    protected open fun onActive() {}
+
+    /**
+     * 激活 -> 未激活，[viewModelScope]触发
+     */
+    protected open fun onInActive() {}
+
+    /**
      * 销毁回调，[onCleared]触发
      */
     protected open fun onDestroy() {}
 
     final override fun onCleared() {
         super.onCleared()
+        _isActiveFlow.value = false
         isDestroyed = true
         destroyExt()
         onDestroy()
