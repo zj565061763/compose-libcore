@@ -27,7 +27,6 @@ abstract class FViewModel<I> : ViewModel() {
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
-    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
 
     /** 互斥修改器 */
     protected val vmMutator = FMutator()
@@ -93,6 +92,43 @@ abstract class FViewModel<I> : ViewModel() {
     }
 
     /**
+     * 处理意图，[viewModelScope]触发
+     */
+    protected abstract suspend fun handleIntent(intent: I)
+
+    /**
+     * 刷新数据，[viewModelScope]触发
+     */
+    protected abstract suspend fun refreshDataImpl()
+
+    /**
+     * 未激活 -> 激活，[viewModelScope]触发
+     */
+    protected open suspend fun onActive() {}
+
+    /**
+     * 激活 -> 未激活，[viewModelScope]触发
+     */
+    protected open suspend fun onInActive() {}
+
+    /**
+     * 销毁回调，[onCleared]触发
+     */
+    protected open fun onDestroy() {}
+
+    final override fun onCleared() {
+        super.onCleared()
+        _isActiveFlow.value = false
+        isDestroyed = true
+        destroyExt()
+        onDestroy()
+    }
+
+    //---------- ext ----------
+
+    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
+
+    /**
      * 获取扩展对象，此方法必须在主线程调用
      */
     @Suppress("UNCHECKED_CAST")
@@ -110,39 +146,6 @@ abstract class FViewModel<I> : ViewModel() {
                 }
             }
         }
-    }
-
-    /**
-     * 处理意图，[viewModelScope]触发
-     */
-    protected abstract suspend fun handleIntent(intent: I)
-
-    /**
-     * 刷新数据，[viewModelScope]触发
-     */
-    protected abstract suspend fun refreshDataImpl()
-
-    /**
-     * 未激活 -> 激活，[viewModelScope]触发
-     */
-    protected open fun onActive() {}
-
-    /**
-     * 激活 -> 未激活，[viewModelScope]触发
-     */
-    protected open fun onInActive() {}
-
-    /**
-     * 销毁回调，[onCleared]触发
-     */
-    protected open fun onDestroy() {}
-
-    final override fun onCleared() {
-        super.onCleared()
-        _isActiveFlow.value = false
-        isDestroyed = true
-        destroyExt()
-        onDestroy()
     }
 
     /**

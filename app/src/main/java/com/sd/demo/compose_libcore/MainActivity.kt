@@ -19,10 +19,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.vm.FViewModel
-import com.sd.lib.compose.libcore.vm.extActive
 
 class MainActivity : BaseActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +44,6 @@ class MainActivity : BaseActivity() {
 
 @Composable
 private fun Content(
-    vm: MainVM = viewModel(),
     listActivity: List<Class<out Activity>>,
     onClickActivity: (Class<out Activity>) -> Unit,
 ) {
@@ -68,26 +64,6 @@ private fun Content(
             ) {
                 Text(text = item.simpleName)
             }
-        }
-    }
-}
-
-class MainVM : FViewModel<Unit>() {
-    override suspend fun handleIntent(intent: Unit) {
-    }
-
-    override suspend fun refreshDataImpl() {
-        logMsg { "MainVM refreshDataImpl" }
-    }
-
-    init {
-        extActive().onActive {
-            logMsg { "MainVM onActive" }
-            refreshData()
-        }
-
-        extActive().onInactive {
-            logMsg { "MainVM onInactive" }
         }
     }
 }
