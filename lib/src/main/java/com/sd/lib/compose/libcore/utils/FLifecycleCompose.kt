@@ -53,9 +53,10 @@ private fun FLifecycleTargetEvent(
                 callbackUpdate()
             }
         }
-        lifecycleOwner.lifecycle.addObserver(observer)
+        val lifecycle = lifecycleOwner.lifecycle
+        lifecycle.addObserver(observer)
         onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
+            lifecycle.removeObserver(observer)
         }
     }
 }
