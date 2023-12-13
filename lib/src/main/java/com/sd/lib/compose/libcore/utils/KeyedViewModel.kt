@@ -15,30 +15,25 @@ import java.util.UUID
 @Composable
 inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
+    val javaClass = VM::class.java
 
-    val key = rememberSaveable(viewModelStoreOwner) { "disposableViewModel:${UUID.randomUUID()}" }
-    val packKey = rememberSaveable(key) { packKey(VM::class.java, key) }
+    val key = rememberSaveable(javaClass) {
+        val id = UUID.randomUUID().toString()
+        "com.sd.android.keyedViewModel:${javaClass.name}:${id}"
+    }
 
-    DisposableEffect(viewModelStoreOwner, packKey) {
+    DisposableEffect(viewModelStoreOwner, key) {
         onDispose {
-            viewModelStoreOwner.vmRemove(packKey)
+            viewModelStoreOwner.vmRemove(key)
         }
     }
 
     return viewModelStoreOwner.vmGet(
         javaClass = VM::class.java,
-        key = packKey,
+        key = key,
     )
 }
 
-private const val KEY_PREFIX = "com.sd.android.keyedViewModel"
-
-@PublishedApi
-internal fun packKey(clazz: Class<out ViewModel>, key: String): String {
-    require(key.isNotEmpty()) { "key is empty" }
-    require(!key.startsWith(KEY_PREFIX)) { "key start with $KEY_PREFIX" }
-    return "${KEY_PREFIX}:${clazz.name}:${key}"
-}
 
 @PublishedApi
 internal fun <VM : ViewModel> ViewModelStoreOwner.vmGet(
