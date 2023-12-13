@@ -2,7 +2,6 @@ package com.sd.lib.compose.libcore.vm
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,11 +25,6 @@ interface VMExtActive {
     fun setActive(active: Boolean)
 
     /**
-     * 设置激活状态（UI逻辑）
-     */
-    fun setUIActive(active: Boolean)
-
-    /**
      * 每次状态变为激活时触发[callback]
      */
     fun onActive(callback: suspend () -> Unit)
@@ -42,53 +36,13 @@ interface VMExtActive {
 }
 
 private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
-    @get:Synchronized
-    private var _isActive: Boolean? = null
-        set(value) {
-            requireNotNull(value) { "Require not null value." }
-            synchronized(this@InternalVMExtActive) {
-                if (field != value) {
-                    field = value
-                    _isPausedByUI = false
-                    updateActiveFlow()
-                }
-            }
-        }
-
-    private var _isPausedByUI = false
-    private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(_isActive)
+    private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 
     override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
 
     override fun setActive(active: Boolean) {
         viewModel ?: return
-        synchronized(this@InternalVMExtActive) {
-            if (active) {
-                if (_isPausedByUI) {
-                    // ignore
-                } else {
-                    _isActive = true
-                }
-            } else {
-                _isActive = false
-            }
-        }
-    }
-
-    override fun setUIActive(active: Boolean) {
-        viewModel ?: return
-        synchronized(this@InternalVMExtActive) {
-            if (active) {
-                if (_isPausedByUI || _isActive == null) {
-                    _isActive = true
-                }
-            } else {
-                if (_isActive == true) {
-                    _isActive = false
-                    _isPausedByUI = true
-                }
-            }
-        }
+        _isActiveFlow.value = active
     }
 
     override fun onActive(callback: suspend () -> Unit) {
@@ -106,13 +60,6 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
             isActiveFlow
                 .filter { it == false }
                 .collect { callback() }
-        }
-    }
-
-    private fun updateActiveFlow() {
-        val vm = viewModel ?: return
-        vm.viewModelScope.launch(Dispatchers.Main) {
-            _isActiveFlow.value = _isActive
         }
     }
 
