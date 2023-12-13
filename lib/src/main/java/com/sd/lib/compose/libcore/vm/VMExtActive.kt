@@ -20,6 +20,11 @@ interface VMExtActive {
     val isActiveFlow: StateFlow<Boolean?>
 
     /**
+     * 是否出于激活状态，null表示初始状态
+     */
+    val isActive: Boolean?
+
+    /**
      * 设置激活状态（业务逻辑）
      */
     fun setActive(active: Boolean)
@@ -39,6 +44,8 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
     private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(null)
 
     override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
+
+    override val isActive: Boolean? get() = isActiveFlow.value
 
     override fun setActive(active: Boolean) {
         viewModel ?: return
