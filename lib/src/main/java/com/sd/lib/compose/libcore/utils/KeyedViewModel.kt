@@ -15,6 +15,7 @@ import java.util.UUID
 @Composable
 inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
+
     val key = rememberSaveable(viewModelStoreOwner) { "disposableViewModel:${UUID.randomUUID()}" }
     val packKey = rememberSaveable(key) { packKey(VM::class.java, key) }
 
