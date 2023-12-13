@@ -10,7 +10,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-abstract class FViewModel<I> : ViewModel() {
+abstract class FViewModel<I>(
+    /** 初始激活状态 */
+    active: Boolean = true,
+) : ViewModel() {
+
     @Volatile
     var isDestroyed = false
         private set(value) {
@@ -18,7 +22,7 @@ abstract class FViewModel<I> : ViewModel() {
             field = value
         }
 
-    private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(active)
     /** 是否处于激活状态，默认true */
     val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
 
