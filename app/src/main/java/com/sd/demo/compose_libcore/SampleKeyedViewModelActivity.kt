@@ -64,7 +64,7 @@ private fun PageView(
     }
 }
 
-private class PageViewModel : ViewModel() {
+internal class PageViewModel : ViewModel() {
     init {
         sCounter.incrementAndGet()
         logMsg { "$this init ${sCounter.get()}" }
