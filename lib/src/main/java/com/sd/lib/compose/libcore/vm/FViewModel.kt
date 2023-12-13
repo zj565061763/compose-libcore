@@ -28,8 +28,10 @@ abstract class FViewModel<I> : ViewModel() {
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
 
-    /** 互斥修改器 */
-    protected val vmMutator = FMutator()
+    /**
+     * 数据互斥修改器，[refreshData]中使用了这个对象
+     */
+    protected val dataMutator = FMutator()
 
     /**
      * 设置激活状态
@@ -75,7 +77,7 @@ abstract class FViewModel<I> : ViewModel() {
         viewModelScope.launch {
             if (isActiveFlow.value) {
                 try {
-                    vmMutator.mutate {
+                    dataMutator.mutate {
                         if (notifyRefreshing) {
                             _isRefreshingFlow.value = true
                         }
