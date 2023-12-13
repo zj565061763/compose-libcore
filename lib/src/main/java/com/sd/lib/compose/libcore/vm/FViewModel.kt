@@ -27,7 +27,6 @@ abstract class FViewModel<I> : ViewModel() {
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
-
     /**
      * 数据互斥修改器，[refreshData]中使用了这个对象
      */
