@@ -1,9 +1,8 @@
-package com.sd.lib.compose.libcore.vm
+package com.sd.lib.compose.libcore
 
 import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.sd.lib.compose.libcore.utils.libCheckMainThread
 import com.sd.lib.coroutine.FMutator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow

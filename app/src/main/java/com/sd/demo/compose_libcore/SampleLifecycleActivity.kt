@@ -5,9 +5,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.utils.FAppLifecycle
-import com.sd.lib.compose.libcore.utils.FLifecycleOnStart
-import com.sd.lib.compose.libcore.utils.FLifecycleOnStop
+import com.sd.lib.compose.libcore.FAppLifecycle
+import com.sd.lib.compose.libcore.FLifecycleOnStart
+import com.sd.lib.compose.libcore.FLifecycleOnStop
 
 class SampleLifecycleActivity : BaseActivity() {
 

@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.utils.*
+import com.sd.lib.compose.libcore.fDisposableViewModel
 import java.util.concurrent.atomic.AtomicInteger
 
 class SampleKeyedViewModelActivity : BaseActivity() {

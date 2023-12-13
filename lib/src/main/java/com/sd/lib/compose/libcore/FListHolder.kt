@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore.utils
+package com.sd.lib.compose.libcore
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

@@ -1,4 +1,4 @@
-package com.sd.lib.compose.libcore.utils
+package com.sd.lib.compose.libcore
 
 import android.app.Activity
 import android.content.Intent
@@ -12,7 +12,8 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import java.util.*
+import java.util.Collections
+import java.util.UUID
 import java.util.concurrent.atomic.AtomicInteger
 
 class FActivityResult(activity: Activity) {
