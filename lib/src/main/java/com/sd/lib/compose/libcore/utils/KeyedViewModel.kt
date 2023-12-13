@@ -13,8 +13,19 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import java.util.UUID
 
 @Composable
-inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
-    val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
+inline fun <reified VM : ViewModel> fDisposableViewModel(
+    viewModelStoreOwner: ViewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current),
+    factory: @Composable (
+        owner: ViewModelStoreOwner,
+        clazz: Class<VM>,
+        key: String,
+    ) -> VM = { owner, clazz, key ->
+        owner.vmGet(
+            javaClass = clazz,
+            key = key,
+        )
+    },
+): VM {
     val javaClass = VM::class.java
 
     val key = rememberSaveable(javaClass) {
@@ -28,10 +39,7 @@ inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
         }
     }
 
-    return viewModelStoreOwner.vmGet(
-        javaClass = VM::class.java,
-        key = key,
-    )
+    return factory(viewModelStoreOwner, javaClass, key)
 }
 
 @PublishedApi
