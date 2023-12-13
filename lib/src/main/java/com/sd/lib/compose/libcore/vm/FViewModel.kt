@@ -149,6 +149,7 @@ interface FViewModelExt {
 }
 
 abstract class BaseViewModelExt : FViewModelExt {
+    @Volatile
     private var _viewModel: FViewModel<*>? = null
     protected val viewModel by ::_viewModel
 

@@ -21,14 +21,14 @@ interface VMExtActive {
     val isActiveFlow: StateFlow<Boolean?>
 
     /**
-     * 设置激活状态，处理业务逻辑的时候调用
+     * 设置激活状态（业务逻辑）
      */
     fun setActive(active: Boolean)
 
     /**
-     * 设置激活状态，由外部UI生命周期触发，业务逻辑不能调用此方法
+     * 设置激活状态（UI逻辑）
      */
-    fun setLifecycleActive(active: Boolean)
+    fun setUIActive(active: Boolean)
 
     /**
      * 每次状态变为激活时触发[callback]
@@ -49,13 +49,13 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
             synchronized(this@InternalVMExtActive) {
                 if (field != value) {
                     field = value
-                    _isPausedByLifecycle = false
+                    _isPausedByUI = false
                     updateActiveFlow()
                 }
             }
         }
 
-    private var _isPausedByLifecycle = false
+    private var _isPausedByUI = false
     private var _isActiveFlow: MutableStateFlow<Boolean?> = MutableStateFlow(_isActive)
 
     override val isActiveFlow: StateFlow<Boolean?> = _isActiveFlow.asStateFlow()
@@ -64,7 +64,7 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         viewModel ?: return
         synchronized(this@InternalVMExtActive) {
             if (active) {
-                if (_isPausedByLifecycle) {
+                if (_isPausedByUI) {
                     // ignore
                 } else {
                     _isActive = true
@@ -75,17 +75,17 @@ private class InternalVMExtActive : BaseViewModelExt(), VMExtActive {
         }
     }
 
-    override fun setLifecycleActive(active: Boolean) {
+    override fun setUIActive(active: Boolean) {
         viewModel ?: return
         synchronized(this@InternalVMExtActive) {
             if (active) {
-                if (_isPausedByLifecycle || _isActive == null) {
+                if (_isPausedByUI || _isActive == null) {
                     _isActive = true
                 }
             } else {
                 if (_isActive == true) {
                     _isActive = false
-                    _isPausedByLifecycle = true
+                    _isPausedByUI = true
                 }
             }
         }
