@@ -34,7 +34,6 @@ inline fun <reified VM : ViewModel> fDisposableViewModel(): VM {
     )
 }
 
-
 @PublishedApi
 internal fun <VM : ViewModel> ViewModelStoreOwner.vmGet(
     javaClass: Class<VM>,
