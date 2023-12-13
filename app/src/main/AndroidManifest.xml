@@ -28,8 +28,9 @@
                 android:value="" />
         </activity>
 
-        <activity android:name=".SampleKeyedViewModelActivity" />
-        <activity android:name=".SampleLifecycleActivity" />
+        <activity android:name=".SampleActive" />
+        <activity android:name=".SampleLifecycle" />
+        <activity android:name=".SampleKeyedViewModel" />
 
     </application>
 

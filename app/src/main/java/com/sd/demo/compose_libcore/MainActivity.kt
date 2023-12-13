@@ -29,8 +29,9 @@ class MainActivity : BaseActivity() {
                 Content(
                     listActivity = remember {
                         listOf(
-                            SampleLifecycleActivity::class.java,
-                            SampleKeyedViewModelActivity::class.java,
+                            SampleActive::class.java,
+                            SampleLifecycle::class.java,
+                            SampleKeyedViewModel::class.java,
                         )
                     },
                     onClickActivity = {

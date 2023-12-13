@@ -9,7 +9,7 @@ import com.sd.lib.compose.libcore.FAppLifecycle
 import com.sd.lib.compose.libcore.FLifecycleOnStart
 import com.sd.lib.compose.libcore.FLifecycleOnStop
 
-class SampleLifecycleActivity : BaseActivity() {
+class SampleLifecycle : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

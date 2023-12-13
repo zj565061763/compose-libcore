@@ -19,7 +19,7 @@ import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.fDisposableViewModel
 import java.util.concurrent.atomic.AtomicInteger
 
-class SampleKeyedViewModelActivity : BaseActivity() {
+class SampleKeyedViewModel : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
