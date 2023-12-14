@@ -31,7 +31,6 @@ class MainActivity : BaseActivity() {
                         listOf(
                             SampleActive::class.java,
                             SampleLifecycle::class.java,
-                            SampleKeyedViewModel::class.java,
                         )
                     },
                     onClickActivity = {
