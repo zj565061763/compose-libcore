@@ -4,11 +4,11 @@ androidCompileSdk = "34"
 androidMinSdk = "21"
 androidTargetSdk = "34"
 
-androidGradlePlugin = "8.1.4"
-kotlin = "1.9.20"
+androidGradlePlugin = "8.2.0"
+kotlin = "1.9.21"
 
 compose = "1.5.4"
-composeCompiler = "1.5.5"
+composeCompiler = "1.5.6"
 composeMaterial3 = "1.1.2"
 
 lifecycle = "2.6.2"
@@ -25,7 +25,7 @@ androidx-compose-material3 = { module = "androidx.compose.material3:material3", 
 androidx-compose-material-ripple = { module = "androidx.compose.material:material-ripple", version.ref = "compose" }
 androidx-compose-material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose" }
 
-androidx-activity-compose = "androidx.activity:activity-compose:1.8.1"
+androidx-activity-compose = "androidx.activity:activity-compose:1.8.2"
 androidx-lifecycle-viewmodelCompose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-lifecycle-runtimeCompose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
 androidx-lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle" }
