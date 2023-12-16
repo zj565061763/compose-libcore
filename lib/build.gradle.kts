@@ -38,12 +38,22 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.androidx.compose.foundation)
+    val composeBom = platform(libs.androidx.compose.bom)
+    api(composeBom)
+    androidTestApi(composeBom)
+
+    api(libs.androidx.compose.material3)
+
+    api(libs.androidx.compose.ui.tooling.preview)
+    debugApi(libs.androidx.compose.ui.tooling)
 
     api(libs.androidx.activity.compose)
+    api(libs.androidx.constraintlayout.compose)
+
     api(libs.androidx.lifecycle.viewmodelCompose)
     api(libs.androidx.lifecycle.runtimeCompose)
     api(libs.androidx.lifecycle.process)
+
     api(libs.sd.coroutine)
 }
 
