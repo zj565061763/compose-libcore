@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -94,10 +95,12 @@ private class TabContainerImpl : TabContainerScope {
         }
 
         for (item in _activeKeyHolder) {
-            TabContent(
-                tabInfo = item.value,
-                selected = item.key == key,
-            )
+            key(item.key) {
+                TabContent(
+                    tabInfo = item.value,
+                    selected = item.key == key,
+                )
+            }
         }
     }
 
