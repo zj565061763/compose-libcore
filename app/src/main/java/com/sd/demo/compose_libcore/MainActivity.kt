@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,7 +22,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 
-class MainActivity : BaseActivity() {
+class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -30,6 +31,7 @@ class MainActivity : BaseActivity() {
                     listActivity = listOf(
                         SampleActive::class.java,
                         SampleLifecycle::class.java,
+                        SampleTabContainer::class.java,
                     ),
                     onClickActivity = {
                         startActivity(Intent(this, it))

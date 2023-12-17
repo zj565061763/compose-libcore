@@ -1,6 +1,7 @@
 package com.sd.demo.compose_libcore
 
 import android.os.Bundle
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -9,7 +10,7 @@ import com.sd.lib.compose.libcore.FAppLifecycle
 import com.sd.lib.compose.libcore.FLifecycleOnStart
 import com.sd.lib.compose.libcore.FLifecycleOnStop
 
-class SampleLifecycle : BaseActivity() {
+class SampleLifecycle : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
