@@ -19,7 +19,9 @@ fun TabContainer(
     val container = remember {
         TabContainerImpl()
     }.apply {
+        startConfig()
         apply()
+        stopConfig()
     }
 
     Box(modifier = modifier) {
@@ -41,57 +43,85 @@ interface TabContainerScope {
 }
 
 private class TabContainerImpl : TabContainerScope {
+    private var _startConfig = false
     private val _tabHolder: MutableMap<Any, TabInfo> = hashMapOf()
-    private val _activeKeyHolder: MutableMap<Any, String> = mutableStateMapOf()
+    private val _activeKeyHolder: MutableMap<Any, TabInfo> = mutableStateMapOf()
+
+    fun startConfig() {
+        check(!_startConfig) { "Config started." }
+        _startConfig = true
+        _tabHolder.clear()
+    }
+
+    fun stopConfig() {
+        check(_startConfig) { "Config not started." }
+        _startConfig = false
+        _activeKeyHolder.iterator().run {
+            while (hasNext()) {
+                val item = next()
+                if (_tabHolder.containsKey(item.key)) {
+                    // key还在
+                } else {
+                    remove()
+                }
+            }
+        }
+    }
 
     override fun tab(
         key: Any,
         display: TabDisplay,
         content: @Composable () -> Unit,
     ) {
-        val info = _tabHolder[key]
-        if (info == null) {
-            _tabHolder[key] = TabInfo(
-                contentState = mutableStateOf(content),
-                displayState = mutableStateOf(display),
-            )
-        } else {
-            info.contentState.value = content
-            info.displayState.value = display
-        }
+        check(_startConfig) { "Config not started." }
+        _tabHolder[key] = TabInfo(
+            contentState = mutableStateOf(content),
+            displayState = mutableStateOf(display),
+        )
     }
 
     @Composable
     fun Content(key: Any) {
         LaunchedEffect(key) {
-            if (_tabHolder.containsKey(key)) {
-                _activeKeyHolder[key] = ""
+            val info = checkNotNull(_tabHolder[key])
+            val activeInfo = _activeKeyHolder[key]
+            if (activeInfo == null) {
+                _activeKeyHolder[key] = info
+            } else {
+                activeInfo.contentState.value = info.contentState.value
+                activeInfo.displayState.value = info.displayState.value
             }
         }
 
-        for (item in _activeKeyHolder.keys) {
-            _tabHolder[item]?.let { info ->
-                when (info.displayState.value) {
-                    TabDisplay.Default -> {
-                        Box(
-                            modifier = Modifier
-                                .graphicsLayer {
-                                    if (item == key) {
-                                        this.scaleX = 1f
-                                    } else {
-                                        this.scaleX = 0f
-                                    }
-                                }
-                        ) {
-                            info.contentState.value.invoke()
-                        }
-                    }
+        for (item in _activeKeyHolder) {
+            TabContent(
+                tabInfo = item.value,
+                selected = item.key == key,
+            )
+        }
+    }
 
-                    TabDisplay.New -> {
-                        if (item == key) {
-                            info.contentState.value.invoke()
+    @Composable
+    private fun TabContent(tabInfo: TabInfo, selected: Boolean) {
+        when (tabInfo.displayState.value) {
+            TabDisplay.Default -> {
+                Box(
+                    modifier = Modifier
+                        .graphicsLayer {
+                            if (selected) {
+                                this.scaleX = 1f
+                            } else {
+                                this.scaleX = 0f
+                            }
                         }
-                    }
+                ) {
+                    tabInfo.contentState.value.invoke()
+                }
+            }
+
+            TabDisplay.New -> {
+                if (selected) {
+                    tabInfo.contentState.value.invoke()
                 }
             }
         }
