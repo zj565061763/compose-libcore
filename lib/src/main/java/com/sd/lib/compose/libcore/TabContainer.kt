@@ -45,7 +45,7 @@ interface TabContainerScope {
 
 private class TabContainerImpl : TabContainerScope {
     private var _startConfig = false
-    private val _tabHolder: MutableMap<Any, TabInfoState> = hashMapOf()
+    private val _tabHolder: MutableMap<Any, TabInfo> = hashMapOf()
     private val _activeHolder: MutableMap<Any, TabInfoState> = mutableStateMapOf()
 
     fun startConfig() {
@@ -75,9 +75,9 @@ private class TabContainerImpl : TabContainerScope {
         content: @Composable () -> Unit,
     ) {
         check(_startConfig) { "Config not started." }
-        _tabHolder[key] = TabInfoState(
-            content = mutableStateOf(content),
-            display = mutableStateOf(display),
+        _tabHolder[key] = TabInfo(
+            content = content,
+            display = display,
         )
     }
 
@@ -87,10 +87,13 @@ private class TabContainerImpl : TabContainerScope {
             val info = checkNotNull(_tabHolder[key])
             val activeInfo = _activeHolder[key]
             if (activeInfo == null) {
-                _activeHolder[key] = info
+                _activeHolder[key] = TabInfoState(
+                    content = mutableStateOf(info.content),
+                    display = mutableStateOf(info.display),
+                )
             } else {
-                activeInfo.content.value = info.content.value
-                activeInfo.display.value = info.display.value
+                activeInfo.content.value = info.content
+                activeInfo.display.value = info.display
             }
         }
 
@@ -130,6 +133,11 @@ private class TabContainerImpl : TabContainerScope {
         }
     }
 }
+
+private class TabInfo(
+    val content: @Composable () -> Unit,
+    val display: TabDisplay,
+)
 
 private class TabInfoState(
     val content: MutableState<@Composable () -> Unit>,
