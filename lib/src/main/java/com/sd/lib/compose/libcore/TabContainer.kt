@@ -46,7 +46,7 @@ interface TabContainerScope {
 private class TabContainerImpl : TabContainerScope {
     private var _startConfig = false
     private val _tabHolder: MutableMap<Any, TabInfo> = hashMapOf()
-    private val _activeKeyHolder: MutableMap<Any, TabInfo> = mutableStateMapOf()
+    private val _activeHolder: MutableMap<Any, TabInfo> = mutableStateMapOf()
 
     fun startConfig() {
         check(!_startConfig) { "Config started." }
@@ -57,7 +57,7 @@ private class TabContainerImpl : TabContainerScope {
     fun stopConfig() {
         check(_startConfig) { "Config not started." }
         _startConfig = false
-        _activeKeyHolder.iterator().run {
+        _activeHolder.iterator().run {
             while (hasNext()) {
                 val item = next()
                 if (_tabHolder.containsKey(item.key)) {
@@ -85,16 +85,16 @@ private class TabContainerImpl : TabContainerScope {
     fun Content(key: Any) {
         LaunchedEffect(key) {
             val info = checkNotNull(_tabHolder[key])
-            val activeInfo = _activeKeyHolder[key]
+            val activeInfo = _activeHolder[key]
             if (activeInfo == null) {
-                _activeKeyHolder[key] = info
+                _activeHolder[key] = info
             } else {
                 activeInfo.contentState.value = info.contentState.value
                 activeInfo.displayState.value = info.displayState.value
             }
         }
 
-        for (item in _activeKeyHolder) {
+        for (item in _activeHolder) {
             key(item.key) {
                 TabContent(
                     tabInfo = item.value,
