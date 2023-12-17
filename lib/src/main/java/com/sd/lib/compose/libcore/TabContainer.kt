@@ -76,8 +76,8 @@ private class TabContainerImpl : TabContainerScope {
     ) {
         check(_startConfig) { "Config not started." }
         _tabHolder[key] = TabInfoState(
-            contentState = mutableStateOf(content),
-            displayState = mutableStateOf(display),
+            content = mutableStateOf(content),
+            display = mutableStateOf(display),
         )
     }
 
@@ -89,8 +89,8 @@ private class TabContainerImpl : TabContainerScope {
             if (activeInfo == null) {
                 _activeHolder[key] = info
             } else {
-                activeInfo.contentState.value = info.contentState.value
-                activeInfo.displayState.value = info.displayState.value
+                activeInfo.content.value = info.content.value
+                activeInfo.display.value = info.display.value
             }
         }
 
@@ -106,7 +106,7 @@ private class TabContainerImpl : TabContainerScope {
 
     @Composable
     private fun TabContent(tabInfo: TabInfoState, selected: Boolean) {
-        when (tabInfo.displayState.value) {
+        when (tabInfo.display.value) {
             TabDisplay.Default -> {
                 Box(
                     modifier = Modifier
@@ -118,13 +118,13 @@ private class TabContainerImpl : TabContainerScope {
                             }
                         }
                 ) {
-                    tabInfo.contentState.value.invoke()
+                    tabInfo.content.value.invoke()
                 }
             }
 
             TabDisplay.New -> {
                 if (selected) {
-                    tabInfo.contentState.value.invoke()
+                    tabInfo.content.value.invoke()
                 }
             }
         }
@@ -132,6 +132,6 @@ private class TabContainerImpl : TabContainerScope {
 }
 
 private class TabInfoState(
-    val contentState: MutableState<@Composable () -> Unit>,
-    val displayState: MutableState<TabDisplay>,
+    val content: MutableState<@Composable () -> Unit>,
+    val display: MutableState<TabDisplay>,
 )
