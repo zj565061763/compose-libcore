@@ -33,9 +33,7 @@ class SampleTabContainer : ComponentActivity() {
 private fun ContentView(
     modifier: Modifier = Modifier,
 ) {
-    val listTab = remember {
-        listOf(TabType.Home, TabType.Me)
-    }
+    val listTab = remember { TabType.entries.toList() }
 
     var selectedTab by remember { mutableStateOf(TabType.Home) }
 
@@ -44,40 +42,34 @@ private fun ContentView(
             key = selectedTab,
             modifier = modifier.weight(1f),
         ) {
-            tab(TabType.Home) {
-                TabHome()
-            }
-
-            tab(TabType.Me) {
-                TabMe()
+            listTab.forEach { tabType ->
+                tab(tabType) {
+                    TabView(tabType)
+                }
             }
         }
 
         NavigationBar {
-            NavigationBarItem(
-                selected = selectedTab == TabType.Home,
-                onClick = { selectedTab = TabType.Home },
-                icon = { Text(text = "Home") },
-                modifier = Modifier.weight(1f),
-            )
-            NavigationBarItem(
-                selected = selectedTab == TabType.Me,
-                onClick = { selectedTab = TabType.Me },
-                icon = { Text(text = "Me") },
-                modifier = Modifier.weight(1f),
-            )
+            listTab.forEach { tabType ->
+                NavigationBarItem(
+                    selected = selectedTab == tabType,
+                    onClick = { selectedTab = tabType },
+                    icon = { Text(text = tabType.name) },
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun TabHome(
+private fun TabView(
+    tagType: TabType,
     modifier: Modifier = Modifier,
 ) {
-    DisposableEffect(Unit) {
-        logMsg { "TabHome" }
+    DisposableEffect(tagType) {
+        logMsg { tagType.name }
         onDispose {
-            logMsg { "TabHome onDispose" }
+            logMsg { "${tagType.name} onDispose" }
         }
     }
 
@@ -86,29 +78,7 @@ private fun TabHome(
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "Home",
-            fontSize = 18.sp,
-        )
-    }
-}
-
-@Composable
-private fun TabMe(
-    modifier: Modifier = Modifier,
-) {
-    DisposableEffect(Unit) {
-        logMsg { "TabMe" }
-        onDispose {
-            logMsg { "TabMe onDispose" }
-        }
-    }
-
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(
-            text = "Me",
+            text = tagType.name,
             fontSize = 18.sp,
         )
     }
@@ -116,5 +86,7 @@ private fun TabMe(
 
 private enum class TabType {
     Home,
+    Live,
+    Video,
     Me,
 }
