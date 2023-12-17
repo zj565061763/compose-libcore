@@ -30,7 +30,6 @@
 
         <activity android:name=".SampleActive" />
         <activity android:name=".SampleLifecycle" />
-        <activity android:name=".SampleTabContainer" />
 
     </application>
 

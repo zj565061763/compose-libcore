@@ -31,7 +31,6 @@ class MainActivity : ComponentActivity() {
                     listActivity = listOf(
                         SampleActive::class.java,
                         SampleLifecycle::class.java,
-                        SampleTabContainer::class.java,
                     ),
                     onClickActivity = {
                         startActivity(Intent(this, it))
