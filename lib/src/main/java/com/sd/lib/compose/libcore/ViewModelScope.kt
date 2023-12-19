@@ -72,8 +72,6 @@ interface ComposeViewModelScope<VM : ViewModel> {
 data class CreateVMParams<VM : ViewModel>(
     val viewModelStoreOwner: ViewModelStoreOwner,
     val key: String,
-    val defaultFactory: ViewModelProvider.Factory?,
-    val defaultExtras: CreationExtras,
     val vmClass: Class<VM>,
 )
 
@@ -101,8 +99,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
             viewModel(
                 viewModelStoreOwner = params.viewModelStoreOwner,
                 key = params.key,
-                factory = params.defaultFactory,
-                extras = params.defaultExtras,
                 modelClass = params.vmClass,
             )
         }
@@ -134,7 +130,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
                 viewModelStoreOwner = params.viewModelStoreOwner,
                 key = params.key,
                 factory = defaultFactory,
-                extras = params.defaultExtras,
                 modelClass = params.vmClass,
             )
         }
@@ -148,21 +143,18 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         val key = "com.sd.android.keyedViewModel:${key}"
         val defaultOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
-        val defaultFactory = when (defaultOwner) {
-            is HasDefaultViewModelProviderFactory -> defaultOwner.defaultViewModelProviderFactory
-            else -> null
-        }
-
-        val defaultExtras = when (defaultOwner) {
-            is HasDefaultViewModelProviderFactory -> defaultOwner.defaultViewModelCreationExtras
-            else -> CreationExtras.Empty
+        val viewModelStoreOwner = if (defaultOwner is HasDefaultViewModelProviderFactory) {
+            ViewModelStoreOwnerHasDefault(
+                owner = this@ViewModelScopeImpl,
+                factory = defaultOwner,
+            )
+        } else {
+            this@ViewModelScopeImpl
         }
 
         val params = CreateVMParams(
-            viewModelStoreOwner = this@ViewModelScopeImpl,
+            viewModelStoreOwner = viewModelStoreOwner,
             key = key,
-            defaultFactory = defaultFactory,
-            defaultExtras = defaultExtras,
             vmClass = clazz,
         )
 
@@ -189,6 +181,21 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         _isDestroyed = true
         viewModelStore.clear()
         _lruCache.evictAll()
+    }
+
+    private class ViewModelStoreOwnerHasDefault(
+        private val owner: ViewModelStoreOwner,
+        private val factory: HasDefaultViewModelProviderFactory,
+    ) : ViewModelStoreOwner, HasDefaultViewModelProviderFactory {
+
+        override val defaultViewModelProviderFactory: ViewModelProvider.Factory
+            get() = factory.defaultViewModelProviderFactory
+
+        override val defaultViewModelCreationExtras: CreationExtras
+            get() = factory.defaultViewModelCreationExtras
+
+        override val viewModelStore: ViewModelStore
+            get() = owner.viewModelStore
     }
 }
 
