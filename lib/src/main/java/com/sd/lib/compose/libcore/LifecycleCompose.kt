@@ -46,11 +46,11 @@ private fun FLifecycleTargetEvent(
     vararg keys: Any?,
     callback: () -> Unit,
 ) {
-    val callbackUpdate by rememberUpdatedState(callback)
+    val callbackUpdated by rememberUpdatedState(callback)
     DisposableEffect(lifecycleOwner, targetEvent, *keys) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == targetEvent) {
-                callbackUpdate()
+                callbackUpdated()
             }
         }
         val lifecycle = lifecycleOwner.lifecycle
