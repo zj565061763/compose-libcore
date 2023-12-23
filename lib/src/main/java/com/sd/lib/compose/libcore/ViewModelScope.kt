@@ -3,7 +3,6 @@ package com.sd.lib.compose.libcore
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -70,7 +69,6 @@ interface ComposeViewModelScope<VM : ViewModel> {
 /**
  * 创建[ViewModel]参数
  */
-@Immutable
 data class CreateVMParams<VM : ViewModel>(
     val viewModelStoreOwner: ViewModelStoreOwner,
     val key: String,
@@ -85,7 +83,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     private var _isDestroyed = false
 
     override val viewModelStore: ViewModelStore = ViewModelStore()
-    private val _vmHolder = viewModelStore.vmHolder()
+    private val _vmHolder: MutableMap<String, ViewModel> = viewModelStore.vmHolder()
 
     private val _lruCache = object : LruCache<String, Int>(Int.MAX_VALUE) {
         override fun entryRemoved(evicted: Boolean, key: String, oldValue: Int?, newValue: Int?) {
@@ -205,8 +203,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 
 @PublishedApi
 internal class VMScopeViewModel : ViewModel() {
-    private val _scopeHolder: MutableMap<Class<out ViewModel>, ViewModelScopeImpl<out ViewModel>> =
-        hashMapOf()
+    private val _scopeHolder: MutableMap<Class<out ViewModel>, ViewModelScopeImpl<out ViewModel>> = hashMapOf()
 
     fun <VM : ViewModel> getScope(vmClass: Class<VM>): ViewModelScopeImpl<VM> {
         val scope = _scopeHolder.getOrPut(vmClass) { ViewModelScopeImpl(vmClass) }
