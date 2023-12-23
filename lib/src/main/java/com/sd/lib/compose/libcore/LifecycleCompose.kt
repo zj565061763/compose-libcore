@@ -13,13 +13,9 @@ import androidx.lifecycle.LifecycleOwner
  * 监听[Lifecycle.Event.ON_START]
  */
 @Composable
-fun FLifecycleOnStart(
-    vararg keys: Any?,
-    callback: () -> Unit,
-) {
+fun FLifecycleOnStart(callback: () -> Unit) {
     FLifecycleTargetEvent(
         targetEvent = Lifecycle.Event.ON_START,
-        keys = keys,
         callback = callback,
     )
 }
@@ -28,13 +24,9 @@ fun FLifecycleOnStart(
  * 监听[Lifecycle.Event.ON_STOP]
  */
 @Composable
-fun FLifecycleOnStop(
-    vararg keys: Any?,
-    callback: () -> Unit,
-) {
+fun FLifecycleOnStop(callback: () -> Unit) {
     FLifecycleTargetEvent(
         targetEvent = Lifecycle.Event.ON_STOP,
-        keys = keys,
         callback = callback,
     )
 }
@@ -43,20 +35,18 @@ fun FLifecycleOnStop(
 private fun FLifecycleTargetEvent(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     targetEvent: Lifecycle.Event,
-    vararg keys: Any?,
     callback: () -> Unit,
 ) {
     val callbackUpdated by rememberUpdatedState(callback)
-    DisposableEffect(lifecycleOwner, targetEvent, *keys) {
+    DisposableEffect(lifecycleOwner, targetEvent) {
         val observer = LifecycleEventObserver { _, event ->
             if (event == targetEvent) {
                 callbackUpdated()
             }
         }
-        val lifecycle = lifecycleOwner.lifecycle
-        lifecycle.addObserver(observer)
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
