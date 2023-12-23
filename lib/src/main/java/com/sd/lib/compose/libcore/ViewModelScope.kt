@@ -143,13 +143,15 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         val key = "com.sd.android.keyedViewModel:${key}"
         val defaultOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
-        val viewModelStoreOwner = if (defaultOwner is HasDefaultViewModelProviderFactory) {
-            ViewModelStoreOwnerHasDefault(
-                owner = this@ViewModelScopeImpl,
-                factory = defaultOwner,
-            )
-        } else {
-            this@ViewModelScopeImpl
+        val viewModelStoreOwner = remember(defaultOwner) {
+            if (defaultOwner is HasDefaultViewModelProviderFactory) {
+                ViewModelStoreOwnerHasDefault(
+                    owner = this@ViewModelScopeImpl,
+                    factory = defaultOwner,
+                )
+            } else {
+                this@ViewModelScopeImpl
+            }
         }
 
         val params = CreateVMParams(
