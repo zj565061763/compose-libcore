@@ -25,19 +25,17 @@ fun FActiveLifecycle(
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     content: @Composable () -> Unit,
 ) {
-
     var lifecycleActive by remember(lifecycleOwner, minActiveState) {
         mutableStateOf(lifecycleOwner.lifecycle.currentState.isAtLeast(minActiveState))
     }
 
     DisposableEffect(lifecycleOwner, minActiveState) {
-        val lifecycle = lifecycleOwner.lifecycle
         val observer = LifecycleEventObserver { _, _ ->
-            lifecycleActive = lifecycle.currentState.isAtLeast(minActiveState)
+            lifecycleActive = lifecycleOwner.lifecycle.currentState.isAtLeast(minActiveState)
         }
-        lifecycle.addObserver(observer)
+        lifecycleOwner.lifecycle.addObserver(observer)
         onDispose {
-            lifecycle.removeObserver(observer)
+            lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 
