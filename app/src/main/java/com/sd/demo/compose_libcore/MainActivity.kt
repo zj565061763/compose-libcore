@@ -31,6 +31,7 @@ class MainActivity : ComponentActivity() {
                     listActivity = listOf(
                         SampleActive::class.java,
                         SampleLifecycle::class.java,
+                        SampleTabContainer::class.java,
                         SampleViewModelScope::class.java,
                     ),
                     onClickActivity = {
