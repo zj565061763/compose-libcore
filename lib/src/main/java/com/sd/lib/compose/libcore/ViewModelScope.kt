@@ -3,6 +3,7 @@ package com.sd.lib.compose.libcore
 import android.util.LruCache
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -69,6 +70,7 @@ interface ComposeViewModelScope<VM : ViewModel> {
 /**
  * 创建[ViewModel]参数
  */
+@Immutable
 data class CreateVMParams<VM : ViewModel>(
     val viewModelStoreOwner: ViewModelStoreOwner,
     val key: String,
