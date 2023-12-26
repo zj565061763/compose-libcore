@@ -31,6 +31,16 @@ open class FListHolder<D> {
     }
 
     /**
+     * 清空数据
+     */
+    open suspend fun clearData() {
+        modifyData { listData ->
+            listData.clear()
+            true
+        }
+    }
+
+    /**
      * 添加数据
      */
     open suspend fun addData(
