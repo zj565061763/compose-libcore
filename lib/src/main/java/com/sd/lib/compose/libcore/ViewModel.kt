@@ -69,9 +69,7 @@ abstract class FViewModel<I>(
     }
 
     /**
-     * 刷新数据
-     * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
-     * @param delayTime 延迟多少毫秒后执行
+     * [refreshDataSuspend]
      */
     @JvmOverloads
     fun refreshData(
@@ -79,19 +77,35 @@ abstract class FViewModel<I>(
         delayTime: Long = 0,
     ) {
         viewModelScope.launch {
-            if (isActiveFlow.value) {
-                try {
-                    dataMutator.mutate {
-                        if (notifyRefreshing) {
-                            _isRefreshingFlow.value = true
-                        }
-                        delay(delayTime)
-                        refreshDataImpl()
-                    }
-                } finally {
+            refreshDataSuspend(
+                notifyRefreshing = notifyRefreshing,
+                delayTime = delayTime,
+            )
+        }
+    }
+
+    /**
+     * 刷新数据
+     * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
+     * @param delayTime 延迟多少毫秒后执行
+     */
+    @JvmOverloads
+    suspend fun refreshDataSuspend(
+        notifyRefreshing: Boolean = true,
+        delayTime: Long = 0,
+    ) {
+        if (isActiveFlow.value) {
+            try {
+                dataMutator.mutate {
                     if (notifyRefreshing) {
-                        _isRefreshingFlow.value = false
+                        _isRefreshingFlow.value = true
                     }
+                    delay(delayTime)
+                    refreshDataImpl()
+                }
+            } finally {
+                if (notifyRefreshing) {
+                    _isRefreshingFlow.value = false
                 }
             }
         }
