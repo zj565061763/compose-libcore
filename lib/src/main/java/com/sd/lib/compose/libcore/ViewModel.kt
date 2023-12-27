@@ -23,10 +23,12 @@ abstract class FViewModel<I>(
         }
 
     private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(active)
+
     /** 是否处于激活状态，默认true */
     val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
 
     private val _isRefreshingFlow = MutableStateFlow(false)
+
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
@@ -52,14 +54,14 @@ abstract class FViewModel<I>(
      */
     fun dispatch(intent: I) {
         viewModelScope.launch {
-            handleIntent(intent)
+            dispatchSuspend(intent)
         }
     }
 
     /**
      * 外部触发意图
      */
-    suspend fun intent(intent: I) {
+    suspend fun dispatchSuspend(intent: I) {
         if (isDestroyed) return
         if (isActiveFlow.value) {
             handleIntent(intent)
