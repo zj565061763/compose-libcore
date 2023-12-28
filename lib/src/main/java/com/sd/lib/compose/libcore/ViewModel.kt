@@ -77,11 +77,13 @@ abstract class FViewModel<I>(
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
+        ignoreActive: Boolean = false,
     ) {
         viewModelScope.launch {
             refreshDataSuspend(
                 notifyRefreshing = notifyRefreshing,
                 delayTime = delayTime,
+                ignoreActive = ignoreActive,
             )
         }
     }
@@ -90,13 +92,15 @@ abstract class FViewModel<I>(
      * 刷新数据
      * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
      * @param delayTime 延迟多少毫秒后执行
+     * @param ignoreActive 是否忽略[isActiveFlow]
      */
     @JvmOverloads
     suspend fun refreshDataSuspend(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
+        ignoreActive: Boolean = false,
     ) {
-        if (isActiveFlow.value) {
+        if (isActiveFlow.value || ignoreActive) {
             try {
                 dataMutator.mutate {
                     if (notifyRefreshing) {
