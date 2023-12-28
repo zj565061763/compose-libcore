@@ -10,6 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+interface IgnoreActiveIntent
+
 abstract class FViewModel<I>(
     /** 初始激活状态 */
     active: Boolean = true,
@@ -63,7 +65,7 @@ abstract class FViewModel<I>(
      */
     suspend fun dispatchSuspend(intent: I) {
         if (isDestroyed) return
-        if (isActiveFlow.value) {
+        if (isActiveFlow.value || intent is IgnoreActiveIntent) {
             handleIntent(intent)
         }
     }
