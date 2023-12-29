@@ -12,8 +12,14 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 inline fun <reified VM : ViewModel> String.fDisposableVM(
     factory: @Composable (key: String) -> VM = { viewModel(key = it) },
 ): VM {
+    val rawKey = this
+    val clazz = VM::class.java
+
+    val key = rememberSaveable(rawKey, clazz) {
+        "com.sd.keyedViewModel:${clazz.name}:${rawKey}"
+    }
+
     val viewModelStoreOwner = checkNotNull(LocalViewModelStoreOwner.current)
-    val key = rememberSaveable { "com.sd.android.keyedViewModel.key:$this" }
     DisposableEffect(viewModelStoreOwner, key) {
         onDispose {
             viewModelStoreOwner.viewModelStore.vmRemove(key)
