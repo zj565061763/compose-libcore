@@ -33,7 +33,7 @@ class MainActivity : ComponentActivity() {
                         SampleActive::class.java,
                         SampleLifecycle::class.java,
                         SampleTabContainer::class.java,
-                        SampleViewModelScope::class.java,
+                        SampleDisposableViewModel::class.java,
                     ),
                     onClickActivity = {
                         startActivity(Intent(this, it))

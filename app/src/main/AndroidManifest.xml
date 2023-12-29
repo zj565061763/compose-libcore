@@ -31,7 +31,7 @@
         <activity android:name=".SampleActive" />
         <activity android:name=".SampleLifecycle" />
         <activity android:name=".SampleTabContainer" />
-        <activity android:name=".SampleViewModelScope" />
+        <activity android:name=".SampleDisposableViewModel" />
 
     </application>
 
