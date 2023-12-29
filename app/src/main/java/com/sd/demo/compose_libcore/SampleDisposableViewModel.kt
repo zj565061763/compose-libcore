@@ -20,7 +20,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.fDisposableViewModel
+import com.sd.lib.compose.libcore.fDisposableVM
 import java.util.concurrent.atomic.AtomicInteger
 
 class SampleDisposableViewModel : ComponentActivity() {
@@ -48,20 +48,14 @@ private fun Content() {
         // 实际开发中应该使用ID来当作key，例如实体对象的ID
         val key = index.toString()
 
-        val viewModel = fDisposableViewModel<PageViewModel>(
-            // 根据[key]获取[ViewModel]
-            key = key,
-
-            // 如果[ViewModel]不存在，从[factory]创建
-            factory = {
-                viewModel(
-                    key = it,
-                    factory = viewModelFactory {
-                        initializer { PageViewModel(index) }
-                    }
-                )
-            }
-        )
+        val viewModel = key.fDisposableVM<PageViewModel> {
+            viewModel(
+                key = it,
+                factory = viewModelFactory {
+                    initializer { PageViewModel(index) }
+                }
+            )
+        }
 
         PageView(
             index = index,
