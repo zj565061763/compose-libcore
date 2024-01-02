@@ -72,7 +72,7 @@ class FListHolder<T> {
     /**
      * 如果[block]返回的对象 !== 原对象，则替换并结束遍历
      */
-    open suspend fun replaceFirst(block: (T) -> T) {
+    suspend fun replaceFirst(block: (T) -> T) {
         modify { listData ->
             var result = false
             for (index in listData.indices) {
