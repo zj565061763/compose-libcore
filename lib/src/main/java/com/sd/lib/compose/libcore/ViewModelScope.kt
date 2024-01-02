@@ -41,13 +41,13 @@ interface ComposeViewModelScope<VM : ViewModel> {
      * 根据[key]获取[ViewModel]，如果[ViewModel]不存在，从[factory]创建
      */
     @Composable
-    fun getViewModel(key: String, factory: (CreationExtras) -> VM): VM
+    fun getViewModel(key: String, factory: CreationExtras.() -> VM): VM
 
     /**
      * 根据[key]获取[ViewModel]，每次调用此方法都会从[factory]中获取
      */
     @Composable
-    fun createViewModel(key: String, factory: @Composable (CreateVMParams<VM>) -> VM): VM
+    fun createViewModel(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM
 
     /**
      * 移除[key]对应的[ViewModel]
@@ -76,44 +76,44 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 
     @Composable
     override fun getViewModel(key: String): VM {
-        return createViewModel(key) { params ->
+        return createViewModel(key) {
             viewModel(
-                viewModelStoreOwner = params.viewModelStoreOwner,
-                key = params.key,
-                modelClass = params.vmClass,
+                viewModelStoreOwner = this.viewModelStoreOwner,
+                key = this.key,
+                modelClass = this.vmClass,
             )
         }
     }
 
     @Suppress("UNCHECKED_CAST")
     @Composable
-    override fun getViewModel(key: String, factory: (CreationExtras) -> VM): VM {
+    override fun getViewModel(key: String, factory: CreationExtras.() -> VM): VM {
         val factoryUpdated by rememberUpdatedState(factory)
 
         val defaultFactory = remember {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return factoryUpdated(CreationExtras.Empty) as T
+                    return CreationExtras.Empty.factoryUpdated() as T
                 }
 
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return factoryUpdated(extras) as T
+                    return extras.factoryUpdated() as T
                 }
             }
         }
 
-        return createViewModel(key) { params ->
+        return createViewModel(key) {
             viewModel(
-                viewModelStoreOwner = params.viewModelStoreOwner,
-                key = params.key,
+                viewModelStoreOwner = this.viewModelStoreOwner,
+                key = this.key,
                 factory = defaultFactory,
-                modelClass = params.vmClass,
+                modelClass = this.vmClass,
             )
         }
     }
 
     @Composable
-    override fun createViewModel(key: String, factory: @Composable (CreateVMParams<VM>) -> VM): VM {
+    override fun createViewModel(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM {
         if (_isDestroyed) error("Scope is destroyed.")
 
         @Suppress("NAME_SHADOWING")
@@ -137,7 +137,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
             vmClass = clazz,
         )
 
-        return factory(params).also { vm ->
+        return params.factory().also { vm ->
             check(vm === _vmHolder[key]) { "ViewModel was not found with key:$key." }
         }
     }
