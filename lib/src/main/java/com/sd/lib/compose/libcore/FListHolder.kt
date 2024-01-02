@@ -102,9 +102,9 @@ open class FListHolder<D> {
     }
 
     /**
-     * 更新所有数据，[block]返回的对象替换原对象
+     * [block]返回的对象替换原对象
      */
-    open suspend fun updateAll(block: (D) -> D) {
+    open suspend fun replaceAll(block: (D) -> D) {
         modify { listData ->
             var result = false
             for (index in listData.indices) {
