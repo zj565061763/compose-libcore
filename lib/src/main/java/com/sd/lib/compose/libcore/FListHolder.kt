@@ -102,7 +102,7 @@ open class FListHolder<D> {
     }
 
     /**
-     * [block]返回的对象替换原对象
+     * 如果[block]返回的对象 !== 原对象，则替换并结束遍历
      */
     open suspend fun replaceFirst(block: (D) -> D) {
         modify { listData ->
@@ -110,10 +110,10 @@ open class FListHolder<D> {
             for (index in listData.indices) {
                 val item = listData[index]
                 val newItem = block(item)
-
-                if (newItem != item) {
+                if (newItem !== item) {
                     listData[index] = newItem
                     result = true
+                    break
                 }
             }
             result
