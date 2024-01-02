@@ -102,6 +102,26 @@ open class FListHolder<D> {
     }
 
     /**
+     * 更新所有数据，[block]返回的对象替换原对象
+     */
+    open suspend fun updateAll(block: (D) -> D) {
+        modify { listData ->
+            var result = false
+            for (index in listData.indices) {
+                val item = listData[index]
+
+                val newItem = block(item)
+                listData[index] = newItem
+
+                if (newItem != item) {
+                    result = true
+                }
+            }
+            result
+        }
+    }
+
+    /**
      * 删除所有[predicate]为true的数据
      */
     open suspend fun removeAll(predicate: (D) -> Boolean) {
