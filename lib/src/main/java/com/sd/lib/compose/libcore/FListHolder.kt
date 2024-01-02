@@ -22,7 +22,7 @@ open class FListHolder<D> {
      * 设置数据
      */
     open suspend fun set(list: List<D>) {
-        update { listData ->
+        modify { listData ->
             listData.clear()
             listData.addAll(list)
             true
@@ -33,7 +33,7 @@ open class FListHolder<D> {
      * 清空数据
      */
     open suspend fun clear() {
-        update { listData ->
+        modify { listData ->
             listData.clear()
             true
         }
@@ -52,7 +52,7 @@ open class FListHolder<D> {
         if (list.isEmpty()) return
         if (distinctAll && distinct == null) throw IllegalArgumentException("Did you forget the distinct parameter?")
 
-        update { listData ->
+        modify { listData ->
             if (distinct != null) {
                 listData.removeWith(distinctAll) { oldItem ->
                     var result = false
@@ -77,7 +77,7 @@ open class FListHolder<D> {
         all: Boolean = false,
         modify: (D) -> D?,
     ) {
-        update { listData ->
+        modify { listData ->
             var result = false
             val listRemove = mutableListOf<Int>()
 
@@ -105,7 +105,7 @@ open class FListHolder<D> {
      * 更新所有数据，[block]返回的对象替换原对象
      */
     open suspend fun updateAll(block: (D) -> D) {
-        update { listData ->
+        modify { listData ->
             var result = false
             for (index in listData.indices) {
                 val item = listData[index]
@@ -125,7 +125,7 @@ open class FListHolder<D> {
      * 删除第一个[predicate]为true的数据
      */
     open suspend fun removeFirst(predicate: (D) -> Boolean) {
-        update { listData ->
+        modify { listData ->
             listData.removeFirst(predicate)
         }
     }
@@ -134,15 +134,15 @@ open class FListHolder<D> {
      * 删除所有[predicate]为true的数据
      */
     open suspend fun removeAll(predicate: (D) -> Boolean) {
-        update { listData ->
+        modify { listData ->
             listData.removeAll(predicate)
         }
     }
 
     /**
-     * 更新数据
+     * 修改数据
      */
-    suspend fun update(block: (list: MutableList<D>) -> Boolean) {
+    suspend fun modify(block: (list: MutableList<D>) -> Boolean) {
         withContext(_dataDispatcher) {
             if (block(_list)) _list.toList() else null
         }?.also { data ->
