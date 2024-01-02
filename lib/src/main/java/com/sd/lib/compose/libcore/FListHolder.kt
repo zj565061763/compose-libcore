@@ -6,14 +6,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-open class FListHolder<D> {
+open class FListHolder<T> {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
 
     /** 列表数据 */
-    private val _list = mutableListOf<D>()
+    private val _list = mutableListOf<T>()
 
-    private val _dataFlow = MutableStateFlow(listOf<D>())
+    private val _dataFlow = MutableStateFlow(listOf<T>())
 
     /** 数据流 */
     val dataFlow = _dataFlow.asStateFlow()
@@ -21,7 +21,7 @@ open class FListHolder<D> {
     /**
      * 设置数据
      */
-    open suspend fun set(list: List<D>) {
+    open suspend fun set(list: List<T>) {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
@@ -43,11 +43,11 @@ open class FListHolder<D> {
      * 添加数据
      */
     open suspend fun addData(
-        list: List<D>,
+        list: List<T>,
         /** 是否全部去重，true-遍历整个列表，false-遇到符合条件的就结束 */
         distinctAll: Boolean = false,
         /** 去重条件 */
-        distinct: ((oldItem: D, newItem: D) -> Boolean)? = null,
+        distinct: ((oldItem: T, newItem: T) -> Boolean)? = null,
     ) {
         if (list.isEmpty()) return
         if (distinctAll && distinct == null) throw IllegalArgumentException("Did you forget the distinct parameter?")
@@ -75,7 +75,7 @@ open class FListHolder<D> {
      */
     open suspend fun updateData(
         all: Boolean = false,
-        modify: (D) -> D?,
+        modify: (T) -> T?,
     ) {
         modify { listData ->
             var result = false
@@ -104,7 +104,7 @@ open class FListHolder<D> {
     /**
      * 如果[block]返回的对象 !== 原对象，则替换并结束遍历
      */
-    open suspend fun replaceFirst(block: (D) -> D) {
+    open suspend fun replaceFirst(block: (T) -> T) {
         modify { listData ->
             var result = false
             for (index in listData.indices) {
@@ -123,7 +123,7 @@ open class FListHolder<D> {
     /**
      * [block]返回的对象替换原对象
      */
-    open suspend fun replaceAll(block: (D) -> D) {
+    open suspend fun replaceAll(block: (T) -> T) {
         modify { listData ->
             var result = false
             for ((index, item) in listData.withIndex()) {
@@ -140,7 +140,7 @@ open class FListHolder<D> {
     /**
      * 删除第一个[predicate]为true的数据
      */
-    open suspend fun removeFirst(predicate: (D) -> Boolean) {
+    open suspend fun removeFirst(predicate: (T) -> Boolean) {
         modify { listData ->
             listData.removeFirst(predicate)
         }
@@ -149,7 +149,7 @@ open class FListHolder<D> {
     /**
      * 删除所有[predicate]为true的数据
      */
-    open suspend fun removeAll(predicate: (D) -> Boolean) {
+    open suspend fun removeAll(predicate: (T) -> Boolean) {
         modify { listData ->
             listData.removeAll(predicate)
         }
@@ -158,7 +158,7 @@ open class FListHolder<D> {
     /**
      * 修改数据
      */
-    suspend fun modify(block: (list: MutableList<D>) -> Boolean) {
+    suspend fun modify(block: (list: MutableList<T>) -> Boolean) {
         withContext(_dataDispatcher) {
             val oldSize = _list.size
             if (block(_list) || oldSize != _list.size) {
