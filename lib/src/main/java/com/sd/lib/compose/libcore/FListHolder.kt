@@ -29,17 +29,6 @@ class FListHolder<T> {
     }
 
     /**
-     * 清空数据
-     */
-    suspend fun clear() {
-        modify { listData ->
-            val oldSize = listData.size
-            listData.clear()
-            oldSize > 0
-        }
-    }
-
-    /**
      * 添加数据
      */
     suspend fun addData(
@@ -121,6 +110,17 @@ class FListHolder<T> {
     suspend fun removeAll(predicate: (T) -> Boolean) {
         modify { listData ->
             listData.removeAll(predicate)
+        }
+    }
+
+    /**
+     * 清空数据
+     */
+    suspend fun clear() {
+        modify { listData ->
+            val oldSize = listData.size
+            listData.clear()
+            oldSize > 0
         }
     }
 
