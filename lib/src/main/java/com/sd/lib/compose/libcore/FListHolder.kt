@@ -13,7 +13,7 @@ class FListHolder<T> {
     /** 列表数据 */
     private val _list = mutableListOf<T>()
 
-    private val _dataFlow = MutableStateFlow(listOf<T>())
+    private val _dataFlow = MutableStateFlow(emptyList<T>())
 
     /** 数据流 */
     val dataFlow = _dataFlow.asStateFlow()
