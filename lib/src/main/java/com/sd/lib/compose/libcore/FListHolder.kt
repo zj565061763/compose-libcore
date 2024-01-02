@@ -43,6 +43,7 @@ class FListHolder<T> {
      * 添加数据
      */
     suspend fun addAll(list: List<T>) {
+        if (list.isEmpty()) return
         modify { listData ->
             listData.addAll(list)
         }
