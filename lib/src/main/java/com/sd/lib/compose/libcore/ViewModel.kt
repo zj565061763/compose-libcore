@@ -157,12 +157,12 @@ abstract class FViewModel<I>(
     /**
      * 获取扩展对象，此方法必须在主线程调用
      */
-    @Suppress("UNCHECKED_CAST")
     @MainThread
     fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
         libCheckMainThread()
         val cache = _extHolder[clazz]
         return if (cache != null) {
+            @Suppress("UNCHECKED_CAST")
             cache as T
         } else {
             clazz.getDeclaredConstructor().newInstance().also { ext ->
