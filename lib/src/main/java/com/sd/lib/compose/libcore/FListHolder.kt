@@ -160,7 +160,12 @@ open class FListHolder<D> {
      */
     suspend fun modify(block: (list: MutableList<D>) -> Boolean) {
         withContext(_dataDispatcher) {
-            if (block(_list)) _list.toList() else null
+            val oldSize = _list.size
+            if (block(_list) || oldSize != _list.size) {
+                _list.toList()
+            } else {
+                null
+            }
         }?.also { data ->
             _dataFlow.value = data
         }
