@@ -12,18 +12,16 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.fDisposableVM
+import com.sd.lib.compose.libcore.fRememberVMScope
 import java.util.concurrent.atomic.AtomicInteger
 
-class SampleDisposableViewModel : ComponentActivity() {
+class SampleViewModelScope : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,6 +36,9 @@ class SampleDisposableViewModel : ComponentActivity() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content() {
+
+    val vmScope = fRememberVMScope<PageViewModel>()
+
     HorizontalPager(
         state = rememberPagerState { 50 },
         modifier = Modifier
@@ -47,14 +48,12 @@ private fun Content() {
 
         // 实际开发中应该使用ID来当作key，例如实体对象的ID
         val key = index.toString()
+        val viewModel = vmScope.getViewModel(key)
 
-        val viewModel = key.fDisposableVM<PageViewModel> {
-            viewModel(
-                key = it,
-                factory = viewModelFactory {
-                    initializer { PageViewModel(index) }
-                }
-            )
+        DisposableEffect(key) {
+            onDispose {
+                vmScope.removeViewModel(key)
+            }
         }
 
         PageView(
@@ -80,9 +79,7 @@ private fun PageView(
     }
 }
 
-internal class PageViewModel(
-    private val index: Int,
-) : ViewModel() {
+internal class PageViewModel : ViewModel() {
 
     init {
         sCounter.incrementAndGet()
@@ -96,7 +93,7 @@ internal class PageViewModel(
     }
 
     override fun toString(): String {
-        return "($index) ${javaClass.simpleName}@${Integer.toHexString(hashCode())}"
+        return "${javaClass.simpleName}@${Integer.toHexString(hashCode())}"
     }
 
     companion object {
