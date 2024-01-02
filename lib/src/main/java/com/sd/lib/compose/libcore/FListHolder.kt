@@ -25,7 +25,6 @@ open class FListHolder<D> {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
-            true
         }
     }
 
@@ -34,8 +33,9 @@ open class FListHolder<D> {
      */
     open suspend fun clear() {
         modify { listData ->
+            val oldSize = listData.size
             listData.clear()
-            true
+            oldSize > 0
         }
     }
 
