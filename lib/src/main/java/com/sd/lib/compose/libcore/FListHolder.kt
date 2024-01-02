@@ -122,20 +122,20 @@ open class FListHolder<D> {
     }
 
     /**
-     * 删除所有[predicate]为true的数据
-     */
-    open suspend fun removeAll(predicate: (D) -> Boolean) {
-        modify { listData ->
-            listData.removeAll(predicate)
-        }
-    }
-
-    /**
      * 删除第一个[predicate]为true的数据
      */
     open suspend fun removeFirst(predicate: (D) -> Boolean) {
         modify { listData ->
             listData.removeFirst(predicate)
+        }
+    }
+
+    /**
+     * 删除所有[predicate]为true的数据
+     */
+    open suspend fun removeAll(predicate: (D) -> Boolean) {
+        modify { listData ->
+            listData.removeAll(predicate)
         }
     }
 
