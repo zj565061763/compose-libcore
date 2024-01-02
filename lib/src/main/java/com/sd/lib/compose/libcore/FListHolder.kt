@@ -79,6 +79,31 @@ class FListHolder<T> {
     }
 
     /**
+     * 添加数据并去重，删除[list]中重复的数据
+     */
+    suspend fun addAllDistinctInput(
+        list: List<T>,
+        /** 去重条件，返回true表示数据重复 */
+        distinct: (oldItem: T, newItem: T) -> Boolean,
+    ) {
+        if (list.isEmpty()) return
+        modify { listData ->
+            val mutableList = list.toMutableList()
+            mutableList.removeAll { newItem ->
+                var result = false
+                for (oldItem in listData) {
+                    if (distinct(oldItem, newItem)) {
+                        result = true
+                        break
+                    }
+                }
+                result
+            }
+            listData.addAll(mutableList)
+        }
+    }
+
+    /**
      * 如果[block]返回的对象 !== 原对象，则替换并结束遍历
      */
     suspend fun replaceFirst(block: (T) -> T) {
