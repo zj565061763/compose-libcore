@@ -19,6 +19,11 @@ open class FListHolder<T> {
     val dataFlow = _dataFlow.asStateFlow()
 
     /**
+     * 数据是否为空
+     */
+    fun isEmpty() = _list.isEmpty()
+
+    /**
      * 设置数据
      */
     open suspend fun set(list: List<T>) {
