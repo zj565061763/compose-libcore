@@ -25,6 +25,13 @@ class FListHolder<T> {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
+            true
+        }
+    }
+
+    suspend fun addAll(list: List<T>) {
+        modify { listData ->
+            listData.addAll(list)
         }
     }
 
