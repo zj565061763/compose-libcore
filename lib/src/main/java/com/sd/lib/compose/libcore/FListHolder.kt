@@ -126,7 +126,8 @@ open class FListHolder<T> {
     open suspend fun replaceAll(block: (T) -> T) {
         modify { listData ->
             var result = false
-            for ((index, item) in listData.withIndex()) {
+            for (index in listData.indices) {
+                val item = listData[index]
                 val newItem = block(item)
                 if (newItem !== item) {
                     listData[index] = newItem
