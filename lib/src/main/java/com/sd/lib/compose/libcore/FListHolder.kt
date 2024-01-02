@@ -59,7 +59,7 @@ class FListHolder<T> {
      */
     suspend fun addAllDistinct(
         list: List<T>,
-        /** 去重条件 */
+        /** 去重条件，返回true表示数据重复 */
         distinct: (oldItem: T, newItem: T) -> Boolean,
     ) {
         if (list.isEmpty()) return
