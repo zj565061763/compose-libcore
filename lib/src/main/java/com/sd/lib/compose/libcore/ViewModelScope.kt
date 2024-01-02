@@ -117,7 +117,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         if (_isDestroyed) error("Scope is destroyed.")
 
         @Suppress("NAME_SHADOWING")
-        val key = "com.sd.android.keyedViewModel:${key}"
+        val key = packKey(key)
         val defaultOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
         val viewModelStoreOwner = remember(defaultOwner) {
@@ -143,7 +143,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     }
 
     override fun removeViewModel(key: String) {
-        _vmHolder.vmRemove(key)
+        _vmHolder.vmRemove(packKey(key))
     }
 
     /**
@@ -168,6 +168,10 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         override val viewModelStore: ViewModelStore
             get() = owner.viewModelStore
     }
+}
+
+private fun packKey(key: String): String {
+    return "com.sd.keyedViewModel:${key}"
 }
 
 /**
