@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-class FListHolder<T> {
+open class FListHolder<T> {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
 
@@ -21,7 +21,7 @@ class FListHolder<T> {
     /**
      * 设置数据
      */
-    suspend fun set(list: List<T>) {
+    open suspend fun set(list: List<T>) {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
