@@ -21,7 +21,7 @@ open class FListHolder<D> {
     /**
      * 设置数据
      */
-    open suspend fun setData(list: List<D>) {
+    open suspend fun set(list: List<D>) {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
@@ -32,7 +32,7 @@ open class FListHolder<D> {
     /**
      * 清空数据
      */
-    open suspend fun clearData() {
+    open suspend fun clear() {
         modify { listData ->
             listData.clear()
             true
