@@ -47,7 +47,7 @@ interface ComposeViewModelScope<VM : ViewModel> {
      * 根据[key]获取[ViewModel]，每次调用此方法都会从[factory]中获取
      */
     @Composable
-    fun createViewModel(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM
+    fun create(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM
 
     /**
      * 移除[key]对应的[ViewModel]
@@ -76,7 +76,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 
     @Composable
     override fun get(key: String): VM {
-        return createViewModel(key) {
+        return create(key) {
             viewModel(
                 viewModelStoreOwner = this.viewModelStoreOwner,
                 key = this.key,
@@ -102,18 +102,18 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
             }
         }
 
-        return createViewModel(key) {
+        return create(key) {
             viewModel(
                 viewModelStoreOwner = this.viewModelStoreOwner,
                 key = this.key,
-                factory = defaultFactory,
                 modelClass = this.vmClass,
+                factory = defaultFactory,
             )
         }
     }
 
     @Composable
-    override fun createViewModel(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM {
+    override fun create(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM {
         if (_isDestroyed) error("Scope is destroyed.")
 
         @Suppress("NAME_SHADOWING")
