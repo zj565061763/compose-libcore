@@ -22,7 +22,7 @@ open class FListHolder<D> {
      * 设置数据
      */
     open suspend fun setData(list: List<D>) {
-        modifyData { listData ->
+        modify { listData ->
             listData.clear()
             listData.addAll(list)
             true
@@ -33,7 +33,7 @@ open class FListHolder<D> {
      * 清空数据
      */
     open suspend fun clearData() {
-        modifyData { listData ->
+        modify { listData ->
             listData.clear()
             true
         }
@@ -52,7 +52,7 @@ open class FListHolder<D> {
         if (list.isEmpty()) return
         if (distinctAll && distinct == null) throw IllegalArgumentException("Did you forget the distinct parameter?")
 
-        modifyData { listData ->
+        modify { listData ->
             if (distinct != null) {
                 listData.removeWith(distinctAll) { oldItem ->
                     var result = false
@@ -77,7 +77,7 @@ open class FListHolder<D> {
         all: Boolean = false,
         modify: (D) -> D?,
     ) {
-        modifyData { listData ->
+        modify { listData ->
             var result = false
             val listRemove = mutableListOf<Int>()
 
@@ -105,7 +105,7 @@ open class FListHolder<D> {
      * 删除所有[predicate]为true的数据
      */
     open suspend fun removeAll(predicate: (D) -> Boolean) {
-        modifyData { listData ->
+        modify { listData ->
             listData.removeAll(predicate)
         }
     }
@@ -114,7 +114,7 @@ open class FListHolder<D> {
      * 删除第一个[predicate]为true的数据
      */
     open suspend fun removeFirst(predicate: (D) -> Boolean) {
-        modifyData { listData ->
+        modify { listData ->
             listData.removeFirst(predicate)
         }
     }
@@ -122,9 +122,9 @@ open class FListHolder<D> {
     /**
      * 修改数据
      */
-    suspend fun modifyData(modify: (list: MutableList<D>) -> Boolean) {
+    suspend fun modify(block: (list: MutableList<D>) -> Boolean) {
         withContext(_dataDispatcher) {
-            if (modify(_list)) _list.toList() else null
+            if (block(_list)) _list.toList() else null
         }?.also { data ->
             _dataFlow.value = data
         }
