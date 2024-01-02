@@ -55,7 +55,7 @@ class FListHolder<T> {
     }
 
     /**
-     * 添加数据并去重，删除原数据中重复的数据
+     * 添加数据并去重，删除[FListHolder]中重复的数据
      */
     suspend fun addAllDistinct(
         list: List<T>,
