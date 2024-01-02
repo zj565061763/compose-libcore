@@ -49,30 +49,24 @@ class FListHolder<T> {
     }
 
     /**
-     * 添加数据
+     * 添加数据并去重，删除原数据中重复的数据
      */
-    suspend fun addData(
+    suspend fun addAllDistinct(
         list: List<T>,
-        /** 是否全部去重，true-遍历整个列表，false-遇到符合条件的就结束 */
-        distinctAll: Boolean = false,
         /** 去重条件 */
-        distinct: ((oldItem: T, newItem: T) -> Boolean)? = null,
+        distinct: (oldItem: T, newItem: T) -> Boolean,
     ) {
         if (list.isEmpty()) return
-        if (distinctAll && distinct == null) throw IllegalArgumentException("Did you forget the distinct parameter?")
-
         modify { listData ->
-            if (distinct != null) {
-                listData.removeWith(distinctAll) { oldItem ->
-                    var result = false
-                    for (newItem in list) {
-                        if (distinct(oldItem, newItem)) {
-                            result = true
-                            break
-                        }
+            listData.removeAll { oldItem ->
+                var result = false
+                for (newItem in list) {
+                    if (distinct(oldItem, newItem)) {
+                        result = true
+                        break
                     }
-                    result
                 }
+                result
             }
             listData.addAll(list)
         }
@@ -148,26 +142,6 @@ class FListHolder<T> {
             _dataFlow.value = data
         }
     }
-}
-
-/**
- * 根据条件移除元素
- */
-private fun <T> MutableList<T>.removeWith(
-    all: Boolean = false,
-    predicate: (T) -> Boolean,
-): Boolean {
-    var result = false
-    with(iterator()) {
-        while (hasNext()) {
-            if (predicate(next())) {
-                remove()
-                result = true
-                if (!all) break
-            }
-        }
-    }
-    return result
 }
 
 /**
