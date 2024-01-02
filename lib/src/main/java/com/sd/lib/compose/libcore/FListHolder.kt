@@ -29,6 +29,9 @@ class FListHolder<T> {
         }
     }
 
+    /**
+     * 添加数据
+     */
     suspend fun addAll(list: List<T>) {
         modify { listData ->
             listData.addAll(list)
