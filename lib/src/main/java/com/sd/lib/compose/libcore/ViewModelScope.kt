@@ -35,13 +35,13 @@ interface ComposeViewModelScope<VM : ViewModel> {
      * 根据[key]获取[ViewModel]
      */
     @Composable
-    fun getViewModel(key: String): VM
+    fun get(key: String): VM
 
     /**
      * 根据[key]获取[ViewModel]，如果[ViewModel]不存在，从[factory]创建
      */
     @Composable
-    fun getViewModel(key: String, factory: CreationExtras.() -> VM): VM
+    fun get(key: String, factory: CreationExtras.() -> VM): VM
 
     /**
      * 根据[key]获取[ViewModel]，每次调用此方法都会从[factory]中获取
@@ -75,7 +75,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     private val _vmHolder: MutableMap<String, ViewModel> = viewModelStore.vmHolder()
 
     @Composable
-    override fun getViewModel(key: String): VM {
+    override fun get(key: String): VM {
         return createViewModel(key) {
             viewModel(
                 viewModelStoreOwner = this.viewModelStoreOwner,
@@ -87,7 +87,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 
     @Suppress("UNCHECKED_CAST")
     @Composable
-    override fun getViewModel(key: String, factory: CreationExtras.() -> VM): VM {
+    override fun get(key: String, factory: CreationExtras.() -> VM): VM {
         val factoryUpdated by rememberUpdatedState(factory)
 
         val defaultFactory = remember {

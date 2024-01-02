@@ -48,7 +48,7 @@ private fun Content() {
 
         // 实际开发中应该使用ID来当作key，例如实体对象的ID
         val key = index.toString()
-        val viewModel = vmScope.getViewModel(key)
+        val viewModel = vmScope.get(key)
 
         DisposableEffect(key) {
             onDispose {
