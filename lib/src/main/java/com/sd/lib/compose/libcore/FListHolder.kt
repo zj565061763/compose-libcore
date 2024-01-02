@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-open class FListHolder<T> {
+class FListHolder<T> {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
 
@@ -21,7 +21,7 @@ open class FListHolder<T> {
     /**
      * 设置数据
      */
-    open suspend fun set(list: List<T>) {
+    suspend fun set(list: List<T>) {
         modify { listData ->
             listData.clear()
             listData.addAll(list)
@@ -31,7 +31,7 @@ open class FListHolder<T> {
     /**
      * 清空数据
      */
-    open suspend fun clear() {
+    suspend fun clear() {
         modify { listData ->
             val oldSize = listData.size
             listData.clear()
@@ -42,7 +42,7 @@ open class FListHolder<T> {
     /**
      * 添加数据
      */
-    open suspend fun addData(
+    suspend fun addData(
         list: List<T>,
         /** 是否全部去重，true-遍历整个列表，false-遇到符合条件的就结束 */
         distinctAll: Boolean = false,
@@ -70,38 +70,6 @@ open class FListHolder<T> {
     }
 
     /**
-     * 更新数据，[all]表示是否遍历整个列表，
-     * [modify]返回的对象如果为null，则删除原对象；如果为新对象，则替换原对象；如果为原对象，则保持不变。
-     */
-    open suspend fun updateData(
-        all: Boolean = false,
-        modify: (T) -> T?,
-    ) {
-        modify { listData ->
-            var result = false
-            val listRemove = mutableListOf<Int>()
-
-            for (index in listData.indices) {
-                val item = listData[index]
-                val newItem = modify(item)
-
-                if (newItem == null) {
-                    listRemove.add(index)
-                    result = true
-                } else if (newItem !== item) {
-                    listData[index] = newItem
-                    result = true
-                }
-
-                if (result && !all) break
-            }
-
-            listRemove.forEach { listData.removeAt(it) }
-            result
-        }
-    }
-
-    /**
      * 如果[block]返回的对象 !== 原对象，则替换并结束遍历
      */
     open suspend fun replaceFirst(block: (T) -> T) {
@@ -123,7 +91,7 @@ open class FListHolder<T> {
     /**
      * [block]返回的对象替换原对象
      */
-    open suspend fun replaceAll(block: (T) -> T) {
+    suspend fun replaceAll(block: (T) -> T) {
         modify { listData ->
             var result = false
             for (index in listData.indices) {
@@ -141,7 +109,7 @@ open class FListHolder<T> {
     /**
      * 删除第一个[predicate]为true的数据
      */
-    open suspend fun removeFirst(predicate: (T) -> Boolean) {
+    suspend fun removeFirst(predicate: (T) -> Boolean) {
         modify { listData ->
             listData.removeFirst(predicate)
         }
@@ -150,7 +118,7 @@ open class FListHolder<T> {
     /**
      * 删除所有[predicate]为true的数据
      */
-    open suspend fun removeAll(predicate: (T) -> Boolean) {
+    suspend fun removeAll(predicate: (T) -> Boolean) {
         modify { listData ->
             listData.removeAll(predicate)
         }
@@ -172,7 +140,6 @@ open class FListHolder<T> {
         }
     }
 }
-
 
 /**
  * 根据条件移除元素
