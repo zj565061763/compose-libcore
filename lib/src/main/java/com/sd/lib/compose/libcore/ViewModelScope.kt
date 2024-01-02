@@ -48,6 +48,11 @@ interface ComposeViewModelScope<VM : ViewModel> {
      */
     @Composable
     fun createViewModel(key: String, factory: @Composable (CreateVMParams<VM>) -> VM): VM
+
+    /**
+     * 移除[key]对应的[ViewModel]
+     */
+    fun removeViewModel(key: String)
 }
 
 /**
@@ -135,6 +140,10 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         return factory(params).also { vm ->
             check(vm === _vmHolder[key]) { "ViewModel was not found with key:$key." }
         }
+    }
+
+    override fun removeViewModel(key: String) {
+        _vmHolder.vmRemove(key)
     }
 
     /**
