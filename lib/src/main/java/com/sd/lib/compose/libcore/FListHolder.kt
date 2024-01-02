@@ -102,14 +102,20 @@ open class FListHolder<D> {
     }
 
     /**
-     * 删除数据，[all]表示是否遍历整个列表，
+     * 删除所有[predicate]为true的数据
      */
-    open suspend fun removeData(
-        all: Boolean = false,
-        predicate: (D) -> Boolean,
-    ) {
+    open suspend fun removeAll(predicate: (D) -> Boolean) {
         modifyData { listData ->
-            listData.removeWith(all = all, predicate = predicate)
+            listData.removeAll(predicate)
+        }
+    }
+
+    /**
+     * 删除第一个[predicate]为true的数据
+     */
+    open suspend fun removeFirst(predicate: (D) -> Boolean) {
+        modifyData { listData ->
+            listData.removeFirst(predicate)
         }
     }
 
@@ -144,4 +150,21 @@ private fun <T> MutableList<T>.removeWith(
         }
     }
     return result
+}
+
+/**
+ * 根据条件移除元素
+ */
+private fun <T> MutableList<T>.removeFirst(
+    predicate: (T) -> Boolean,
+): Boolean {
+    with(iterator()) {
+        while (hasNext()) {
+            if (predicate(next())) {
+                remove()
+                return true
+            }
+        }
+    }
+    return false
 }
