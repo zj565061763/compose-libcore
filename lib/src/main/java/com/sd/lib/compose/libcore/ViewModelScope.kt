@@ -52,7 +52,7 @@ interface ComposeViewModelScope<VM : ViewModel> {
     /**
      * 移除[key]对应的[ViewModel]
      */
-    fun removeViewModel(key: String)
+    fun remove(key: String)
 }
 
 /**
@@ -142,7 +142,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         }
     }
 
-    override fun removeViewModel(key: String) {
+    override fun remove(key: String) {
         _vmHolder.vmRemove(packKey(key))
     }
 

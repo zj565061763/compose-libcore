@@ -52,7 +52,7 @@ private fun Content() {
 
         DisposableEffect(key) {
             onDispose {
-                vmScope.removeViewModel(key)
+                vmScope.remove(key)
             }
         }
 
