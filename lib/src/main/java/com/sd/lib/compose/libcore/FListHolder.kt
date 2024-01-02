@@ -104,16 +104,32 @@ open class FListHolder<D> {
     /**
      * [block]返回的对象替换原对象
      */
-    open suspend fun replaceAll(block: (D) -> D) {
+    open suspend fun replaceFirst(block: (D) -> D) {
         modify { listData ->
             var result = false
             for (index in listData.indices) {
                 val item = listData[index]
-
                 val newItem = block(item)
-                listData[index] = newItem
 
                 if (newItem != item) {
+                    listData[index] = newItem
+                    result = true
+                }
+            }
+            result
+        }
+    }
+
+    /**
+     * [block]返回的对象替换原对象
+     */
+    open suspend fun replaceAll(block: (D) -> D) {
+        modify { listData ->
+            var result = false
+            for ((index, item) in listData.withIndex()) {
+                val newItem = block(item)
+                if (newItem !== item) {
+                    listData[index] = newItem
                     result = true
                 }
             }
