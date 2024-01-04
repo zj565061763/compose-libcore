@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-class FListHolder<T> {
+open class FListHolder<T> {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
 
@@ -165,15 +165,26 @@ class FListHolder<T> {
         withContext(_dataDispatcher) {
             val oldSize = _list.size
             if (block(_list) || oldSize != _list.size) {
-                _list.toList()
+                ModifyResult(list = _list.toList(), oldSize = oldSize)
             } else {
                 null
             }
-        }?.also { data ->
-            _dataFlow.value = data
+        }?.also { result ->
+            _dataFlow.value = result.list
+            onModify(
+                oldSize = result.oldSize,
+                newSize = result.list.size,
+            )
         }
     }
+
+    protected open fun onModify(oldSize: Int, newSize: Int) {}
 }
+
+private data class ModifyResult<T>(
+    val list: List<T>,
+    val oldSize: Int,
+)
 
 /**
  * 根据条件移除元素
