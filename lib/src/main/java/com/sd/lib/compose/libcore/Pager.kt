@@ -7,24 +7,26 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
-import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppHorizontalPager(
     modifier: Modifier = Modifier,
     state: PagerState,
-    // add
-    selectedPage: Int? = null,
-    // add
-    onPageChange: ((Int) -> Unit)? = null,
     // add
     activeTag: (index: Int) -> String = { it.toString() },
     // add
@@ -40,17 +42,9 @@ fun AppHorizontalPager(
     pageNestedScrollConnection: NestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
         Orientation.Horizontal
     ),
-    pageContent: @Composable PagerScope.(page: Int) -> Unit
+    pageContent: @Composable FPagerScope.(page: Int) -> Unit
 ) {
-    // 滚动到选中到位置
-    if (selectedPage != null) {
-        state.fScrollToPage(page = selectedPage)
-    }
-
-    // 监听位置变化
-    if (onPageChange != null) {
-        state.fCurrentPage(onChange = onPageChange)
-    }
+    val scope = remember(state) { FPagerScopeImpl(state) }
 
     HorizontalPager(
         state = state,
@@ -66,11 +60,45 @@ fun AppHorizontalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
+        scope.index = index
         FActive(
             active = activeIndex(index),
             tag = activeTag(index),
         ) {
-            pageContent(index)
+            scope.pageContent(index)
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+interface FPagerScope {
+    val pagerState: PagerState
+
+    @Composable
+    fun LaunchSettledPage(
+        vararg keys: Any?,
+        block: suspend CoroutineScope.() -> Unit,
+    )
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+private class FPagerScopeImpl(
+    override val pagerState: PagerState
+) : FPagerScope {
+
+    var index by mutableIntStateOf(0)
+
+    @Composable
+    override fun LaunchSettledPage(
+        vararg keys: Any?,
+        block: suspend CoroutineScope.() -> Unit,
+    ) {
+        val blockUpdated by rememberUpdatedState(block)
+        val settledPage = pagerState.settledPage
+        if (index == settledPage) {
+            LaunchedEffect(keys = keys) {
+                blockUpdated()
+            }
         }
     }
 }
