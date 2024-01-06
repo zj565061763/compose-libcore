@@ -73,7 +73,7 @@ fun FHorizontalPager(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppVerticalPager(
+fun FVerticalPager(
     modifier: Modifier = Modifier,
     state: PagerState,
     // add
