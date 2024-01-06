@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.FActive
 import com.sd.lib.compose.libcore.FActiveLifecycle
+import com.sd.lib.compose.libcore.FLaunchActive
 import com.sd.lib.compose.libcore.fActive
 
 class SampleActive : ComponentActivity() {
@@ -35,7 +36,10 @@ class SampleActive : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                Content()
+                FActiveLifecycle(tag = "Lifecycle") {
+                    logMsg { "lifecycle active:${fActive()}" }
+                    Content()
+                }
             }
         }
     }
@@ -43,19 +47,21 @@ class SampleActive : ComponentActivity() {
 
 @Composable
 private fun Content() {
+
+    FLaunchActive {
+        logMsg { "FLaunchActive active:${it}" }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(10.dp)
     ) {
-        FActiveLifecycle(tag = "Lifecycle") {
-            logMsg { "lifecycle active:${fActive()}" }
-            ActiveBox(tag = "1") {
-                ActiveBox(tag = "2") {
-                    ActiveBox(tag = "3") {
-                        ActiveBox(tag = "4") {
-                            ActiveBox()
-                        }
+        ActiveBox(tag = "1") {
+            ActiveBox(tag = "2") {
+                ActiveBox(tag = "3") {
+                    ActiveBox(tag = "4") {
+                        ActiveBox()
                     }
                 }
             }
