@@ -9,11 +9,13 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.CoroutineScope
 
 private val LocalActive = compositionLocalOf<Boolean?> { null }
 private val LocalTag = compositionLocalOf<String?> { null }
@@ -74,6 +76,18 @@ fun FActive(
         LocalTag provides finalTag,
     ) {
         content()
+    }
+}
+
+@Composable
+fun FLaunchActive(
+    vararg keys: Any?,
+    block: suspend CoroutineScope.(active: Boolean) -> Unit,
+) {
+    val blockUpdated by rememberUpdatedState(block)
+    val active = fActive()
+    LaunchedEffect(active, *keys) {
+        blockUpdated(active)
     }
 }
 
