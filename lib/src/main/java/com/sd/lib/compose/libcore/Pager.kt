@@ -7,21 +7,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerDefaults
+import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.CoroutineScope
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -43,10 +37,8 @@ fun FHorizontalPager(
     pageNestedScrollConnection: NestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
         Orientation.Horizontal
     ),
-    pageContent: @Composable FPagerScope.(page: Int) -> Unit
+    pageContent: @Composable PagerScope.(page: Int) -> Unit
 ) {
-    val scope = remember(state) { FPagerScopeImpl(state) }
-
     HorizontalPager(
         state = state,
         modifier = modifier,
@@ -61,12 +53,11 @@ fun FHorizontalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
-        scope.index = index
         FActive(
             active = activeIndex(index),
             tag = activeTag(index),
         ) {
-            scope.pageContent(index)
+            pageContent(index)
         }
     }
 }
@@ -91,10 +82,8 @@ fun FVerticalPager(
     pageNestedScrollConnection: NestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
         Orientation.Vertical
     ),
-    pageContent: @Composable FPagerScope.(page: Int) -> Unit
+    pageContent: @Composable PagerScope.(page: Int) -> Unit
 ) {
-    val scope = remember(state) { FPagerScopeImpl(state) }
-
     VerticalPager(
         state = state,
         modifier = modifier,
@@ -109,45 +98,11 @@ fun FVerticalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
-        scope.index = index
         FActive(
             active = activeIndex(index),
             tag = activeTag(index)
         ) {
-            scope.pageContent(index)
-        }
-    }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-interface FPagerScope {
-    val pagerState: PagerState
-
-    @Composable
-    fun LaunchSettledPage(
-        vararg keys: Any?,
-        block: suspend CoroutineScope.() -> Unit,
-    )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-private class FPagerScopeImpl(
-    override val pagerState: PagerState
-) : FPagerScope {
-
-    var index by mutableIntStateOf(0)
-
-    @Composable
-    override fun LaunchSettledPage(
-        vararg keys: Any?,
-        block: suspend CoroutineScope.() -> Unit,
-    ) {
-        val blockUpdated by rememberUpdatedState(block)
-        val settledPage = pagerState.settledPage
-        if (index == settledPage) {
-            LaunchedEffect(keys = keys) {
-                blockUpdated()
-            }
+            pageContent(index)
         }
     }
 }
