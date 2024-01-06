@@ -109,6 +109,7 @@ fun FVerticalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
+        scope.index = index
         FActive(
             active = activeIndex(index),
             tag = activeTag(index)
