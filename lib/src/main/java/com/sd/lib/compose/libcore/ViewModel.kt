@@ -4,6 +4,8 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sd.lib.coroutine.FMutator
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +40,14 @@ abstract class FViewModel<I>(
      * 数据互斥修改器，[refreshData]中使用了这个对象
      */
     protected val dataMutator = FMutator()
+
+    /**
+     * 基于[Dispatchers.Default]并发为1的调度器
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    protected val singleDefault by lazy {
+        Dispatchers.Default.limitedParallelism(1)
+    }
 
     /**
      * 设置激活状态
