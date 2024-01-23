@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,61 +38,81 @@ class SampleTabContainer : ComponentActivity() {
     }
 }
 
+private val Tabs = TabType.entries.toList()
+
+private enum class TabType {
+    Home,
+    Me,
+}
+
 @Composable
 private fun ContentView(
     modifier: Modifier = Modifier,
 ) {
-    val tabs = remember { TabType.entries.toList() }
-    var selectedTab by remember { mutableStateOf(TabType.A) }
+    /** 当前选中的Tab */
+    var selectedTab by remember { mutableStateOf(TabType.Home) }
 
     Column(modifier = modifier.fillMaxSize()) {
         TabContainer(
             selectedKey = selectedTab,
             modifier = Modifier.weight(1f),
         ) {
-            tab(TabType.A) {
-                TabContent(TabType.A)
+            tab(TabType.Home) {
+                TabHome()
             }
-            tab(TabType.B) {
-                TabContent(TabType.B)
+            tab(TabType.Me) {
+                TabMe()
             }
         }
         NavigationBar {
-            tabs.forEach { tabType ->
-                NavigationBarItem(
-                    selected = selectedTab == tabType,
-                    onClick = { selectedTab = tabType },
-                    icon = { Text(text = tabType.name) },
-                )
+            for (tab in Tabs) {
+                key(tab) {
+                    NavigationBarItem(
+                        selected = selectedTab == tab,
+                        onClick = { selectedTab = tab },
+                        icon = { Text(text = tab.name) },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TabContent(
-    tagType: TabType,
-    modifier: Modifier = Modifier,
-) {
-    DisposableEffect(tagType) {
-        logMsg { "tab:${tagType.name}" }
+private fun TabHome() {
+    DisposableEffect(Unit) {
+        logMsg { "TabHome" }
         onDispose {
-            logMsg { "tab:${tagType.name} onDispose" }
+            logMsg { "TabHome onDispose" }
         }
     }
-
     Box(
-        modifier = modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = tagType.name,
+            text = "Home",
             fontSize = 18.sp,
         )
     }
 }
 
-private enum class TabType {
-    A,
-    B,
+@Composable
+private fun TabMe() {
+    DisposableEffect(Unit) {
+        logMsg { "TabMe" }
+        onDispose {
+            logMsg { "TabMe onDispose" }
+        }
+    }
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = "Me",
+            fontSize = 18.sp,
+        )
+    }
 }
+
