@@ -68,7 +68,7 @@ private fun Tabs(
     selectedTab: TabType,
 ) {
     TabContainer(
-        key = selectedTab,
+        selectedKey = selectedTab,
         modifier = modifier,
     ) {
         tab(TabType.Home) {

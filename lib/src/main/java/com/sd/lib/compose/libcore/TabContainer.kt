@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 @Composable
 fun TabContainer(
     modifier: Modifier = Modifier,
-    key: Any,
+    selectedKey: Any,
     apply: TabContainerScope.() -> Unit,
 ) {
     val container = remember {
@@ -27,7 +27,7 @@ fun TabContainer(
     }
 
     Box(modifier = modifier) {
-        container.Content(key)
+        container.Content(selectedKey)
     }
 }
 
@@ -87,15 +87,15 @@ private class TabContainerImpl : TabContainerScope {
     }
 
     @Composable
-    fun Content(key: Any) {
+    fun Content(selectedKey: Any) {
         SideEffect {
             checkConfig()
         }
 
-        LaunchedEffect(key) {
-            if (!_activeTabs.containsKey(key)) {
-                val info = checkNotNull(_store[key]) { "Key $key was not found." }
-                _activeTabs[key] = TabState(
+        LaunchedEffect(selectedKey) {
+            if (!_activeTabs.containsKey(selectedKey)) {
+                val info = checkNotNull(_store[selectedKey]) { "Key $selectedKey was not found." }
+                _activeTabs[selectedKey] = TabState(
                     display = mutableStateOf(info.display),
                     content = mutableStateOf(info.content),
                 )
@@ -106,7 +106,7 @@ private class TabContainerImpl : TabContainerScope {
             key(item.key) {
                 DisplayTab(
                     state = item.value,
-                    selected = item.key == key,
+                    selected = item.key == selectedKey,
                 )
             }
         }
