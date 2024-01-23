@@ -18,7 +18,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.sp
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.TabContainer
 
@@ -27,7 +26,7 @@ class SampleTabContainer : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                ContentView()
+                Content()
             }
         }
     }
@@ -46,13 +45,11 @@ private enum class TabType {
 }
 
 @Composable
-private fun ContentView(
-    modifier: Modifier = Modifier,
-) {
+private fun Content() {
     /** 当前选中的Tab */
     var selectedTab by remember { mutableStateOf(TabType.Home) }
 
-    Column(modifier = modifier.fillMaxSize()) {
+    Column(modifier = Modifier.fillMaxSize()) {
         TabContainer(
             selectedKey = selectedTab,
             modifier = Modifier.weight(1f),
@@ -90,10 +87,7 @@ private fun TabHome() {
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "Home",
-            fontSize = 18.sp,
-        )
+        Text(text = "Home")
     }
 }
 
@@ -101,18 +95,13 @@ private fun TabHome() {
 private fun TabMe() {
     DisposableEffect(Unit) {
         logMsg { "TabMe" }
-        onDispose {
-            logMsg { "TabMe onDispose" }
-        }
+        onDispose { logMsg { "TabMe onDispose" } }
     }
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = "Me",
-            fontSize = 18.sp,
-        )
+        Text(text = "Me")
     }
 }
 
