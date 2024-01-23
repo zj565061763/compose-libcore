@@ -83,5 +83,5 @@ private fun PreviewContent() {
 }
 
 inline fun logMsg(block: () -> Any?) {
-    Log.i("libcore-demo", block().toString())
+    Log.i("compose-libcore-demo", block().toString())
 }
