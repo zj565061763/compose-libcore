@@ -64,14 +64,17 @@ private fun Content() {
 }
 
 @Composable
-private fun TabContent(tabType: TabType) {
+private fun TabContent(
+    tabType: TabType,
+    modifier: Modifier = Modifier,
+) {
     // 打印生命周期日志
     DisposableEffect(tabType) {
         logMsg { "tab:${tabType.name}" }
         onDispose { logMsg { "tab:${tabType.name} onDispose" } }
     }
     Box(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
         Text(text = tabType.name)
