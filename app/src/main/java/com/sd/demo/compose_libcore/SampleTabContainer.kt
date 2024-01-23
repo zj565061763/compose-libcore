@@ -67,12 +67,7 @@ private fun Content() {
 
 @Composable
 private fun TabHome() {
-    DisposableEffect(Unit) {
-        logMsg { "TabHome" }
-        onDispose {
-            logMsg { "TabHome onDispose" }
-        }
-    }
+    LogDisposable("Home")
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -83,10 +78,7 @@ private fun TabHome() {
 
 @Composable
 private fun TabMe() {
-    DisposableEffect(Unit) {
-        logMsg { "TabMe" }
-        onDispose { logMsg { "TabMe onDispose" } }
-    }
+    LogDisposable("Me")
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
@@ -110,5 +102,13 @@ private fun BottomNavigation(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun LogDisposable(key: String) {
+    DisposableEffect(key) {
+        logMsg { key }
+        onDispose { logMsg { "$key onDispose" } }
     }
 }
