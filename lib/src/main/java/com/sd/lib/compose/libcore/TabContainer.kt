@@ -105,10 +105,9 @@ private class TabContainerImpl : TabContainerScope {
         }
 
         for ((key, state) in _activeTabs) {
-            val selected = key == selectedKey
-            val display = state.display.value ?: DefaultDisplay
             key(key) {
-                display(state.content.value, selected)
+                val display = state.display.value ?: DefaultDisplay
+                display(state.content.value, key == selectedKey)
             }
         }
     }
