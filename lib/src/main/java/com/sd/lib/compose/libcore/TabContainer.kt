@@ -5,7 +5,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SideEffect
-import androidx.compose.runtime.Stable
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -65,7 +64,10 @@ private class TabContainerImpl : TabContainerScope {
 
         _activeTabs.forEach { active ->
             val info = checkNotNull(_store[active.key])
-            active.value.read(info)
+            active.value.apply {
+                this.display.value = info.display
+                this.content.value = info.content
+            }
         }
     }
 
@@ -102,20 +104,13 @@ private class TabContainerImpl : TabContainerScope {
             }
         }
 
-        for (item in _activeTabs) {
-            key(item.key) {
-                DisplayTab(
-                    state = item.value,
-                    selected = item.key == selectedKey,
-                )
+        for ((key, state) in _activeTabs) {
+            val selected = key == selectedKey
+            val display = state.display.value ?: DefaultDisplay
+            key(key) {
+                display(state.content.value, selected)
             }
         }
-    }
-
-    @Composable
-    private fun DisplayTab(state: TabState, selected: Boolean) {
-        val display = state.display.value ?: DefaultDisplay
-        display(state.content.value, selected)
     }
 }
 
@@ -138,13 +133,7 @@ private class TabInfo(
     var content: @Composable () -> Unit,
 )
 
-@Stable
 private class TabState(
     val display: MutableState<TabDisplay?>,
     val content: MutableState<@Composable () -> Unit>,
-) {
-    fun read(info: TabInfo) {
-        this.display.value = info.display
-        this.content.value = info.content
-    }
-}
+)
