@@ -65,11 +65,11 @@ private fun Content() {
 
 @Composable
 private fun TabContent(tabType: TabType) {
+    // 打印生命周期日志
     DisposableEffect(tabType) {
         logMsg { "tab:${tabType.name}" }
         onDispose { logMsg { "tab:${tabType.name} onDispose" } }
     }
-
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
