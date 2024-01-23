@@ -51,8 +51,8 @@ private class TabContainerImpl : TabContainerScope {
     private val _keys: MutableSet<Any> = hashSetOf()
 
     fun startConfig(checkKey: Boolean) {
-        _checkKey = checkKey
         _config = true
+        _checkKey = checkKey
         if (checkKey) {
             _keys.clear()
             _keys.addAll(_store.keys)
