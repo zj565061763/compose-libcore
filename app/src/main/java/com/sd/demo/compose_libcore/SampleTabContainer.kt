@@ -41,17 +41,23 @@ class SampleTabContainer : ComponentActivity() {
 private fun ContentView(
     modifier: Modifier = Modifier,
 ) {
-    val listTab = remember { TabType.entries.toList() }
-
-    var selectedTab by remember { mutableStateOf(TabType.Home) }
+    val tabs = remember { TabType.entries.toList() }
+    var selectedTab by remember { mutableStateOf(TabType.A) }
 
     Column(modifier = modifier.fillMaxSize()) {
-        Tabs(
+        TabContainer(
+            selectedKey = selectedTab,
             modifier = Modifier.weight(1f),
-            selectedTab = selectedTab,
-        )
+        ) {
+            tab(TabType.A) {
+                TabContent(TabType.A)
+            }
+            tab(TabType.B) {
+                TabContent(TabType.B)
+            }
+        }
         NavigationBar {
-            listTab.forEach { tabType ->
+            tabs.forEach { tabType ->
                 NavigationBarItem(
                     selected = selectedTab == tabType,
                     onClick = { selectedTab = tabType },
@@ -63,42 +69,14 @@ private fun ContentView(
 }
 
 @Composable
-private fun Tabs(
-    modifier: Modifier = Modifier,
-    selectedTab: TabType,
-) {
-    TabContainer(
-        selectedKey = selectedTab,
-        modifier = modifier,
-    ) {
-        tab(TabType.Home) {
-            logMsg { "Home receive $selectedTab" }
-            TabView(TabType.Home)
-        }
-
-        tab(TabType.Video) {
-            logMsg { "Video receive $selectedTab" }
-            TabView(TabType.Video)
-        }
-
-        tab(
-            key = TabType.Me,
-            display = { content, selected -> if (selected) content() }
-        ) {
-            logMsg { "Me receive $selectedTab" }
-            TabView(TabType.Me)
-        }
-    }
-}
-
-@Composable
-private fun TabView(
+private fun TabContent(
     tagType: TabType,
     modifier: Modifier = Modifier,
 ) {
     DisposableEffect(tagType) {
+        logMsg { "tab:${tagType.name}" }
         onDispose {
-            logMsg { "${tagType.name} onDispose" }
+            logMsg { "tab:${tagType.name} onDispose" }
         }
     }
 
@@ -114,7 +92,6 @@ private fun TabView(
 }
 
 private enum class TabType {
-    Home,
-    Video,
-    Me,
+    A,
+    B,
 }
