@@ -37,8 +37,6 @@ class SampleTabContainer : ComponentActivity() {
     }
 }
 
-private val Tabs = TabType.entries.toList()
-
 private enum class TabType {
     Home,
     Me,
@@ -55,10 +53,10 @@ private fun Content() {
             modifier = Modifier.weight(1f),
         ) {
             tab(TabType.Home) {
-                TabHome()
+                TabContent(TabType.Home)
             }
             tab(TabType.Me) {
-                TabMe()
+                TabContent(TabType.Me)
             }
         }
         BottomNavigation(selectedTab) { selectedTab = it }
@@ -66,24 +64,17 @@ private fun Content() {
 }
 
 @Composable
-private fun TabHome() {
-    LogDisposable("Home")
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center,
-    ) {
-        Text(text = "Home")
+private fun TabContent(tabType: TabType) {
+    DisposableEffect(tabType) {
+        logMsg { "tab:${tabType.name}" }
+        onDispose { logMsg { "tab:${tabType.name} onDispose" } }
     }
-}
 
-@Composable
-private fun TabMe() {
-    LogDisposable("Me")
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = "Me")
+        Text(text = tabType.name)
     }
 }
 
@@ -92,8 +83,9 @@ private fun BottomNavigation(
     selectedTab: TabType,
     onClickTab: (TabType) -> Unit,
 ) {
+    val tabs = remember { TabType.entries.toList() }
     NavigationBar {
-        for (tab in Tabs) {
+        for (tab in tabs) {
             key(tab) {
                 NavigationBarItem(
                     selected = selectedTab == tab,
@@ -102,13 +94,5 @@ private fun BottomNavigation(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun LogDisposable(key: String) {
-    DisposableEffect(key) {
-        logMsg { key }
-        onDispose { logMsg { "$key onDispose" } }
     }
 }
