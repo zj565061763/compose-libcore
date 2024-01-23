@@ -16,12 +16,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 fun TabContainer(
     modifier: Modifier = Modifier,
     selectedKey: Any,
+    checkKey: Boolean = false,
     apply: TabContainerScope.() -> Unit,
 ) {
     val container = remember {
         TabContainerImpl()
     }.apply {
-        startConfig()
+        startConfig(checkKey)
         apply()
     }
 
@@ -45,29 +46,16 @@ private class TabContainerImpl : TabContainerScope {
     private val _activeTabs: MutableMap<Any, TabState> = mutableStateMapOf()
 
     private var _config = false
+
+    private var _checkKey = false
     private val _keys: MutableSet<Any> = hashSetOf()
 
-    fun startConfig() {
+    fun startConfig(checkKey: Boolean) {
+        _checkKey = checkKey
         _config = true
-        _keys.clear()
-        _keys.addAll(_store.keys)
-    }
-
-    private fun checkConfig() {
-        if (!_config) return
-        _config = false
-
-        _keys.forEach { key ->
-            _store.remove(key)
-            _activeTabs.remove(key)
-        }
-
-        _activeTabs.forEach { active ->
-            val info = checkNotNull(_store[active.key])
-            active.value.apply {
-                this.display.value = info.display
-                this.content.value = info.content
-            }
+        if (checkKey) {
+            _keys.clear()
+            _keys.addAll(_store.keys)
         }
     }
 
@@ -77,7 +65,10 @@ private class TabContainerImpl : TabContainerScope {
         content: @Composable () -> Unit,
     ) {
         check(_config) { "Config not started." }
-        _keys.remove(key)
+
+        if (_checkKey) {
+            _keys.remove(key)
+        }
 
         val info = _store[key]
         if (info == null) {
@@ -91,7 +82,24 @@ private class TabContainerImpl : TabContainerScope {
     @Composable
     fun Content(selectedKey: Any) {
         SideEffect {
-            checkConfig()
+            if (_config) {
+                _config = false
+
+                if (_checkKey) {
+                    _keys.forEach { key ->
+                        _store.remove(key)
+                        _activeTabs.remove(key)
+                    }
+                }
+
+                _activeTabs.forEach { active ->
+                    val info = checkNotNull(_store[active.key])
+                    active.value.apply {
+                        this.display.value = info.display
+                        this.content.value = info.content
+                    }
+                }
+            }
         }
 
         LaunchedEffect(selectedKey) {
