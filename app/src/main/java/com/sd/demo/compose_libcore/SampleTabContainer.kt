@@ -61,17 +61,7 @@ private fun Content() {
                 TabMe()
             }
         }
-        NavigationBar {
-            for (tab in Tabs) {
-                key(tab) {
-                    NavigationBarItem(
-                        selected = selectedTab == tab,
-                        onClick = { selectedTab = tab },
-                        icon = { Text(text = tab.name) },
-                    )
-                }
-            }
-        }
+        BottomNavigation(selectedTab) { selectedTab = it }
     }
 }
 
@@ -105,3 +95,20 @@ private fun TabMe() {
     }
 }
 
+@Composable
+private fun BottomNavigation(
+    selectedTab: TabType,
+    onClickTab: (TabType) -> Unit,
+) {
+    NavigationBar {
+        for (tab in Tabs) {
+            key(tab) {
+                NavigationBarItem(
+                    selected = selectedTab == tab,
+                    onClick = { onClickTab(tab) },
+                    icon = { Text(text = tab.name) },
+                )
+            }
+        }
+    }
+}
