@@ -38,15 +38,7 @@ kotlin {
 }
 
 dependencies {
-    val composeBom = platform(libs.androidx.compose.bom)
-    api(composeBom)
-    debugApi(composeBom)
-    androidTestApi(composeBom)
-
-    api(libs.androidx.compose.material3)
-
-    api(libs.androidx.compose.ui.tooling.preview)
-    debugApi(libs.androidx.compose.ui.tooling)
+    implementation(libs.androidx.compose.foundation)
 
     api(libs.androidx.activity.compose)
     api(libs.androidx.constraintlayout.compose)
