@@ -11,6 +11,7 @@ import androidx.compose.foundation.pager.PagerScope
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -28,16 +29,16 @@ fun FHorizontalPager(
     activeIndex: (index: Int) -> Boolean = { it == state.settledPage },
     contentPadding: PaddingValues = PaddingValues(0.dp),
     pageSize: PageSize = PageSize.Fill,
-    beyondBoundsPageCount: Int = 0,
+    beyondBoundsPageCount: Int = PagerDefaults.BeyondBoundsPageCount,
     pageSpacing: Dp = 0.dp,
     verticalAlignment: Alignment.Vertical = Alignment.CenterVertically,
     flingBehavior: SnapFlingBehavior = PagerDefaults.flingBehavior(state = state),
     userScrollEnabled: Boolean = true,
     reverseLayout: Boolean = false,
-    pageNestedScrollConnection: NestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-        Orientation.Horizontal
-    ),
-    pageContent: @Composable PagerScope.(page: Int) -> Unit
+    pageNestedScrollConnection: NestedScrollConnection = remember(state) {
+        PagerDefaults.pageNestedScrollConnection(state, Orientation.Horizontal)
+    },
+    pageContent: @Composable PagerScope.(page: Int) -> Unit,
 ) {
     HorizontalPager(
         state = state,
@@ -73,15 +74,15 @@ fun FVerticalPager(
     activeIndex: (index: Int) -> Boolean = { it == state.settledPage },
     contentPadding: PaddingValues = PaddingValues(0.dp),
     pageSize: PageSize = PageSize.Fill,
-    beyondBoundsPageCount: Int = 0,
+    beyondBoundsPageCount: Int = PagerDefaults.BeyondBoundsPageCount,
     pageSpacing: Dp = 0.dp,
     horizontalAlignment: Alignment.Horizontal = Alignment.CenterHorizontally,
     flingBehavior: SnapFlingBehavior = PagerDefaults.flingBehavior(state = state),
     userScrollEnabled: Boolean = true,
     reverseLayout: Boolean = false,
-    pageNestedScrollConnection: NestedScrollConnection = PagerDefaults.pageNestedScrollConnection(
-        Orientation.Vertical
-    ),
+    pageNestedScrollConnection: NestedScrollConnection = remember(state) {
+        PagerDefaults.pageNestedScrollConnection(state, Orientation.Vertical)
+    },
     pageContent: @Composable PagerScope.(page: Int) -> Unit
 ) {
     VerticalPager(
