@@ -26,13 +26,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
             AppTheme {
                 Content(
                     listActivity = listOf(
                         SampleActive::class.java,
                         SampleLifecycle::class.java,
-                        SampleTabContainer::class.java,
                         SampleViewModelScope::class.java,
                     ),
                     onClickActivity = {
