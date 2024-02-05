@@ -7,10 +7,10 @@ androidTargetSdk = "34"
 androidGradlePlugin = "8.2.2"
 kotlin = "1.9.21"
 
-composeBom = "2023.10.01"
-composeCompiler = "1.5.6"
+composeBom = "2024.01.00"
+composeCompiler = "1.5.8"
 
-lifecycle = "2.6.2"
+lifecycle = "2.7.0"
 
 [libraries]
 
