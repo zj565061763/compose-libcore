@@ -1,5 +1,6 @@
 package com.sd.lib.compose.libcore
 
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -7,10 +8,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
-open class FListHolder<T> {
+open class FListHolder<T>(
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
-
+    private val dispatcher: CoroutineDispatcher = Dispatchers.Default.limitedParallelism(1),
+) {
     private val _list: MutableList<T> = mutableListOf()
     private val _dataFlow: MutableStateFlow<List<T>> = MutableStateFlow(emptyList())
 
@@ -156,7 +157,7 @@ open class FListHolder<T> {
      * 修改数据
      */
     suspend fun modify(block: (list: MutableList<T>) -> Boolean) {
-        withContext(_dataDispatcher) {
+        withContext(dispatcher) {
             val oldSize = _list.size
             if (block(_list) || oldSize != _list.size) {
                 ModifyResult(list = _list.toList(), oldSize = oldSize)
