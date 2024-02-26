@@ -27,8 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.FActive
+import com.sd.lib.compose.libcore.FActiveLaunchedEffect
 import com.sd.lib.compose.libcore.FActiveLifecycle
-import com.sd.lib.compose.libcore.FLaunchActive
 import com.sd.lib.compose.libcore.fActive
 
 class SampleActive : ComponentActivity() {
@@ -36,8 +36,7 @@ class SampleActive : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             AppTheme {
-                FActiveLifecycle(tag = "Lifecycle") {
-                    logMsg { "lifecycle active:${fActive()}" }
+                FActiveLifecycle {
                     Content()
                 }
             }
@@ -48,7 +47,7 @@ class SampleActive : ComponentActivity() {
 @Composable
 private fun Content() {
 
-    FLaunchActive {
+    FActiveLaunchedEffect {
         logMsg { "FLaunchActive active:${it}" }
     }
 
@@ -57,10 +56,10 @@ private fun Content() {
             .fillMaxSize()
             .padding(10.dp)
     ) {
-        ActiveBox(tag = "1") {
-            ActiveBox(tag = "2") {
-                ActiveBox(tag = "3") {
-                    ActiveBox(tag = "4") {
+        ActiveBox(text = "1") {
+            ActiveBox(text = "2") {
+                ActiveBox(text = "3") {
+                    ActiveBox(text = "4") {
                         ActiveBox()
                     }
                 }
@@ -72,10 +71,10 @@ private fun Content() {
 @Composable
 private fun ActiveBox(
     modifier: Modifier = Modifier,
-    tag: String = "",
+    text: String = "",
     content: (@Composable () -> Unit)? = null,
 ) {
-    var childActive by remember { mutableStateOf(false) }
+    var checked by remember { mutableStateOf(false) }
 
     WrapperBox(
         modifier = modifier,
@@ -85,16 +84,16 @@ private fun ActiveBox(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
             ) {
-                Text(text = tag)
+                Text(text = text)
                 if (content != null) {
                     Spacer(modifier = Modifier.width(10.dp))
-                    Switch(checked = childActive, onCheckedChange = { childActive = it })
+                    Switch(checked = checked, onCheckedChange = { checked = it })
                 }
             }
         },
         content = {
             if (content != null) {
-                FActive(active = childActive, tag = tag) {
+                FActive(active = checked) {
                     content()
                 }
             }

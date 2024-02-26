@@ -18,11 +18,9 @@ import androidx.lifecycle.LifecycleOwner
 import kotlinx.coroutines.CoroutineScope
 
 private val LocalActive = compositionLocalOf<Boolean?> { null }
-private val LocalTag = compositionLocalOf<String?> { null }
 
 @Composable
 fun FActiveLifecycle(
-    tag: String = "Lifecycle",
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
     minActiveState: Lifecycle.State = Lifecycle.State.STARTED,
     content: @Composable () -> Unit,
@@ -43,7 +41,6 @@ fun FActiveLifecycle(
 
     FActive(
         active = lifecycleActive,
-        tag = tag,
         content = content,
     )
 }
@@ -51,36 +48,18 @@ fun FActiveLifecycle(
 @Composable
 fun FActive(
     active: Boolean,
-    tag: String = "",
     content: @Composable () -> Unit,
 ) {
-    val localTag = LocalTag.current
-
-    val finalTag = remember(localTag, tag) {
-        if (localTag == null) {
-            "(${tag})"
-        } else {
-            "${localTag}_(${tag})"
-        }
-    }
-
     val localActive = LocalActive.current
     val finalActive = if (localActive == null) active else active && localActive
 
-    LaunchedEffect(finalActive) {
-        logMsg { "$finalTag $finalActive" }
-    }
-
-    CompositionLocalProvider(
-        LocalActive provides finalActive,
-        LocalTag provides finalTag,
-    ) {
+    CompositionLocalProvider(LocalActive provides finalActive) {
         content()
     }
 }
 
 @Composable
-fun FLaunchActive(
+fun FActiveLaunchedEffect(
     vararg keys: Any?,
     block: suspend CoroutineScope.(active: Boolean) -> Unit,
 ) {

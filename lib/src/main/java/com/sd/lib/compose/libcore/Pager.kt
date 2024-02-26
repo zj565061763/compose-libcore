@@ -24,8 +24,6 @@ fun FHorizontalPager(
     modifier: Modifier = Modifier,
     state: PagerState,
     // add
-    activeTag: (index: Int) -> String = { it.toString() },
-    // add
     activeIndex: (index: Int) -> Boolean = { it == state.settledPage },
     contentPadding: PaddingValues = PaddingValues(0.dp),
     pageSize: PageSize = PageSize.Fill,
@@ -54,10 +52,7 @@ fun FHorizontalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
-        FActive(
-            active = activeIndex(index),
-            tag = activeTag(index),
-        ) {
+        FActive(active = activeIndex(index)) {
             pageContent(index)
         }
     }
@@ -68,8 +63,6 @@ fun FHorizontalPager(
 fun FVerticalPager(
     modifier: Modifier = Modifier,
     state: PagerState,
-    // add
-    activeTag: (index: Int) -> String = { it.toString() },
     // add
     activeIndex: (index: Int) -> Boolean = { it == state.settledPage },
     contentPadding: PaddingValues = PaddingValues(0.dp),
@@ -99,10 +92,7 @@ fun FVerticalPager(
         key = null,
         pageNestedScrollConnection = pageNestedScrollConnection,
     ) { index ->
-        FActive(
-            active = activeIndex(index),
-            tag = activeTag(index)
-        ) {
+        FActive(active = activeIndex(index)) {
             pageContent(index)
         }
     }
