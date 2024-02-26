@@ -16,7 +16,7 @@ interface IgnoreActiveIntent
 
 abstract class FViewModel<I>(
     /** 初始激活状态 */
-    active: Boolean = true,
+    initialActive: Boolean = true,
 ) : ViewModel() {
 
     @Volatile
@@ -26,7 +26,7 @@ abstract class FViewModel<I>(
             field = value
         }
 
-    private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(active)
+    private var _isActiveFlow: MutableStateFlow<Boolean> = MutableStateFlow(initialActive)
 
     /** 是否处于激活状态，默认true */
     val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
