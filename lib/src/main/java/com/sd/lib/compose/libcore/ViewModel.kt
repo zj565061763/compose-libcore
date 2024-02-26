@@ -79,7 +79,6 @@ abstract class FViewModel<I>(
     /**
      * [refreshDataSuspend]
      */
-    @JvmOverloads
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
@@ -100,7 +99,6 @@ abstract class FViewModel<I>(
      * @param delayTime 延迟多少毫秒后执行
      * @param ignoreActive 是否忽略激活状态[isActiveFlow]
      */
-    @JvmOverloads
     suspend fun refreshDataSuspend(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
