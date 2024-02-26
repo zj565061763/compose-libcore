@@ -32,9 +32,7 @@ abstract class FViewModel<I>(
 
     /** 基于[Dispatchers.Default]并发为1的调度器 */
     @OptIn(ExperimentalCoroutinesApi::class)
-    protected val singleDispatcher by lazy {
-        Dispatchers.Default.limitedParallelism(1)
-    }
+    val singleDispatcher by lazy { Dispatchers.Default.limitedParallelism(1) }
 
     /**
      * 设置激活状态
@@ -53,14 +51,14 @@ abstract class FViewModel<I>(
      */
     fun dispatch(intent: I) {
         viewModelScope.launch {
-            dispatchSuspend(intent)
+            dispatchAwait(intent)
         }
     }
 
     /**
      * 触发意图
      */
-    suspend fun dispatchSuspend(intent: I) {
+    suspend fun dispatchAwait(intent: I) {
         if (isDestroyed) return
         if (isActiveFlow.value || intent is IgnoreActiveIntent) {
             handleIntent(intent)
@@ -97,31 +95,31 @@ abstract class FViewModel<I>(
 
     //---------- plugins ----------
 
-    fun dataPlugin(): DataPlugin = plugin()
+    /**
+     * [DataPlugin]
+     */
+    fun dataPlugin(): DataPlugin = plugin(DataPlugin::class.java)
 
     //---------- plugin logic ----------
 
-    @PublishedApi
-    internal val pluginHolder: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
-
-    @PublishedApi
-    internal val pluginFactoryHolder: MutableMap<Class<out Plugin>, PluginFactory> = hashMapOf()
+    private val _pluginHolder: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
+    private val _pluginFactoryHolder: MutableMap<Class<out Plugin>, PluginFactory> = hashMapOf()
 
     /**
      * 获取插件，此方法必须在主线程调用
      */
     @MainThread
-    protected inline fun <reified T : Plugin> plugin(): T {
+    protected fun <T : Plugin> plugin(clazz: Class<T>): T {
         libCheckMainThread()
-        val clazz = T::class.java
-        val cache = pluginHolder[clazz]
+        val cache = _pluginHolder[clazz]
         return if (cache != null) {
+            @Suppress("UNCHECKED_CAST")
             cache as T
         } else {
-            val factory = pluginFactoryHolder[clazz] ?: DefaultPluginFactory
-            factory.create(T::class.java).also {
+            val factory = _pluginFactoryHolder[clazz] ?: DefaultPluginFactory
+            factory.create(clazz).also {
                 if (!isDestroyed) {
-                    pluginHolder[T::class.java] = it
+                    _pluginHolder[clazz] = it
                     it.init(this@FViewModel)
                 }
             }
@@ -134,9 +132,9 @@ abstract class FViewModel<I>(
     @MainThread
     private fun destroyPlugins() {
         libCheckMainThread()
-        while (pluginHolder.isNotEmpty()) {
-            pluginHolder.keys.toTypedArray().forEach { key ->
-                pluginHolder.remove(key)?.destroy()
+        while (_pluginHolder.isNotEmpty()) {
+            _pluginHolder.keys.toTypedArray().forEach { key ->
+                _pluginHolder.remove(key)?.destroy()
             }
         }
     }
@@ -160,8 +158,7 @@ abstract class FViewModel<I>(
     }
 }
 
-@PublishedApi
-internal object DefaultPluginFactory : FViewModel.PluginFactory {
+private object DefaultPluginFactory : FViewModel.PluginFactory {
     override fun <T : FViewModel.Plugin> create(clazz: Class<T>): T {
         return clazz.getDeclaredConstructor().newInstance()
     }
@@ -175,6 +172,7 @@ abstract class FViewModelPlugin : FViewModel.Plugin {
     protected val viewModelScope get() = vm.viewModelScope
     protected val isDestroyed get() = vm.isDestroyed
     protected val isActiveFlow get() = vm.isActiveFlow
+    protected val singleDispatcher get() = vm.singleDispatcher
 
     final override fun init(viewModel: FViewModel<*>) {
         libCheckMainThread()
