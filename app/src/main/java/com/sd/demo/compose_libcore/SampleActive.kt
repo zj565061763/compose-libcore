@@ -56,11 +56,11 @@ private fun Content() {
             .fillMaxSize()
             .padding(10.dp)
     ) {
-        ActiveBox(text = "1") {
-            ActiveBox(text = "2") {
-                ActiveBox(text = "3") {
-                    ActiveBox(text = "4") {
-                        ActiveBox()
+        StateBox(text = "1", activeColor = Color.Green) {
+            StateBox(text = "2", activeColor = Color.Red) {
+                StateBox(text = "3", activeColor = Color.Blue) {
+                    StateBox(text = "4", activeColor = Color.Yellow) {
+                        StateBox(activeColor = Color.Cyan)
                     }
                 }
             }
@@ -69,58 +69,37 @@ private fun Content() {
 }
 
 @Composable
-private fun ActiveBox(
+private fun StateBox(
     modifier: Modifier = Modifier,
     text: String = "",
-    content: (@Composable () -> Unit)? = null,
+    activeColor: Color,
+    child: (@Composable () -> Unit)? = null,
 ) {
     var checked by remember { mutableStateOf(false) }
 
-    WrapperBox(
-        modifier = modifier,
-        title = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                Text(text = text)
-                if (content != null) {
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Switch(checked = checked, onCheckedChange = { checked = it })
-                }
-            }
-        },
-        content = {
-            if (content != null) {
-                FActive(active = checked) {
-                    content()
-                }
-            }
-        },
-    )
-}
-
-@Composable
-private fun WrapperBox(
-    modifier: Modifier = Modifier,
-    title: @Composable () -> Unit,
-    content: @Composable () -> Unit,
-) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .border(2.dp, if (fActive()) Color.Green else Color.Gray)
+            .border(2.dp, if (fActive()) activeColor else Color.Gray)
             .padding(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        title()
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
         ) {
-            content()
+            Text(text = text)
+            if (child != null) {
+                Spacer(modifier = Modifier.width(10.dp))
+                Switch(checked = checked, onCheckedChange = { checked = it })
+            }
+        }
+
+        if (child != null) {
+            FActive(active = checked) {
+                child()
+            }
         }
     }
 }
