@@ -35,7 +35,7 @@ class DataPlugin @JvmOverloads constructor(
 
     /**
      * 加载数据
-     * @param notifyLoading 是否通知状态[isLoadingFlow]
+     * @param notifyLoading 是否通知[isLoadingFlow]
      * @param ignoreActive 是否忽略激活状态[isActiveFlow]
      * @param onLoad 触发加载
      */
