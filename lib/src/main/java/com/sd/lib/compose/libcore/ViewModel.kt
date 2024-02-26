@@ -82,7 +82,7 @@ abstract class FViewModel<I>(
     fun refreshData(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
-        ignoreActive: Boolean = true,
+        ignoreActive: Boolean = false,
     ) {
         viewModelScope.launch {
             refreshDataSuspend(
@@ -102,7 +102,7 @@ abstract class FViewModel<I>(
     suspend fun refreshDataSuspend(
         notifyRefreshing: Boolean = true,
         delayTime: Long = 0,
-        ignoreActive: Boolean = true,
+        ignoreActive: Boolean = false,
     ) {
         if (isDestroyed) return
         if (isActiveFlow.value || ignoreActive) {
