@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-class DataPlugin(
+class DataPlugin @JvmOverloads constructor(
     /** 数据互斥修改器 */
     private val mutator: FMutator = FMutator()
 ) : FViewModelPlugin() {
