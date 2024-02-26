@@ -36,16 +36,12 @@ abstract class FViewModel<I>(
     /** 是否正在刷新中 */
     val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
 
-    /**
-     * 数据互斥修改器，[refreshData]中使用了这个对象
-     */
+    /** 数据互斥修改器，[refreshData]中使用了这个对象 */
     protected val dataMutator = FMutator()
 
-    /**
-     * 基于[Dispatchers.Default]并发为1的调度器
-     */
+    /** 基于[Dispatchers.Default]并发为1的调度器 */
     @OptIn(ExperimentalCoroutinesApi::class)
-    protected val singleDefault by lazy {
+    protected val singleDispatcher by lazy {
         Dispatchers.Default.limitedParallelism(1)
     }
 
