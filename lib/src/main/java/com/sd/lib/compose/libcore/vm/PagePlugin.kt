@@ -1,0 +1,177 @@
+package com.sd.lib.compose.libcore.vm
+
+import com.sd.lib.compose.libcore.FListHolder
+import com.sd.lib.coroutine.FMutator
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+/**
+ * 分页管理
+ */
+class PagePlugin<T> : FViewModelPlugin() {
+    /** 刷新数据的页码，默认1 */
+    private val _refreshPage = 1
+    private val _defaultPage = _refreshPage - 1
+
+    /** 数据互斥修改器 */
+    private val _mutator = FMutator()
+
+    /** 刷新数据 */
+    private val _refreshData = DataPlugin(_mutator)
+
+    /** 加载更多数据 */
+    private val _loadMoreData = DataPlugin(_mutator)
+
+    private val _state = MutableStateFlow(
+        State<T>(
+            currentPage = _defaultPage,
+        )
+    )
+
+    /** 状态 */
+    val state = _state.asStateFlow()
+
+    /** 列表数据 */
+    private val _listHolder = object : FListHolder<T>() {
+        override fun onModify(oldSize: Int, newSize: Int) {
+            super.onModify(oldSize, newSize)
+            if (oldSize == 0) {
+                // 将列表结果设置为成功
+                _state.update {
+                    it.copy(result = Result.success(Unit))
+                }
+            }
+        }
+    }
+
+    /**
+     * 刷新数据
+     */
+    fun refresh(
+        notifyRefreshing: Boolean = true,
+        ignoreActive: Boolean = false,
+        onLoad: suspend (page: Int, listHolder: FListHolder<T>) -> Result<PageData<T>>,
+    ) {
+        _refreshData.load(
+            notifyLoading = notifyRefreshing,
+            ignoreActive = ignoreActive,
+            onLoad = {
+                val page = _refreshPage
+                val result = onLoad(page, _listHolder)
+                handleLoadResult(result, page)
+            },
+        )
+    }
+
+    /**
+     * 加载更多数据
+     */
+    fun loadMore(
+        onLoad: suspend (page: Int, listHolder: FListHolder<T>) -> Result<PageData<T>>,
+    ) {
+        val page = state.value.currentPage + 1
+        _loadMoreData.load(
+            notifyLoading = true,
+            ignoreActive = false,
+            onLoad = {
+                val result = onLoad(page, _listHolder)
+                handleLoadResult(result, page)
+            },
+        )
+    }
+
+    /**
+     * 处理加载结果
+     */
+    private fun handleLoadResult(
+        result: Result<PageData<T>>,
+        page: Int,
+    ) {
+        result.onSuccess { pageData ->
+            val newPage = pageData.data.isNotEmpty().let { hasData ->
+                if (page == _refreshPage) {
+                    // refresh
+                    if (hasData) _refreshPage else _defaultPage
+                } else {
+                    // loadMore
+                    if (hasData) page + 1 else page
+                }
+            }
+
+            _state.update {
+                it.copy(
+                    currentPage = newPage,
+                    hasMore = pageData.hasMore,
+                )
+            }
+        }
+
+        result.onFailure { throwable ->
+            if (_listHolder.dataFlow.value.isEmpty()) {
+                // 将列表结果设置为失败
+                _state.update {
+                    it.copy(result = Result.failure(throwable))
+                }
+            }
+        }
+    }
+
+    override fun onInit() {
+        viewModelScope.launch {
+            _refreshData.isLoadingFlow.collect { loading ->
+                _state.update {
+                    it.copy(isRefreshing = loading)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            _loadMoreData.isLoadingFlow.collect { loading ->
+                _state.update {
+                    it.copy(isLoadingMore = loading)
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            _listHolder.dataFlow.collect { data ->
+                _state.update {
+                    it.copy(data = data)
+                }
+            }
+        }
+    }
+
+    override fun onDestroy() {
+    }
+
+    data class State<T>(
+        /** 列表数据加载结果 */
+        val result: Result<Unit>? = null,
+
+        /** 列表数据 */
+        val data: List<T> = listOf(),
+
+        /** 是否正在刷新 */
+        val isRefreshing: Boolean = false,
+
+        /** 是否正在加载更多 */
+        val isLoadingMore: Boolean = false,
+
+        /** 当前页码 */
+        val currentPage: Int = 0,
+
+        /** 是否还有更多数据 */
+        val hasMore: Boolean = false,
+    )
+
+    data class PageData<T>(
+        /** 列表数据 */
+        val data: List<T>,
+
+        /** 是否还有更多数据 */
+        val hasMore: Boolean = false,
+    )
+}

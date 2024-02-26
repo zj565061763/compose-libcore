@@ -6,6 +6,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+/**
+ * 数据加载
+ */
 class DataPlugin @JvmOverloads constructor(
     /** 数据互斥修改器 */
     private val mutator: FMutator = FMutator()
