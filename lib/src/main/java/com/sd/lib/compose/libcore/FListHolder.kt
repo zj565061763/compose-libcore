@@ -3,6 +3,7 @@ package com.sd.lib.compose.libcore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 
@@ -10,18 +11,11 @@ open class FListHolder<T> {
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _dataDispatcher = Dispatchers.Default.limitedParallelism(1)
 
-    /** 列表数据 */
-    private val _list = mutableListOf<T>()
-
-    private val _dataFlow = MutableStateFlow(emptyList<T>())
+    private val _list: MutableList<T> = mutableListOf()
+    private val _dataFlow: MutableStateFlow<List<T>> = MutableStateFlow(emptyList())
 
     /** 数据流 */
-    val dataFlow = _dataFlow.asStateFlow()
-
-    /**
-     * 数据是否为空
-     */
-    fun isEmpty() = _list.isEmpty()
+    val dataFlow: StateFlow<List<T>> = _dataFlow.asStateFlow()
 
     /**
      * 设置数据
