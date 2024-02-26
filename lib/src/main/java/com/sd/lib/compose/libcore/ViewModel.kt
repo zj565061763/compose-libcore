@@ -151,78 +151,78 @@ abstract class FViewModel<I>(
         super.onCleared()
         _isActiveFlow.value = false
         isDestroyed = true
-        destroyExt()
+        destroyPlugins()
         onDestroy()
     }
 
-    //---------- ext ----------
+    //---------- plugin ----------
 
-    private val _extHolder: MutableMap<Class<out FViewModelExt>, FViewModelExt> = hashMapOf()
+    @PublishedApi
+    internal val plugins: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
 
     /**
-     * 获取扩展对象，此方法必须在主线程调用
+     * 获取插件，如果插件不存在，则调用[factory]创建，此方法必须在主线程调用
      */
     @MainThread
-    fun <T : FViewModelExt> getExt(clazz: Class<T>): T {
+    inline fun <reified T : Plugin> plugin(
+        factory: () -> T = { T::class.java.getDeclaredConstructor().newInstance() },
+    ): T {
         libCheckMainThread()
-        val cache = _extHolder[clazz]
+        val cache = plugins[T::class.java]
         return if (cache != null) {
-            @Suppress("UNCHECKED_CAST")
             cache as T
         } else {
-            clazz.getDeclaredConstructor().newInstance().also { ext ->
+            factory().also {
                 if (!isDestroyed) {
-                    _extHolder[clazz] = ext
-                    ext.init(this@FViewModel)
+                    plugins[T::class.java] = it
+                    it.init(this@FViewModel)
                 }
             }
         }
     }
 
     /**
-     * 销毁并清空扩展对象
+     * 销毁并清空插件
      */
     @MainThread
-    private fun destroyExt() {
+    private fun destroyPlugins() {
         libCheckMainThread()
-        while (_extHolder.isNotEmpty()) {
-            _extHolder.keys.toMutableList().forEach { key ->
-                _extHolder.remove(key)?.destroy()
+        while (plugins.isNotEmpty()) {
+            plugins.keys.toTypedArray().forEach { key ->
+                plugins.remove(key)?.destroy()
             }
         }
     }
+
+    interface Plugin {
+        /**
+         * 初始化（主线程）
+         */
+        @MainThread
+        fun init(viewModel: FViewModel<*>)
+
+        /**
+         * 销毁（主线程）
+         */
+        @MainThread
+        fun destroy()
+    }
 }
 
-interface FViewModelExt {
-    /**
-     * 初始化（主线程）
-     */
-    @MainThread
-    fun init(viewModel: FViewModel<*>)
-
-    /**
-     * 销毁（主线程）
-     */
-    @MainThread
-    fun destroy()
-}
-
-abstract class BaseViewModelExt : FViewModelExt {
+abstract class FViewModelPlugin : FViewModel.Plugin {
     @Volatile
-    private var _viewModel: FViewModel<*>? = null
-    protected val viewModel by ::_viewModel
+    private var _vm: FViewModel<*>? = null
+    protected val vm = checkNotNull(_vm)
 
     final override fun init(viewModel: FViewModel<*>) {
         libCheckMainThread()
-        check(_viewModel == null) { "$this has been initialized." }
-        _viewModel = viewModel
+        check(_vm == null) { "$this has been initialized." }
+        _vm = viewModel
         onInit()
     }
 
     final override fun destroy() {
         libCheckMainThread()
-        /** 提前置为null，不允许[onDestroy]里面继续访问[viewModel] */
-        _viewModel = null
         onDestroy()
     }
 
