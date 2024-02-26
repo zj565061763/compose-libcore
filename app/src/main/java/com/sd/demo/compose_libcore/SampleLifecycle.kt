@@ -5,13 +5,12 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
 import com.sd.lib.compose.libcore.FAppLifecycle
-import com.sd.lib.compose.libcore.FLifecycleOnStart
-import com.sd.lib.compose.libcore.FLifecycleOnStop
 
 class SampleLifecycle : ComponentActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -24,12 +23,12 @@ class SampleLifecycle : ComponentActivity() {
 
 @Composable
 private fun Content() {
-    FLifecycleOnStart {
-        logMsg { "onStart" }
+    LifecycleEventEffect(Lifecycle.Event.ON_START) {
+        logMsg { "ON_START" }
     }
 
-    FLifecycleOnStop {
-        logMsg { "onStop" }
+    LifecycleEventEffect(Lifecycle.Event.ON_STOP) {
+        logMsg { "ON_STOP" }
     }
 
     LaunchedEffect(Unit) {
