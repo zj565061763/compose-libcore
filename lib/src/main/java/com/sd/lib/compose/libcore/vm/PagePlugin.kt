@@ -48,6 +48,7 @@ class PagePlugin<T> : FViewModelPlugin() {
         notifyRefreshing: Boolean = true,
         ignoreActive: Boolean = false,
         canLoad: suspend () -> Boolean = { true },
+        onLoadSuccess: suspend LoadScope<T>.(PageData<T>) -> Unit = { listHolder.set(it.data) },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
         _refreshPlugin.load(
@@ -56,8 +57,11 @@ class PagePlugin<T> : FViewModelPlugin() {
             canLoad = canLoad,
             onLoad = {
                 val page = _refreshPage
-                val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
-                handleLoadResult(result, page)
+                with(LoadScopeImpl(page, _listHolder)) {
+                    val result = onLoad()
+                    handleLoadResult(result, page)
+                    result.onSuccess { onLoadSuccess(it) }
+                }
             },
         )
     }
@@ -67,6 +71,7 @@ class PagePlugin<T> : FViewModelPlugin() {
      */
     fun loadMore(
         canLoad: suspend () -> Boolean = { !_loadMorePlugin.isLoadingFlow.value },
+        onLoadSuccess: suspend LoadScope<T>.(PageData<T>) -> Unit = { listHolder.addAll(it.data) },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
         _loadMorePlugin.load(
@@ -75,8 +80,11 @@ class PagePlugin<T> : FViewModelPlugin() {
             canLoad = canLoad,
             onLoad = {
                 val page = state.value.currentPage + 1
-                val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
-                handleLoadResult(result, page)
+                with(LoadScopeImpl(page, _listHolder)) {
+                    val result = onLoad()
+                    handleLoadResult(result, page)
+                    result.onSuccess { onLoadSuccess(it) }
+                }
             },
         )
     }
