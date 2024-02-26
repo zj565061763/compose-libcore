@@ -4,10 +4,8 @@ import androidx.annotation.MainThread
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sd.lib.compose.libcore.libCheckMainThread
-import com.sd.lib.coroutine.FMutator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,14 +29,6 @@ abstract class FViewModel<I>(
 
     /** 是否处于激活状态，默认true */
     val isActiveFlow: StateFlow<Boolean> = _isActiveFlow.asStateFlow()
-
-    private val _isRefreshingFlow = MutableStateFlow(false)
-
-    /** 是否正在刷新中 */
-    val isRefreshingFlow: StateFlow<Boolean> = _isRefreshingFlow.asStateFlow()
-
-    /** 数据互斥修改器，[refreshData]中使用了这个对象 */
-    protected val dataMutator = FMutator()
 
     /** 基于[Dispatchers.Default]并发为1的调度器 */
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -78,60 +68,9 @@ abstract class FViewModel<I>(
     }
 
     /**
-     * [refreshDataSuspend]
-     */
-    fun refreshData(
-        notifyRefreshing: Boolean = true,
-        delayTime: Long = 0,
-        ignoreActive: Boolean = false,
-    ) {
-        viewModelScope.launch {
-            refreshDataSuspend(
-                notifyRefreshing = notifyRefreshing,
-                delayTime = delayTime,
-                ignoreActive = ignoreActive,
-            )
-        }
-    }
-
-    /**
-     * 刷新数据
-     * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
-     * @param delayTime 延迟多少毫秒后执行
-     * @param ignoreActive 是否忽略激活状态[isActiveFlow]
-     */
-    suspend fun refreshDataSuspend(
-        notifyRefreshing: Boolean = true,
-        delayTime: Long = 0,
-        ignoreActive: Boolean = false,
-    ) {
-        if (isDestroyed) return
-        if (isActiveFlow.value || ignoreActive) {
-            try {
-                dataMutator.mutate {
-                    if (notifyRefreshing) {
-                        _isRefreshingFlow.value = true
-                    }
-                    delay(delayTime)
-                    refreshDataImpl()
-                }
-            } finally {
-                if (notifyRefreshing) {
-                    _isRefreshingFlow.value = false
-                }
-            }
-        }
-    }
-
-    /**
      * 处理意图，[viewModelScope]触发
      */
     protected abstract suspend fun handleIntent(intent: I)
-
-    /**
-     * 刷新数据，[viewModelScope]触发
-     */
-    protected abstract suspend fun refreshDataImpl()
 
     /**
      * 未激活 -> 激活，[viewModelScope]触发
@@ -156,7 +95,11 @@ abstract class FViewModel<I>(
         onDestroy()
     }
 
-    //---------- plugin ----------
+    //---------- plugins ----------
+
+    fun dataPlugin(): DataPlugin = plugin()
+
+    //---------- plugin logic ----------
 
     @PublishedApi
     internal val plugins: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
@@ -214,6 +157,10 @@ abstract class FViewModelPlugin : FViewModel.Plugin {
     @Volatile
     private var _vm: FViewModel<*>? = null
     protected val vm = checkNotNull(_vm)
+
+    protected val viewModelScope get() = vm.viewModelScope
+    protected val isDestroyed get() = vm.isDestroyed
+    protected val isActiveFlow get() = vm.isActiveFlow
 
     final override fun init(viewModel: FViewModel<*>) {
         libCheckMainThread()
