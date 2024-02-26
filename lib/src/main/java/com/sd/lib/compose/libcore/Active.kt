@@ -1,6 +1,5 @@
 package com.sd.lib.compose.libcore
 
-import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -73,8 +72,4 @@ fun FActiveLaunchedEffect(
 @Composable
 fun fActive(): Boolean {
     return checkNotNull(LocalActive.current) { "Not in FActive scope." }
-}
-
-private inline fun logMsg(block: () -> String) {
-    Log.i("FActive", block())
 }
