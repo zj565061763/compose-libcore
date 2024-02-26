@@ -12,23 +12,20 @@ object FAppLifecycle {
     @JvmStatic
     val lifecycle get() = ProcessLifecycleOwner.get().lifecycle
 
-    private val _mutableForegroundFlow = MutableStateFlow(isForeground())
-    /**
-     * App是否出于前台
-     */
-    val isForegroundFlow: StateFlow<Boolean> = _mutableForegroundFlow.asStateFlow()
+    private val _isForegroundFlow = MutableStateFlow(isForeground())
+
+    /** App是否处于前台 */
+    val isForegroundFlow: StateFlow<Boolean> = _isForegroundFlow.asStateFlow()
 
     /**
-     * App是否出于前台
+     * App是否处于前台
      */
     @JvmStatic
-    fun isForeground(): Boolean {
-        return lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
-    }
+    fun isForeground(): Boolean = lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)
 
     init {
-        val observer = LifecycleEventObserver { source, event ->
-            _mutableForegroundFlow.value = isForeground()
+        val observer = LifecycleEventObserver { _, _ ->
+            _isForegroundFlow.value = isForeground()
         }
         lifecycle.addObserver(observer)
     }
