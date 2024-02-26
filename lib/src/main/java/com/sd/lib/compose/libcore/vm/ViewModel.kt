@@ -102,23 +102,26 @@ abstract class FViewModel<I>(
     //---------- plugin logic ----------
 
     @PublishedApi
-    internal val plugins: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
+    internal val pluginHolder: MutableMap<Class<out Plugin>, Plugin> = hashMapOf()
+
+    @PublishedApi
+    internal val pluginFactoryHolder: MutableMap<Class<out Plugin>, PluginFactory> = hashMapOf()
 
     /**
-     * 获取插件，如果插件不存在，则调用[factory]创建，此方法必须在主线程调用
+     * 获取插件，此方法必须在主线程调用
      */
     @MainThread
-    inline fun <reified T : Plugin> plugin(
-        factory: () -> T = { T::class.java.getDeclaredConstructor().newInstance() },
-    ): T {
+    protected inline fun <reified T : Plugin> plugin(): T {
         libCheckMainThread()
-        val cache = plugins[T::class.java]
+        val clazz = T::class.java
+        val cache = pluginHolder[clazz]
         return if (cache != null) {
             cache as T
         } else {
-            factory().also {
+            val factory = pluginFactoryHolder[clazz] ?: DefaultPluginFactory
+            factory.create(T::class.java).also {
                 if (!isDestroyed) {
-                    plugins[T::class.java] = it
+                    pluginHolder[T::class.java] = it
                     it.init(this@FViewModel)
                 }
             }
@@ -131,9 +134,9 @@ abstract class FViewModel<I>(
     @MainThread
     private fun destroyPlugins() {
         libCheckMainThread()
-        while (plugins.isNotEmpty()) {
-            plugins.keys.toTypedArray().forEach { key ->
-                plugins.remove(key)?.destroy()
+        while (pluginHolder.isNotEmpty()) {
+            pluginHolder.keys.toTypedArray().forEach { key ->
+                pluginHolder.remove(key)?.destroy()
             }
         }
     }
@@ -151,12 +154,23 @@ abstract class FViewModel<I>(
         @MainThread
         fun destroy()
     }
+
+    interface PluginFactory {
+        fun <T : Plugin> create(clazz: Class<T>): T
+    }
+}
+
+@PublishedApi
+internal object DefaultPluginFactory : FViewModel.PluginFactory {
+    override fun <T : FViewModel.Plugin> create(clazz: Class<T>): T {
+        return clazz.getDeclaredConstructor().newInstance()
+    }
 }
 
 abstract class FViewModelPlugin : FViewModel.Plugin {
     @Volatile
     private var _vm: FViewModel<*>? = null
-    protected val vm = checkNotNull(_vm)
+    private val vm = checkNotNull(_vm)
 
     protected val viewModelScope get() = vm.viewModelScope
     protected val isDestroyed get() = vm.isDestroyed
