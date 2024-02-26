@@ -25,12 +25,14 @@ class DataPlugin @JvmOverloads constructor(
     fun load(
         notifyLoading: Boolean = true,
         ignoreActive: Boolean = false,
+        canLoad: suspend () -> Boolean = { true },
         onLoad: suspend () -> Unit,
     ) {
         viewModelScope.launch {
             loadAwait(
                 notifyLoading = notifyLoading,
                 ignoreActive = ignoreActive,
+                canLoad = canLoad,
                 onLoad = onLoad,
             )
         }
@@ -40,25 +42,29 @@ class DataPlugin @JvmOverloads constructor(
      * 加载数据
      * @param notifyLoading 是否通知[isLoadingFlow]
      * @param ignoreActive 是否忽略激活状态[isActiveFlow]
+     * @param canLoad 返回是否可以触发加载
      * @param onLoad 触发加载
      */
     suspend fun loadAwait(
         notifyLoading: Boolean = true,
         ignoreActive: Boolean = false,
+        canLoad: suspend () -> Boolean = { true },
         onLoad: suspend () -> Unit,
     ) {
         if (isDestroyed) return
         if (isActiveFlow.value || ignoreActive) {
-            try {
-                mutator.mutate {
-                    if (notifyLoading) {
-                        _isLoadingFlow.value = true
+            if (canLoad()) {
+                try {
+                    mutator.mutate {
+                        if (notifyLoading) {
+                            _isLoadingFlow.value = true
+                        }
+                        onLoad()
                     }
-                    onLoad()
-                }
-            } finally {
-                if (notifyLoading) {
-                    _isLoadingFlow.value = false
+                } finally {
+                    if (notifyLoading) {
+                        _isLoadingFlow.value = false
+                    }
                 }
             }
         }
