@@ -58,7 +58,7 @@ abstract class FViewModel<I>(
     }
 
     /**
-     * 外部触发意图
+     * 触发意图
      */
     fun dispatch(intent: I) {
         viewModelScope.launch {
@@ -67,7 +67,7 @@ abstract class FViewModel<I>(
     }
 
     /**
-     * 外部触发意图
+     * 触发意图
      */
     suspend fun dispatchSuspend(intent: I) {
         if (isDestroyed) return
@@ -98,7 +98,7 @@ abstract class FViewModel<I>(
      * 刷新数据
      * @param notifyRefreshing 是否通知刷新状态[isRefreshingFlow]
      * @param delayTime 延迟多少毫秒后执行
-     * @param ignoreActive 是否忽略[isActiveFlow]
+     * @param ignoreActive 是否忽略激活状态[isActiveFlow]
      */
     @JvmOverloads
     suspend fun refreshDataSuspend(
