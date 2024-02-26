@@ -47,11 +47,13 @@ class PagePlugin<T> : FViewModelPlugin() {
     fun refresh(
         notifyRefreshing: Boolean = true,
         ignoreActive: Boolean = false,
+        canLoad: suspend () -> Boolean = { true },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
         _refreshData.load(
             notifyLoading = notifyRefreshing,
             ignoreActive = ignoreActive,
+            canLoad = canLoad,
             onLoad = {
                 val page = _refreshPage
                 val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
@@ -64,11 +66,13 @@ class PagePlugin<T> : FViewModelPlugin() {
      * 加载更多数据
      */
     fun loadMore(
+        canLoad: suspend () -> Boolean = { !_loadMoreData.isLoadingFlow.value },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
         _loadMoreData.load(
             notifyLoading = true,
             ignoreActive = false,
+            canLoad = canLoad,
             onLoad = {
                 val page = state.value.currentPage + 1
                 val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
