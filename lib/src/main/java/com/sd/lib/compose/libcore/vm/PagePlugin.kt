@@ -13,7 +13,6 @@ import kotlinx.coroutines.launch
 class PagePlugin<T> : FViewModelPlugin() {
     /** 刷新数据的页码，默认1 */
     private val _refreshPage = 1
-    private val _defaultPage = _refreshPage - 1
 
     /** 数据互斥修改器 */
     private val _mutator = FMutator()
@@ -24,11 +23,7 @@ class PagePlugin<T> : FViewModelPlugin() {
     /** 加载更多数据 */
     private val _loadMoreData = DataPlugin(_mutator)
 
-    private val _state = MutableStateFlow(
-        State<T>(
-            currentPage = _defaultPage,
-        )
-    )
+    private val _state = MutableStateFlow(State<T>(currentPage = _refreshPage - 1))
 
     /** 状态 */
     val state = _state.asStateFlow()
@@ -52,14 +47,14 @@ class PagePlugin<T> : FViewModelPlugin() {
     fun refresh(
         notifyRefreshing: Boolean = true,
         ignoreActive: Boolean = false,
-        onLoad: suspend (page: Int, listHolder: FListHolder<T>) -> Result<PageData<T>>,
+        onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
         _refreshData.load(
             notifyLoading = notifyRefreshing,
             ignoreActive = ignoreActive,
             onLoad = {
                 val page = _refreshPage
-                val result = onLoad(page, _listHolder)
+                val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
                 handleLoadResult(result, page)
             },
         )
@@ -69,14 +64,14 @@ class PagePlugin<T> : FViewModelPlugin() {
      * 加载更多数据
      */
     fun loadMore(
-        onLoad: suspend (page: Int, listHolder: FListHolder<T>) -> Result<PageData<T>>,
+        onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
-        val page = state.value.currentPage + 1
         _loadMoreData.load(
             notifyLoading = true,
             ignoreActive = false,
             onLoad = {
-                val result = onLoad(page, _listHolder)
+                val page = state.value.currentPage + 1
+                val result = with(LoadScopeImpl(page, _listHolder)) { onLoad() }
                 handleLoadResult(result, page)
             },
         )
@@ -90,14 +85,13 @@ class PagePlugin<T> : FViewModelPlugin() {
         page: Int,
     ) {
         result.onSuccess { pageData ->
-            val newPage = pageData.data.isNotEmpty().let { hasData ->
-                if (page == _refreshPage) {
-                    // refresh
-                    if (hasData) _refreshPage else _defaultPage
-                } else {
-                    // loadMore
-                    if (hasData) page + 1 else page
-                }
+            val newPage = if (page == _refreshPage) {
+                // refresh
+                _refreshPage
+            } else {
+                // loadMore
+                val hasData = pageData.data.isNotEmpty()
+                if (hasData) page + 1 else page
             }
 
             _state.update {
@@ -174,4 +168,14 @@ class PagePlugin<T> : FViewModelPlugin() {
         /** 是否还有更多数据 */
         val hasMore: Boolean = false,
     )
+
+    interface LoadScope<T> {
+        val page: Int
+        val listHolder: FListHolder<T>
+    }
+
+    private class LoadScopeImpl<T>(
+        override val page: Int,
+        override val listHolder: FListHolder<T>,
+    ) : LoadScope<T>
 }
