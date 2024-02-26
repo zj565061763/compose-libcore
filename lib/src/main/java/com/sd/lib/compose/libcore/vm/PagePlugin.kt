@@ -126,17 +126,17 @@ class PagePlugin<T> : FViewModelPlugin() {
 
     override fun onInit() {
         viewModelScope.launch {
-            _refreshPlugin.isLoadingFlow.collect { loading ->
+            _refreshPlugin.isLoadingFlow.collect { isRefreshing ->
                 _state.update {
-                    it.copy(isRefreshing = loading)
+                    it.copy(isRefreshing = isRefreshing)
                 }
             }
         }
 
         viewModelScope.launch {
-            _loadMorePlugin.isLoadingFlow.collect { loading ->
+            _loadMorePlugin.isLoadingFlow.collect { isLoadingMore ->
                 _state.update {
-                    it.copy(isLoadingMore = loading)
+                    it.copy(isLoadingMore = isLoadingMore)
                 }
             }
         }
