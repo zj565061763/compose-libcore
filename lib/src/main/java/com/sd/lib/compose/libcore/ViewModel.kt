@@ -106,6 +106,7 @@ abstract class FViewModel<I>(
         delayTime: Long = 0,
         ignoreActive: Boolean = true,
     ) {
+        if (isDestroyed) return
         if (isActiveFlow.value || ignoreActive) {
             try {
                 dataMutator.mutate {
