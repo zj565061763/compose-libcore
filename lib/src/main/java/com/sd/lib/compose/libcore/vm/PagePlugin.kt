@@ -18,10 +18,10 @@ class PagePlugin<T> : FViewModelPlugin() {
     private val _mutator = FMutator()
 
     /** 刷新数据 */
-    private val _refreshData = DataPlugin(_mutator)
+    private val _refreshPlugin = DataPlugin(_mutator)
 
     /** 加载更多数据 */
-    private val _loadMoreData = DataPlugin(_mutator)
+    private val _loadMorePlugin = DataPlugin(_mutator)
 
     private val _state = MutableStateFlow(State<T>(currentPage = _refreshPage - 1))
 
@@ -50,7 +50,7 @@ class PagePlugin<T> : FViewModelPlugin() {
         canLoad: suspend () -> Boolean = { true },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
-        _refreshData.load(
+        _refreshPlugin.load(
             notifyLoading = notifyRefreshing,
             ignoreActive = ignoreActive,
             canLoad = canLoad,
@@ -66,10 +66,10 @@ class PagePlugin<T> : FViewModelPlugin() {
      * 加载更多数据
      */
     fun loadMore(
-        canLoad: suspend () -> Boolean = { !_loadMoreData.isLoadingFlow.value },
+        canLoad: suspend () -> Boolean = { !_loadMorePlugin.isLoadingFlow.value },
         onLoad: suspend LoadScope<T>.() -> Result<PageData<T>>,
     ) {
-        _loadMoreData.load(
+        _loadMorePlugin.load(
             notifyLoading = true,
             ignoreActive = false,
             canLoad = canLoad,
@@ -118,7 +118,7 @@ class PagePlugin<T> : FViewModelPlugin() {
 
     override fun onInit() {
         viewModelScope.launch {
-            _refreshData.isLoadingFlow.collect { loading ->
+            _refreshPlugin.isLoadingFlow.collect { loading ->
                 _state.update {
                     it.copy(isRefreshing = loading)
                 }
@@ -126,7 +126,7 @@ class PagePlugin<T> : FViewModelPlugin() {
         }
 
         viewModelScope.launch {
-            _loadMoreData.isLoadingFlow.collect { loading ->
+            _loadMorePlugin.isLoadingFlow.collect { loading ->
                 _state.update {
                     it.copy(isLoadingMore = loading)
                 }
