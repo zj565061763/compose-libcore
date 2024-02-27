@@ -87,8 +87,8 @@ abstract class FViewModel<I>(
 
     final override fun onCleared() {
         super.onCleared()
-        _isActiveFlow.value = false
         isDestroyed = true
+        _isActiveFlow.value = false
         destroyPlugins()
         onDestroy()
     }
