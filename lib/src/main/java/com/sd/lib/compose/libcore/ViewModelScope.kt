@@ -59,9 +59,9 @@ interface ComposeViewModelScope<VM : ViewModel> {
  * 创建[ViewModel]参数
  */
 data class CreateVMParams<VM : ViewModel>(
+    val vmClass: Class<VM>,
     val viewModelStoreOwner: ViewModelStoreOwner,
     val key: String,
-    val vmClass: Class<VM>,
 )
 
 @PublishedApi
@@ -78,9 +78,9 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     override fun get(key: String): VM {
         return create(key) {
             viewModel(
+                modelClass = this.vmClass,
                 viewModelStoreOwner = this.viewModelStoreOwner,
                 key = this.key,
-                modelClass = this.vmClass,
             )
         }
     }
@@ -93,20 +93,20 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         val defaultFactory = remember {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return CreationExtras.Empty.factoryUpdated() as T
+                    return with(CreationExtras.Empty) { factoryUpdated() as T }
                 }
 
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return extras.factoryUpdated() as T
+                    return with(extras) { factoryUpdated() as T }
                 }
             }
         }
 
         return create(key) {
             viewModel(
+                modelClass = this.vmClass,
                 viewModelStoreOwner = this.viewModelStoreOwner,
                 key = this.key,
-                modelClass = this.vmClass,
                 factory = defaultFactory,
             )
         }
