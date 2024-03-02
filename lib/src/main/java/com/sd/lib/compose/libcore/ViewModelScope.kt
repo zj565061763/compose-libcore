@@ -146,7 +146,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
             key = key,
         )
 
-        return params.factory().also { vm ->
+        return with(params) { factory() }.also { vm ->
             check(vm === _vmHolder[key]) { "ViewModel was not found with key:$key." }
         }
     }
