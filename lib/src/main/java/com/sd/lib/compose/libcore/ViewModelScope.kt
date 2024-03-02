@@ -141,9 +141,9 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         }
 
         val params = CreateVMParams(
+            vmClass = clazz,
             viewModelStoreOwner = viewModelStoreOwner,
             key = key,
-            vmClass = clazz,
         )
 
         return params.factory().also { vm ->
