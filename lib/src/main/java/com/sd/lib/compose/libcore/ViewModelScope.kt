@@ -70,6 +70,10 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 ) : ComposeViewModelScope<VM>, ViewModelStoreOwner {
 
     private var _isDestroyed = false
+        set(value) {
+            require(value) { "Require true value." }
+            field = value
+        }
 
     override val viewModelStore: ViewModelStore = ViewModelStore()
     private val _vmHolder: MutableMap<String, ViewModel> = viewModelStore.vmHolder()
@@ -85,7 +89,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         }
     }
 
-    @Suppress("UNCHECKED_CAST")
     @Composable
     override fun get(key: String, factory: CreationExtras.() -> VM): VM {
         val factoryUpdated by rememberUpdatedState(factory)
@@ -93,11 +96,17 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         val defaultFactory = remember {
             object : ViewModelProvider.Factory {
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return with(CreationExtras.Empty) { factoryUpdated() as T }
+                    return with(CreationExtras.Empty) {
+                        @Suppress("UNCHECKED_CAST")
+                        factoryUpdated() as T
+                    }
                 }
 
                 override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
-                    return with(extras) { factoryUpdated() as T }
+                    return with(extras) {
+                        @Suppress("UNCHECKED_CAST")
+                        factoryUpdated() as T
+                    }
                 }
             }
         }
