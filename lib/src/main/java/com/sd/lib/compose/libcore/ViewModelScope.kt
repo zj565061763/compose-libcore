@@ -159,7 +159,9 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     /**
      * 销毁所有[ViewModel]
      */
+    @MainThread
     fun destroy() {
+        checkMainThread()
         _isDestroyed = true
         viewModelStore.clear()
     }
