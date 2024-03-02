@@ -1,5 +1,7 @@
 package com.sd.lib.compose.libcore
 
+import android.os.Looper
+import androidx.annotation.MainThread
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -52,6 +54,7 @@ interface ComposeViewModelScope<VM : ViewModel> {
     /**
      * 移除[key]对应的[ViewModel]
      */
+    @MainThread
     fun remove(key: String)
 }
 
@@ -180,7 +183,9 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 /**
  * 根据[key]移除[ViewModel]
  */
+@MainThread
 private fun MutableMap<String, ViewModel>.vmRemove(key: String): Boolean {
+    checkMainThread()
     val viewModel = remove(key) ?: return false
     ViewModel::class.java.run {
         try {
@@ -213,5 +218,11 @@ private fun ViewModelStore.vmHolder(): MutableMap<String, ViewModel> {
         field.isAccessible = true
         @Suppress("UNCHECKED_CAST")
         field.get(this@vmHolder) as MutableMap<String, ViewModel>
+    }
+}
+
+private fun checkMainThread() {
+    check(Looper.myLooper() === Looper.getMainLooper()) {
+        "Expected main thread but was " + Thread.currentThread().name
     }
 }
