@@ -125,8 +125,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     override fun create(key: String, factory: @Composable CreateVMParams<VM>.() -> VM): VM {
         if (_isDestroyed) error("Scope is destroyed.")
 
-        @Suppress("NAME_SHADOWING")
-        val key = packKey(key)
         val defaultOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
         val viewModelStoreOwner = remember(defaultOwner) {
@@ -152,7 +150,7 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     }
 
     override fun remove(key: String) {
-        _vmHolder.vmRemove(packKey(key))
+        _vmHolder.vmRemove(key)
     }
 
     /**
@@ -177,10 +175,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         override val viewModelStore: ViewModelStore
             get() = owner.viewModelStore
     }
-}
-
-private fun packKey(key: String): String {
-    return "com.sd.keyedViewModel:${key}"
 }
 
 /**
