@@ -8,7 +8,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import com.sd.demo.compose_libcore.ui.theme.AppTheme
-import com.sd.lib.compose.libcore.FAppLifecycle
+import com.sd.lib.compose.libcore.fAppIsStartedFlow
 
 class SampleLifecycle : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,8 +32,8 @@ private fun Content() {
     }
 
     LaunchedEffect(Unit) {
-        FAppLifecycle.isForegroundFlow.collect { isForeground ->
-            logMsg { "isForeground:${isForeground}" }
+        fAppIsStartedFlow.collect {
+            logMsg { "started:$it" }
         }
     }
 }
