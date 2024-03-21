@@ -73,10 +73,6 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 ) : ComposeViewModelScope<VM>, ViewModelStoreOwner {
 
     private var _isDestroyed = false
-        set(value) {
-            require(value) { "Require true value." }
-            field = value
-        }
 
     override val viewModelStore: ViewModelStore = ViewModelStore()
     private val _vmHolder: MutableMap<String, ViewModel> = viewModelStore.vmHolder()
