@@ -15,6 +15,9 @@ open class FListHolder<T>(
     private val _list: MutableList<T> = mutableListOf()
     private val _dataFlow: MutableStateFlow<List<T>> = MutableStateFlow(emptyList())
 
+    /** 数据 */
+    val data: List<T> get() = _dataFlow.value
+
     /** 数据流 */
     val dataFlow: StateFlow<List<T>> = _dataFlow.asStateFlow()
 
