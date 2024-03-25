@@ -12,7 +12,7 @@ android {
     namespace = "com.sd.lib.compose.libcore"
     compileSdk = libs.versions.androidCompileSdk.get().toInt()
     defaultConfig {
-        minSdk = libs.versions.androidMinSdk.get().toInt()
+        minSdk = 21
     }
 
     kotlinOptions {
@@ -46,8 +46,6 @@ dependencies {
     api(libs.androidx.lifecycle.viewmodelCompose)
     api(libs.androidx.lifecycle.runtimeCompose)
     api(libs.androidx.lifecycle.process)
-
-    api(libs.sd.coroutine)
 }
 
 publishing {
