@@ -74,8 +74,11 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
 
     private var _isDestroyed = false
 
-    override val viewModelStore: ViewModelStore = ViewModelStore()
-    private val _vmHolder: MutableMap<String, ViewModel> = viewModelStore.vmHolder()
+    private val _viewModelStore = ViewModelStore()
+    private val _vmMap: MutableMap<String, ViewModel> = _viewModelStore.vmMap()
+
+    override val viewModelStore: ViewModelStore
+        get() = _viewModelStore
 
     @Composable
     override fun get(key: String): VM {
@@ -144,12 +147,12 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
         )
 
         return with(params) { factory() }.also { vm ->
-            check(vm === _vmHolder[key]) { "ViewModel was not found with key:$key." }
+            check(vm === _vmMap[key]) { "ViewModel was not found with key:$key." }
         }
     }
 
     override fun remove(key: String) {
-        _vmHolder.vmRemove(key)
+        _vmMap.vmRemove(key)
     }
 
     /**
@@ -201,7 +204,7 @@ private fun MutableMap<String, ViewModel>.vmRemove(key: String): Boolean {
 /**
  * 获取[ViewModelStore]内保存[ViewModel]的[Map]
  */
-private fun ViewModelStore.vmHolder(): MutableMap<String, ViewModel> {
+private fun ViewModelStore.vmMap(): MutableMap<String, ViewModel> {
     return ViewModelStore::class.java.run {
         try {
             getDeclaredField("map")
@@ -215,7 +218,7 @@ private fun ViewModelStore.vmHolder(): MutableMap<String, ViewModel> {
     }.let { field ->
         field.isAccessible = true
         @Suppress("UNCHECKED_CAST")
-        field.get(this@vmHolder) as MutableMap<String, ViewModel>
+        field.get(this@vmMap) as MutableMap<String, ViewModel>
     }
 }
 
