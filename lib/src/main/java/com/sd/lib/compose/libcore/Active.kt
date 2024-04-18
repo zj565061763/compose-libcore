@@ -8,11 +8,13 @@ import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
+import kotlinx.coroutines.CoroutineScope
 
 private val LocalActive = compositionLocalOf<Boolean?> { null }
 
@@ -87,5 +89,20 @@ fun FActiveAtLeastOnce(
 
     if (hasActive) {
         content()
+    }
+}
+
+/**
+ * 当[keys]或者当前位置的激活状态发生变化时，会触发[block]
+ */
+@Composable
+fun FActiveLaunchedEffect(
+    vararg keys: Any?,
+    block: suspend CoroutineScope.(active: Boolean) -> Unit,
+) {
+    val blockUpdated by rememberUpdatedState(block)
+    val fActive = fActive()
+    LaunchedEffect(fActive, *keys) {
+        blockUpdated(fActive)
     }
 }
