@@ -16,7 +16,7 @@ import androidx.lifecycle.LifecycleOwner
 private val LocalActive = compositionLocalOf<Boolean?> { null }
 
 /**
- * 根据[Lifecycle]决定是否处于激活状态，当状态大于等于[minActiveState]时处于激活状态
+ * 根据[Lifecycle]决定[content]是否处于激活状态，当状态大于等于[minActiveState]时处于激活状态
  */
 @Composable
 fun FActiveLifecycle(
@@ -44,6 +44,9 @@ fun FActiveLifecycle(
     )
 }
 
+/**
+ * 根据[active]决定[content]是否处于激活状态
+ */
 @Composable
 fun FActive(
     active: Boolean,
@@ -57,6 +60,9 @@ fun FActive(
     }
 }
 
+/**
+ * 获取当前位置是否处于激活状态
+ */
 @Composable
 fun fActive(): Boolean {
     return checkNotNull(LocalActive.current) { "Not in FActive scope." }
