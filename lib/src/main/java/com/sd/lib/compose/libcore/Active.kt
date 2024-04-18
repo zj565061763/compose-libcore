@@ -3,6 +3,7 @@ package com.sd.lib.compose.libcore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,6 +65,27 @@ fun FActive(
     val finalActive = if (localActive == null) active else active && localActive
 
     CompositionLocalProvider(LocalActive provides finalActive) {
+        content()
+    }
+}
+
+/**
+ * 至少激活过一次，才会显示[content]
+ */
+@Composable
+fun FActiveAtLeastOnce(
+    content: @Composable () -> Unit,
+) {
+    var hasActive by remember { mutableStateOf(false) }
+
+    val fActive = fActive()
+    LaunchedEffect(fActive) {
+        if (fActive) {
+            hasActive = true
+        }
+    }
+
+    if (hasActive) {
         content()
     }
 }
