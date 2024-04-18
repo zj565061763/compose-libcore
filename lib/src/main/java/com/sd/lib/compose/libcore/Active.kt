@@ -3,18 +3,15 @@ package com.sd.lib.compose.libcore
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
-import kotlinx.coroutines.CoroutineScope
 
 private val LocalActive = compositionLocalOf<Boolean?> { null }
 
@@ -54,18 +51,6 @@ fun FActive(
 
     CompositionLocalProvider(LocalActive provides finalActive) {
         content()
-    }
-}
-
-@Composable
-fun FActiveLaunchedEffect(
-    vararg keys: Any?,
-    block: suspend CoroutineScope.(active: Boolean) -> Unit,
-) {
-    val blockUpdated by rememberUpdatedState(block)
-    val active = fActive()
-    LaunchedEffect(active, *keys) {
-        blockUpdated(active)
     }
 }
 
