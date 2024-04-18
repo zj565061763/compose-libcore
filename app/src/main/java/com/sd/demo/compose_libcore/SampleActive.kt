@@ -47,8 +47,8 @@ class SampleActive : ComponentActivity() {
 @Composable
 private fun Content() {
 
-    FActiveLaunchedEffect {
-        logMsg { "FActiveLaunchedEffect" }
+    FActiveLaunchedEffect { active ->
+        logMsg { "FActiveLaunchedEffect active:$active" }
     }
 
     Box(
