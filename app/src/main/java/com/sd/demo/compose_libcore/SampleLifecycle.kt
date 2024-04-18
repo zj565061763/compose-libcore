@@ -33,7 +33,7 @@ private fun Content() {
 
     LaunchedEffect(Unit) {
         fAppIsStartedFlow.collect {
-            logMsg { "started:$it" }
+            logMsg { "App started:$it" }
         }
     }
 }
