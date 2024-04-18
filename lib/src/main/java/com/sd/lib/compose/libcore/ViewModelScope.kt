@@ -123,16 +123,17 @@ internal class ViewModelScopeImpl<VM : ViewModel>(
     override fun create(key: String, factory: @Composable (CreateVMParams<VM>) -> VM): VM {
         if (_isDestroyed) error("Scope is destroyed.")
 
-        val defaultOwner = checkNotNull(LocalViewModelStoreOwner.current)
+        val realOwner = this@ViewModelScopeImpl
+        val localOwner = checkNotNull(LocalViewModelStoreOwner.current)
 
-        val viewModelStoreOwner = remember(defaultOwner) {
-            if (defaultOwner is HasDefaultViewModelProviderFactory) {
+        val viewModelStoreOwner = remember(localOwner) {
+            if (localOwner is HasDefaultViewModelProviderFactory) {
                 ViewModelStoreOwnerHasDefault(
-                    owner = this@ViewModelScopeImpl,
-                    factory = defaultOwner,
+                    owner = realOwner,
+                    factory = localOwner,
                 )
             } else {
-                this@ViewModelScopeImpl
+                realOwner
             }
         }
 
