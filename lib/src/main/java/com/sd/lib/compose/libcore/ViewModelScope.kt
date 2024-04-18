@@ -188,7 +188,7 @@ private fun MutableMap<String, ViewModel>.vmRemove(key: String): Boolean {
     ViewModel::class.java.run {
         try {
             getDeclaredMethod("clear")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             null
         } ?: error("clear method was not found in ${ViewModel::class.java.name}")
     }.let { method ->
@@ -205,11 +205,11 @@ private fun ViewModelStore.vmHolder(): MutableMap<String, ViewModel> {
     return ViewModelStore::class.java.run {
         try {
             getDeclaredField("map")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             null
         } ?: try {
             getDeclaredField("mMap")
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             null
         } ?: error("map field was not found in ${ViewModelStore::class.java.name}")
     }.let { field ->
