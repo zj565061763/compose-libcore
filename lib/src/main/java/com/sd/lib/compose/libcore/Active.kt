@@ -15,6 +15,9 @@ import androidx.lifecycle.LifecycleOwner
 
 private val LocalActive = compositionLocalOf<Boolean?> { null }
 
+/**
+ * 根据[Lifecycle]决定是否处于激活状态，当状态大于等于[minActiveState]时处于激活状态
+ */
 @Composable
 fun FActiveLifecycle(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
